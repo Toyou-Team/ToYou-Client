@@ -1,26 +1,44 @@
-import { style } from '@vanilla-extract/css';
 import { vars } from '@/styles/theme.css';
+import { recipe } from '@vanilla-extract/recipes';
 
-export const buttonStyle = style({
-  ...vars.fontStyles.subtitle,
+export const buttonStyle = recipe({
+  base: {
+    width: '100%',
+    height: '5.8rem',
+    borderRadius: '1.2rem',
 
-  width: '100%',
-  height: '5.8rem',
+    ...vars.fontStyles.subtitle,
 
-  borderRadius: '1.2rem',
+    background: vars.color.neutral_900,
+    color: vars.color.neutral_50,
 
-  background: vars.color.neutral_900,
-  color: vars.color.neutral_50,
-
-  selectors: {
-    '&:disabled': {
-      background: vars.color.neutral_300,
-      color: vars.color.neutral_600,
+    selectors: {
+      '&:disabled': {
+        background: vars.color.neutral_300,
+        color: vars.color.neutral_600,
+        cursor: 'not-allowed',
+      },
     },
   },
-});
 
-export const outlinedStyle = style({
-  background: vars.color.neutral_600,
-  color: vars.color.neutral_300,
+  variants: {
+    outlined: {
+      true: {
+        background: vars.color.neutral_50,
+        boxShadow: `inset 0 0 0 1px ${vars.color.neutral_300}`,
+        color: vars.color.neutral_900,
+      },
+    },
+
+    selected: {
+      true: {
+        backgroundColor: vars.color.neutral_900,
+        color: vars.color.neutral_50,
+      },
+    },
+  },
+
+  defaultVariants: {
+    outlined: false,
+  },
 });
