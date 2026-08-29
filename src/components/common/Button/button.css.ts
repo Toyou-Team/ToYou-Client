@@ -28,10 +28,6 @@ export const buttonStyle = recipe({
         boxShadow: `inset 0 0 0 1px ${vars.color.neutral_300}`,
         color: vars.color.neutral_900,
       },
-      // false: {
-      //   background: vars.color.neutral_300,
-      //   color: vars.color.neutral_600,
-      // },
     },
 
     selected: {
@@ -39,10 +35,6 @@ export const buttonStyle = recipe({
         backgroundColor: vars.color.neutral_900,
         color: vars.color.neutral_50,
       },
-      // false: {
-      //   backgroundColor: vars.color.neutral_50,
-      //   color: vars.color.neutral_900,
-      // },
     },
   },
 
