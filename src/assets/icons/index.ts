@@ -6,5 +6,24 @@ import IcGreyCircle from '@/assets/icons/ic_grey_circle.svg';
 import IcPreviousStep from '@/assets/icons/ic_previous_step.svg';
 import IcDottedLine from '@/assets/icons/ic_dotted_line.svg';
 import IcSolidLine from '@/assets/icons/ic_solid_line.svg';
+import IcChevronLeft from '@/assets/icons/ic_chevron_left.svg';
+import IcCheckCircleNeutral300 from '@/assets/icons/ic_check_circle_neutral300.svg';
+import IcCheckCircleNeutral900 from '@/assets/icons/ic_check_circle_neutral900.svg';
+import IcCheckNeutral300 from '@/assets/icons/ic_check_neutral300.svg';
+import IcCheckNeutral900 from '@/assets/icons/ic_check_neutral900.svg';
 
-export { IcLogoKakao, IcStep1, IcStep2, IcStep3, IcGreyCircle, IcPreviousStep, IcDottedLine, IcSolidLine };
+export {
+  IcLogoKakao,
+  IcStep1,
+  IcStep2,
+  IcStep3,
+  IcGreyCircle,
+  IcPreviousStep,
+  IcDottedLine,
+  IcSolidLine,
+  IcChevronLeft,
+  IcCheckCircleNeutral300,
+  IcCheckCircleNeutral900,
+  IcCheckNeutral300,
+  IcCheckNeutral900,
+};
