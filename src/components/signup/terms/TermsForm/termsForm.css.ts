@@ -18,7 +18,7 @@ export const termCheckboxListContainer = style({
 });
 
 export const bottomButtonWrapper = style({
-  position: 'fixed',
+  position: 'absolute',
   bottom: '3.4rem',
   left: '0',
   right: '0',
