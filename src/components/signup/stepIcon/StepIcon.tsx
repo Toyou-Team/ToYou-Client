@@ -1,6 +1,5 @@
 import { memo } from 'react';
 
-import Image from 'next/image';
 import { IcGreyCircle, IcPreviousStep, IcStep1, IcStep2, IcStep3, IcDottedLine, IcSolidLine } from '@/assets/icons';
 
 import * as styles from './stepIcon.css';
@@ -26,17 +25,17 @@ export function StepIcon({ step }: StepIconProps) {
         const isCurrentStep = currentStep === step;
         const isPreviousStep = currentStep < step;
 
-        const icon = isPreviousStep ? IcPreviousStep : isCurrentStep ? currentStepIcons[step] : IcGreyCircle;
+        const Icon = isPreviousStep ? IcPreviousStep : isCurrentStep ? currentStepIcons[step] : IcGreyCircle;
+
+        const LineIcon = isPreviousStep ? IcSolidLine : IcDottedLine;
 
         return (
           <div key={currentStep} className={styles.stepItem}>
             <div className={styles.stepIconWrapper}>
-              <Image src={icon} alt="" className={styles.stepIcon({ isCurrentStep })} />
+              <Icon aria-hidden className={styles.stepIcon({ isCurrentStep })} />
             </div>
 
-            {!isLastStep && (
-              <Image src={isPreviousStep ? IcSolidLine : IcDottedLine} alt="" className={styles.stepLine} />
-            )}
+            {!isLastStep && <LineIcon aria-hidden className={styles.stepLine} />}
           </div>
         );
       })}

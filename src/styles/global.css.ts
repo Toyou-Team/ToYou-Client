@@ -15,7 +15,7 @@ globalStyle('article, aside, details, figcaption, figure, footer, header, hgroup
   display: 'block',
 });
 
-globalStyle('textarea, textfield', {
+globalStyle('input, textarea', {
   fontFamily: 'inherit',
   fontSize: 'inherit',
 });
@@ -29,7 +29,7 @@ globalStyle('body', {
   overscrollBehavior: 'none',
   lineHeight: 1,
   touchAction: 'manipulation',
-  fontFamily: 'var(--font-montserrat), var(--font-pretendard)',
+  fontFamily: 'var(--font-montserrat), var(--font-pretendard), sans-serif',
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
 });
@@ -116,7 +116,7 @@ globalStyle('button', {
   justifyContent: 'center',
 });
 
-globalStyle('button, input, textarea, select', {
+globalStyle('button, select', {
   fontFamily: 'inherit',
   fontSize: 'inherit',
   fontWeight: 'inherit',

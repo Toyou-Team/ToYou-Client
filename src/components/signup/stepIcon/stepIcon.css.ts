@@ -5,7 +5,7 @@ export const stepIconContainer = style({
   display: 'flex',
   alignItems: 'center',
 
-  marginTop: '10.95rem',
+  marginTop: '3.4rem',
   marginLeft: '2.4rem',
 });
 
