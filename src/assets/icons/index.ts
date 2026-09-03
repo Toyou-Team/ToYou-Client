@@ -2,6 +2,7 @@ import IcLogoKakao from '@/assets/icons/ic_logo_kakao.svg';
 import IcStep1 from '@/assets/icons/ic_step1.svg';
 import IcStep2 from '@/assets/icons/ic_step2.svg';
 import IcStep3 from '@/assets/icons/ic_step3.svg';
+import IcStep4 from '@/assets/icons/ic_step4.svg';
 import IcGreyCircle from '@/assets/icons/ic_grey_circle.svg';
 import IcPreviousStep from '@/assets/icons/ic_previous_step.svg';
 import IcDottedLine from '@/assets/icons/ic_dotted_line.svg';
@@ -17,6 +18,7 @@ export {
   IcStep1,
   IcStep2,
   IcStep3,
+  IcStep4,
   IcGreyCircle,
   IcPreviousStep,
   IcDottedLine,
