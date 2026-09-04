@@ -1,4 +1,5 @@
 import IcLogoKakao from '@/assets/icons/ic_logo_kakao.svg';
+import IcProfileImage from '@/assets/icons/ic_profile_image.svg';
 import IcStep1 from '@/assets/icons/ic_step1.svg';
 import IcStep2 from '@/assets/icons/ic_step2.svg';
 import IcStep3 from '@/assets/icons/ic_step3.svg';
@@ -14,6 +15,7 @@ import IcCheckNeutral900 from '@/assets/icons/ic_check_neutral900.svg';
 
 export {
   IcLogoKakao,
+  IcProfileImage,
   IcStep1,
   IcStep2,
   IcStep3,
