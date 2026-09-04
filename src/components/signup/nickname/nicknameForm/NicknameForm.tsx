@@ -4,8 +4,10 @@ import Button from '@/components/common/Button/Button';
 import TextField from '../textField/TextField';
 import * as styles from './nicknameForm.css';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 function NicknameForm() {
+  const router = useRouter();
   const [nickname, setNickname] = useState('');
 
   const isValidNickname = nickname.length >= 2 && nickname.length <= 12;
@@ -18,6 +20,11 @@ function NicknameForm() {
   };
 
   const isError = nickname !== '' && !isValidNickname;
+
+  const handleNext = () => {
+    // TODO: 닉네임 값 저장/중복확인은 가입 API 붙일 때
+    router.push('/signup/my-gender');
+  };
 
   const helperText =
     nickname === ''
@@ -40,7 +47,9 @@ function NicknameForm() {
         />
       </div>
       <div className={styles.bottomButtonWrapper}>
-        <Button disabled={!isValidNickname}>다음</Button>
+        <Button type="button" disabled={!isValidNickname} onClick={handleNext}>
+          다음
+        </Button>
       </div>
     </div>
   );

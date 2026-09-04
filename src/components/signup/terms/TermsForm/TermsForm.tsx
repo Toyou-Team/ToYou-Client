@@ -54,10 +54,10 @@ export function TermsForm() {
 
   const onSubmit = () => {
     const termsArray = [agree1, agree2, agree3];
-
     localStorage.setItem('terms', JSON.stringify(termsArray));
 
-    //router.push('/sign-up/email');
+    // TODO: 여기서 POST /api/v1/auth/signup 호출 후 홈
+    router.push('/home');
   };
 
   return (
