@@ -12,6 +12,7 @@ import IcCheckCircleNeutral300 from '@/assets/icons/ic_check_circle_neutral300.s
 import IcCheckCircleNeutral900 from '@/assets/icons/ic_check_circle_neutral900.svg';
 import IcCheckNeutral300 from '@/assets/icons/ic_check_neutral300.svg';
 import IcCheckNeutral900 from '@/assets/icons/ic_check_neutral900.svg';
+import IcProfileImage from '@/assets/icons/ic_profile_image.svg';
 
 export {
   IcLogoKakao,
@@ -28,4 +29,5 @@ export {
   IcCheckCircleNeutral900,
   IcCheckNeutral300,
   IcCheckNeutral900,
+  IcProfileImage,
 };
