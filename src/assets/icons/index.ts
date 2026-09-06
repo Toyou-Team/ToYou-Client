@@ -13,6 +13,7 @@ import IcCheckCircleNeutral900 from '@/assets/icons/ic_check_circle_neutral900.s
 import IcCheckNeutral300 from '@/assets/icons/ic_check_neutral300.svg';
 import IcCheckNeutral900 from '@/assets/icons/ic_check_neutral900.svg';
 import IcProfileImage from '@/assets/icons/ic_profile_image.svg';
+import IcTrashCan from '@/assets/icons/ic_trashcan.svg';
 
 export {
   IcLogoKakao,
@@ -30,4 +31,5 @@ export {
   IcCheckNeutral300,
   IcCheckNeutral900,
   IcProfileImage,
+  IcTrashCan,
 };
