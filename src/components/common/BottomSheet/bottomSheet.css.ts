@@ -18,7 +18,6 @@ export const sheet = style({
 
   width: '100%',
   maxHeight: '80dvh',
-  paddingBottom: '3rem',
 
   borderRadius: '2.4rem 2.4rem 0 0',
   backgroundColor: vars.color.neutral_50,
@@ -81,25 +80,4 @@ export const headerAction = style({
   right: '3rem',
 
   transform: 'translateY(-50%)',
-});
-
-export const content = style({
-  marginTop: '1.6rem',
-  marginRight: '1.4rem',
-
-  overflowY: 'auto',
-
-  ...vars.fontStyles.body,
-  color: vars.color.neutral_900,
-
-  selectors: {
-    '&::-webkit-scrollbar': {
-      width: '0.5rem',
-    },
-
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: vars.color.neutral_300,
-      borderRadius: '0.8rem',
-    },
-  },
 });
