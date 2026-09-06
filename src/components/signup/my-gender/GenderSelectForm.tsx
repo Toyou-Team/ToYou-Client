@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Button from '@/components/common/Button/Button';
 import * as styles from './genderSelectForm.css';
 
@@ -11,10 +12,17 @@ export type Gender = (typeof GENDER_OPTIONS)[number];
 interface GenderSelectFormProps {
   options: readonly string[];
   description?: string;
+  nextPath: string;
 }
 
-function GenderSelectForm({ options, description }: GenderSelectFormProps) {
+function GenderSelectForm({ options, description, nextPath }: GenderSelectFormProps) {
+  const router = useRouter();
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
+
+  const handleNext = () => {
+    // TODO: 선택값 저장은 가입 API 붙일 때
+    router.push(nextPath);
+  };
 
   return (
     <>
@@ -39,7 +47,9 @@ function GenderSelectForm({ options, description }: GenderSelectFormProps) {
       </div>
 
       <div className={styles.bottomButtonWrapper}>
-        <Button disabled={selectedGender === null}>다음</Button>
+        <Button type="button" disabled={selectedGender === null} onClick={handleNext}>
+          다음
+        </Button>
       </div>
     </>
   );

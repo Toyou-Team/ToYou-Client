@@ -4,6 +4,8 @@ import localFont from 'next/font/local';
 import '@/styles/global.css';
 import { themeClass } from '@/styles/theme.css';
 
+import Providers from './providers';
+
 const pretendard = localFont({
   src: '../fonts/PretendardVariable.woff2',
   weight: '45 920',
@@ -30,7 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${pretendard.variable} ${montserrat.variable} ${themeClass}`}>{children}</body>
+      <body className={`${pretendard.variable} ${montserrat.variable} ${themeClass}`}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

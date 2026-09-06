@@ -11,7 +11,6 @@ import { PolicySheet } from '../PolicySheet/PolicySheet';
 import * as styles from './termsForm.css';
 
 import { AGREE_DATA } from '@/constants';
-import { PRIVACY_POLICY } from '@/constants/privacy';
 
 interface TermsFormData {
   agree1: boolean;
@@ -62,10 +61,10 @@ export function TermsForm() {
 
   const onSubmit = () => {
     const termsArray = [agree1, agree2, agree3];
-
     localStorage.setItem('terms', JSON.stringify(termsArray));
 
-    // router.push('/...');
+    // TODO: 여기서 POST /api/v1/auth/signup 호출 후 홈
+    //router.push('/home');
   };
 
   return (

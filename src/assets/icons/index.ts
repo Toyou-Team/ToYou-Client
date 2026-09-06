@@ -1,4 +1,5 @@
 import IcLogoKakao from '@/assets/icons/ic_logo_kakao.svg';
+import IcProfileImage from '@/assets/icons/ic_profile_image.svg';
 import IcStep1 from '@/assets/icons/ic_step1.svg';
 import IcStep2 from '@/assets/icons/ic_step2.svg';
 import IcStep3 from '@/assets/icons/ic_step3.svg';
@@ -12,11 +13,11 @@ import IcCheckCircleNeutral300 from '@/assets/icons/ic_check_circle_neutral300.s
 import IcCheckCircleNeutral900 from '@/assets/icons/ic_check_circle_neutral900.svg';
 import IcCheckNeutral300 from '@/assets/icons/ic_check_neutral300.svg';
 import IcCheckNeutral900 from '@/assets/icons/ic_check_neutral900.svg';
-import IcProfileImage from '@/assets/icons/ic_profile_image.svg';
 import IcTrashCan from '@/assets/icons/ic_trashcan.svg';
 
 export {
   IcLogoKakao,
+  IcProfileImage,
   IcStep1,
   IcStep2,
   IcStep3,
@@ -30,6 +31,5 @@ export {
   IcCheckCircleNeutral900,
   IcCheckNeutral300,
   IcCheckNeutral900,
-  IcProfileImage,
   IcTrashCan,
 };

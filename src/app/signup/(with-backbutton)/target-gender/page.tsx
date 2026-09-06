@@ -12,7 +12,7 @@ export default function SignUpTargetgenderPage() {
           받을 사람의 성별을 선택해주세요.
         </h1>
       </div>
-      <GenderSelectForm options={['남성', '여성', '모두']} />
+      <GenderSelectForm options={['남성', '여성', '모두']} nextPath="/signup/profile-image" />
     </>
   );
 }
