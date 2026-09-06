@@ -11,7 +11,6 @@ import { PolicySheet } from '../PolicySheet/PolicySheet';
 import * as styles from './termsForm.css';
 
 import { AGREE_DATA } from '@/constants';
-import { useRouter } from 'next/router';
 
 interface TermsFormData {
   agree1: boolean;
@@ -20,7 +19,6 @@ interface TermsFormData {
 }
 
 export function TermsForm() {
-  const router = useRouter();
   const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
   const selectedPolicy = AGREE_DATA.find((data) => data.id === selectedPolicyId);
 
@@ -66,7 +64,7 @@ export function TermsForm() {
     localStorage.setItem('terms', JSON.stringify(termsArray));
 
     // TODO: 여기서 POST /api/v1/auth/signup 호출 후 홈
-    router.push('/home');
+    //router.push('/home');
   };
 
   return (
