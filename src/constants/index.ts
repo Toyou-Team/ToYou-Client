@@ -1,5 +1,23 @@
+import { PRIVACY_POLICY } from './privacy';
+import { TERMS_OF_SERVICE } from './terms';
+
 export const AGREE_DATA = [
-  { id: 1, text: '서비스 이용약관', type: 'required', detailLink: '' },
-  { id: 2, text: '개인정보 처리방침', type: 'required', detailLink: '' },
-  { id: 3, text: '푸시 알림 기능', type: 'optional', detailLink: '' },
-];
+  {
+    id: 1,
+    type: 'required',
+    text: '서비스 이용약관',
+    content: TERMS_OF_SERVICE,
+  },
+  {
+    id: 2,
+    type: 'required',
+    text: '개인정보처리방침',
+    content: PRIVACY_POLICY,
+  },
+  {
+    id: 3,
+    type: 'required',
+    text: 'optional',
+    // content: PUSH,
+  },
+] as const;
