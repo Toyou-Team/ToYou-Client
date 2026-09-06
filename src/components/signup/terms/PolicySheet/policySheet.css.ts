@@ -18,17 +18,6 @@ export const scrollArea = style({
 
   overflowY: 'auto',
   marginBottom: '3rem',
-
-  selectors: {
-    '&::-webkit-scrollbar': {
-      width: '0.5rem',
-    },
-
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: vars.color.neutral_300,
-      borderRadius: '0.8rem',
-    },
-  },
 });
 
 export const content = style({
