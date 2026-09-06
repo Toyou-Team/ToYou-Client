@@ -18,6 +18,6 @@ export const AGREE_DATA = [
     id: 3,
     type: 'required',
     text: 'optional',
-    // content: PUSH,
+    content: '',
   },
 ] as const;
