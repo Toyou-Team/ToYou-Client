@@ -22,7 +22,9 @@ export function PolicySheet({ isOpen, onClose, title, content }: PolicySheetProp
         </button>
       }
     >
-      <p className={styles.content}>{content}</p>
+      <div className={styles.scrollArea}>
+        <p className={styles.content}>{content}</p>
+      </div>
     </BottomSheet>
   );
 }

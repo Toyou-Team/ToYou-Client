@@ -10,9 +10,6 @@ export const profileWrapper = style({
 
 export const profileImageWrapper = style({
   position: 'relative',
-
-  flexShrink: 0,
-  borderRadius: '50%',
   overflow: 'visible',
 
   width: '20rem',
@@ -26,7 +23,7 @@ export const profileImage = style({
   objectFit: 'cover',
 });
 
-export const imageUploadButton = style({
+export const imageChangeButton = style({
   position: 'absolute',
   right: '-0.1rem',
   bottom: '-0.1rem',
@@ -37,6 +34,8 @@ export const imageUploadButton = style({
 
   width: '4.8rem',
   height: '4.8rem',
+  padding: 0,
+  border: 0,
 
   borderRadius: '50%',
   backgroundColor: vars.color.neutral_50,
@@ -48,7 +47,6 @@ export const imageUploadButton = style({
   color: vars.color.neutral_600,
 
   cursor: 'pointer',
-  // pointerEvents: 'none',
 });
 
 export const hiddenInput = style({

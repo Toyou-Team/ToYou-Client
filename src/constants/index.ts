@@ -16,8 +16,8 @@ export const AGREE_DATA = [
   },
   {
     id: 3,
-    type: 'required',
-    text: 'optional',
+    type: 'optional',
+    text: '푸시 알림 기능',
     content: '',
   },
 ] as const;

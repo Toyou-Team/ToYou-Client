@@ -12,6 +12,25 @@ export const closeText = style({
   cursor: 'pointer',
 });
 
+export const scrollArea = style({
+  marginTop: '1.6rem',
+  marginRight: '1.4rem',
+
+  overflowY: 'auto',
+  marginBottom: '3rem',
+
+  selectors: {
+    '&::-webkit-scrollbar': {
+      width: '0.5rem',
+    },
+
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: vars.color.neutral_300,
+      borderRadius: '0.8rem',
+    },
+  },
+});
+
 export const content = style({
   ...vars.fontStyles.body,
   color: vars.color.neutral_900,

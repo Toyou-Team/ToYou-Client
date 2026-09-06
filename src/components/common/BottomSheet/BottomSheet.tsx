@@ -38,7 +38,7 @@ export function BottomSheet({ isOpen, onClose, title, headerAction, children }: 
           </header>
         )}
 
-        <div className={styles.content}>{children}</div>
+        {children}
       </section>
     </>
   );
