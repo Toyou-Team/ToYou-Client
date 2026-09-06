@@ -9,9 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.102.8",
     "@vanilla-extract/css": "^1.21.2",
     "@vanilla-extract/recipes": "^0.5.7",
     "clsx": "^2.1.1",
+    "ky": "^2.1.0",
     "next": "16.3.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
