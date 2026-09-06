@@ -1,0 +1,40 @@
+import { vars } from '@/styles/theme.css';
+import { style } from '@vanilla-extract/css';
+
+export const closeText = style({
+  border: 0,
+  background: 'transparent',
+
+  ...vars.fontStyles.body,
+  color: vars.color.neutral_600,
+
+  marginTop: '1.4rem',
+  cursor: 'pointer',
+});
+
+export const scrollArea = style({
+  marginTop: '1.6rem',
+  marginRight: '1.4rem',
+
+  overflowY: 'auto',
+  marginBottom: '3rem',
+
+  selectors: {
+    '&::-webkit-scrollbar': {
+      width: '0.5rem',
+    },
+
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: vars.color.neutral_300,
+      borderRadius: '0.8rem',
+    },
+  },
+});
+
+export const content = style({
+  ...vars.fontStyles.body,
+  color: vars.color.neutral_900,
+
+  padding: '0 1.1rem 0 3.5rem',
+  whiteSpace: 'pre-wrap',
+});

@@ -1,6 +1,6 @@
 import { MemoizedStepIcon } from '@/components/signup/stepIcon/StepIcon';
 import * as styles from './profile-image.css';
-import ImageUpload from '@/components/signup/profile-image/ImageUpload';
+import ImageUpload from '@/components/signup/profile-image/ImageUpload/ImageUpload';
 
 export default function SignUpProfileImagePage() {
   return (

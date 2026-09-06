@@ -2,13 +2,16 @@
 
 import Button from '@/components/common/Button/Button';
 import { useForm } from 'react-hook-form';
+import { useCallback, useMemo, useState } from 'react';
 
-import { useCallback, useMemo } from 'react';
 import { AllAgreeCheckboxField } from '../AllAgreeCheckboxField/AllAgreeCheckboxField';
 import { TermCheckboxField } from '../TermCheckboxField/TermCheckboxField';
+import { PolicySheet } from '../PolicySheet/PolicySheet';
+
 import * as styles from './termsForm.css';
+
 import { AGREE_DATA } from '@/constants';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 
 interface TermsFormData {
   agree1: boolean;
@@ -18,6 +21,9 @@ interface TermsFormData {
 
 export function TermsForm() {
   const router = useRouter();
+  const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
+  const selectedPolicy = AGREE_DATA.find((data) => data.id === selectedPolicyId);
+
   const { watch, setValue, handleSubmit } = useForm<TermsFormData>({
     defaultValues: {
       agree1: false,
@@ -43,7 +49,10 @@ export function TermsForm() {
   const handleSingleChecked = useCallback(
     (id: number, checked: boolean) => {
       const fieldName = `agree${id}` as keyof TermsFormData;
-      setValue(fieldName, !checked, { shouldValidate: true });
+
+      setValue(fieldName, !checked, {
+        shouldValidate: true,
+      });
     },
     [setValue],
   );
@@ -61,25 +70,39 @@ export function TermsForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={styles.termsFormWrapper}>
-      <div>
-        <AllAgreeCheckboxField isAllChecked={isAllChecked} onClick={handleClickAllCheckBox} />
-        <div className={styles.termCheckboxListContainer}>
-          {AGREE_DATA.map((data) => (
-            <TermCheckboxField
-              key={data.id}
-              id={data.id}
-              text={data.text}
-              isChecked={watch(`agree${data.id}` as keyof TermsFormData)}
-              isRequired={data.type === 'required'}
-              onChangeChecked={handleSingleChecked}
-            />
-          ))}
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.termsFormWrapper}>
+        <div>
+          <AllAgreeCheckboxField isAllChecked={isAllChecked} onClick={handleClickAllCheckBox} />
+
+          <div className={styles.termCheckboxListContainer}>
+            {AGREE_DATA.map((data) => (
+              <TermCheckboxField
+                key={data.id}
+                id={data.id}
+                text={data.text}
+                isChecked={watch(`agree${data.id}` as keyof TermsFormData)}
+                isRequired={data.type === 'required'}
+                onChangeChecked={handleSingleChecked}
+                onClickView={() => setSelectedPolicyId(data.id)}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-      <div className={styles.bottomButtonWrapper}>
-        <Button disabled={!isAllRequired}>다음</Button>
-      </div>
-    </form>
+
+        <div className={styles.bottomButtonWrapper}>
+          <Button type="submit" disabled={!isAllRequired}>
+            다음
+          </Button>
+        </div>
+      </form>
+
+      <PolicySheet
+        isOpen={selectedPolicy !== undefined}
+        onClose={() => setSelectedPolicyId(null)}
+        title={selectedPolicy?.text ?? ''}
+        content={selectedPolicy?.content ?? ''}
+      />
+    </>
   );
 }
