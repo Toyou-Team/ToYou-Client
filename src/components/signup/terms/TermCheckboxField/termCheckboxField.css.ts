@@ -67,4 +67,6 @@ export const termText = style({
 export const descriptionText = style({
   ...vars.fontStyles.body,
   color: vars.color.neutral_600,
+
+  cursor: 'pointer',
 });
