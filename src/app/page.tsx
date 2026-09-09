@@ -1,6 +1,6 @@
 import { LoginButtonSection } from '@/components/landing/KaKaoLoginSection/KaKaoLoginSection';
 import * as styles from './landing.css';
-import { LetterCard } from '@/components/landing/LetterCard/LetterCard';
+import { LetterCard } from '@/components/common/LetterCard/LetterCard';
 
 export default function LandingPage() {
   return (
