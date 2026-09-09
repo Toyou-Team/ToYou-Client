@@ -25,6 +25,10 @@ export const typography = {
   },
 
   lineHeight: {
-    default: '120%',
+    default: '160%',
+  },
+
+  letterSpacing: {
+    default: '-2.5%',
   },
 } as const;

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 
 import '@/styles/global.css';
@@ -13,11 +13,15 @@ const pretendard = localFont({
   variable: '--font-pretendard',
 });
 
+// Montserrat : 영문
+// Pretendard : 한글, 숫자
 const montserrat = localFont({
   src: '../fonts/Montserrat-VariableFont_wght.ttf',
   weight: '100 900',
   display: 'swap',
   variable: '--font-montserrat',
+  adjustFontFallback: false,
+  declarations: [{ prop: 'unicode-range', value: 'U+0041-005A, U+0061-007A, U+00C0-024F' }],
 });
 
 export const metadata: Metadata = {
