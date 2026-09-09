@@ -1,7 +1,6 @@
 import { style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
-import { recipe } from '@vanilla-extract/recipes';
 
 export const letterCardWrapper = style({
   position: 'relative',
@@ -22,9 +21,9 @@ export const profileWrapper = style({
 
   display: 'flex',
   alignItems: 'center',
-  gap: '1.2rem',
+  gap: '1rem',
 
-  padding: '2.1rem 2.4rem 0 2.1rem',
+  padding: '2.1rem 2.1rem 0 2.1rem',
 });
 
 export const profileImage = style({
@@ -39,6 +38,12 @@ export const profileImage = style({
 });
 
 export const nickname = style({
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
+
   ...vars.fontStyles.subtitle,
   color: vars.color.neutral_950,
 });
@@ -47,12 +52,12 @@ export const expiresText = style({
   marginLeft: 'auto',
   flexShrink: 0,
 
-  padding: '0.6rem 1.2rem',
+  padding: '0.4rem 1rem',
   borderRadius: '2rem',
 
   ...vars.fontStyles.label,
 
-  backgroundColor: 'rgba(255, 255, 255, 0.6)',
+  backgroundColor: 'rgba(254, 254, 254, 0.3)',
   color: vars.color.neutral_950,
 });
 
@@ -63,15 +68,56 @@ export const messageWrapper = style({
   right: '2.1rem',
   zIndex: 1,
 
-  padding: '1.5rem 2rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1.6rem',
 
+  padding: '2rem',
   transform: 'translateY(-50%)',
+
   backgroundColor: vars.color.neutral_50,
 });
 
 export const message = style({
   ...vars.fontStyles.body,
-
   whiteSpace: 'pre-line',
+  color: vars.color.neutral_950,
+
+  display: '-webkit-box',
+  WebkitBoxOrient: 'vertical',
+  WebkitLineClamp: 4,
+  overflow: 'hidden',
+});
+
+export const songWrapper = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '1.6rem',
+});
+
+export const songImageWrapper = style({
+  position: 'relative',
+  flexShrink: 0,
+
+  width: '4.9rem',
+  height: '4.9rem',
+  overflow: 'hidden',
+});
+
+export const songImage = style({
+  objectFit: 'cover',
+});
+
+export const songInfo = style({
+  minWidth: 0,
+});
+
+export const songTitle = style({
+  ...vars.fontStyles.body,
+  color: vars.color.neutral_950,
+});
+
+export const songArtist = style({
+  ...vars.fontStyles.caption,
   color: vars.color.neutral_950,
 });

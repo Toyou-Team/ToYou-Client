@@ -2,6 +2,7 @@ import Image, { StaticImageData } from 'next/image';
 
 import ImgMockCard from '@/assets/imgs/img_mock_card.png';
 import * as styles from './letterCard.css';
+import { LetterSong } from '@/types/letterCardTypes';
 
 interface LetterCardProps {
   nickname: string;
@@ -11,19 +12,27 @@ interface LetterCardProps {
   expiresText?: string;
   width?: number;
   height?: number;
+  song?: LetterSong;
 }
 
 export function LetterCard({
   nickname,
   message,
   profileImage,
-  profileImageSize = 4,
+  profileImageSize = 4.3,
   expiresText = '3일 후 사라져요!',
-  width = 300,
-  height = 400,
+  width,
+  height = 40,
+  song,
 }: LetterCardProps) {
   return (
-    <div className={styles.letterCardWrapper} style={{ width: `${width}rem`, height: `${height}rem` }}>
+    <div
+      className={styles.letterCardWrapper}
+      style={{
+        width: width ? `${width}rem` : '100%',
+        height: `${height}rem`,
+      }}
+    >
       <Image src={ImgMockCard} alt="" fill className={styles.letterCardBackground} />
 
       <section className={styles.profileWrapper}>
@@ -38,13 +47,25 @@ export function LetterCard({
         </div>
 
         <span className={styles.nickname}>{nickname}</span>
-
         <span className={styles.expiresText}>{expiresText}</span>
       </section>
 
-      <div className={styles.messageWrapper}>
+      <section className={styles.messageWrapper}>
         <p className={styles.message}>{message}</p>
-      </div>
+
+        {song && (
+          <div className={styles.songWrapper}>
+            <div className={styles.songImageWrapper}>
+              <Image src={song.albumImage} alt="" fill className={styles.songImage} />
+            </div>
+
+            <div className={styles.songInfo}>
+              <p className={styles.songTitle}>{song.title}</p>
+              <p className={styles.songArtist}>{song.artist}</p>
+            </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
