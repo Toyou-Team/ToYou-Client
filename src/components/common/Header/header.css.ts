@@ -9,6 +9,8 @@ export const headerWrapper = recipe({
     width: '100%',
     height: '5.8rem',
     backgroundColor: 'white',
+
+    marginTop: '3rem',
   },
   variants: {
     isSticky: {
