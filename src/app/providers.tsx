@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 
 import { isServer, MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { ModalProvider } from '@/common/providers/ModalProvider';
+
 function makeQueryClient() {
   return new QueryClient({
     queryCache: new QueryCache({ onError: handleQueryError }),
@@ -26,7 +28,11 @@ function getQueryClient() {
 export default function Providers({ children }: { children: ReactNode }) {
   const queryClient = getQueryClient();
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ModalProvider>{children}</ModalProvider>
+    </QueryClientProvider>
+  );
 }
 
 // 중앙 집중 에러 핸들링 방식으로 구현
