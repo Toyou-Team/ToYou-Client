@@ -32,6 +32,14 @@ export const slide = style({
   scrollSnapAlign: 'start',
 });
 
+export const cardButton = style({
+  display: 'block',
+  width: '100%',
+
+  cursor: 'pointer',
+  textAlign: 'inherit',
+});
+
 export const dots = style({
   display: 'flex',
   justifyContent: 'center',
