@@ -3,7 +3,7 @@ import { LetterCarousel, type CarouselLetter } from '@/components/home/LetterCar
 import * as styles from './home.css';
 import { ImgMockAlbum } from '@/assets/imgs';
 
-const LETTER_QUESTIONS = ['오늘,\n어떤 마음이었어?', '오늘 하루는\n어땠어?', '오늘 가장 기억에 남는 순간은?'];
+const LETTER_QUESTIONS = ['오늘,\n어떤 마음이었어?', '오늘 하루는\n어땠어?', '오늘\n가장 기억에 남는 순간은?'];
 
 // TODO: 임시 데이터
 const MOCK_LETTERS: CarouselLetter[] = [
@@ -35,7 +35,8 @@ export default function HomePage() {
       <h1 className={styles.titleText}>{question}</h1>
 
       <div className={styles.carouselWrapper}>
-        <LetterCarousel letters={MOCK_LETTERS} />
+        {/* TODO: myChoco 는 API 연결 전 임시값.*/}
+        <LetterCarousel letters={MOCK_LETTERS} myChoco={40} />
       </div>
 
       <div className={styles.moreButtonWrapper}>

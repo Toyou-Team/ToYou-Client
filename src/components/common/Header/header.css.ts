@@ -1,9 +1,10 @@
+import { Z_INDEX } from '@/constants/zIndex';
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
 export const headerWrapper = recipe({
   base: {
-    // zIndex: Z_INDEX.HEADER,
+    zIndex: Z_INDEX.HEADER,
     top: 0,
     display: 'flex',
     width: '100%',
