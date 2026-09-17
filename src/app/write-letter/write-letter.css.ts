@@ -67,7 +67,7 @@ export const message = style({
   },
 });
 
-export const letterCount = style({
+export const characterCount = style({
   alignSelf: 'flex-end',
   marginRight: '2.5rem',
 

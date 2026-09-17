@@ -74,7 +74,7 @@ export default function WriteLetterPage() {
           />
 
           {message.length > 0 && (
-            <span className={styles.letterCount}>
+            <span className={styles.characterCount}>
               {message.length} / {MAX_LENGTH}
             </span>
           )}
