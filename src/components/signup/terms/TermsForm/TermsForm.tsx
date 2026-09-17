@@ -1,16 +1,19 @@
 'use client';
 
-import Button from '@/components/common/Button/Button';
-import { useForm } from 'react-hook-form';
 import { useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+
+import { useSignupMutation, type SignupPayload } from '@/common/apis/auth';
+import { kakaoProfileStore, registrationTokenStore, setTokens, signupDraftStore } from '@/common/apis/token';
+import Button from '@/components/common/Button/Button';
+import { AGREE_DATA } from '@/constants';
 
 import { AllAgreeCheckboxField } from '../AllAgreeCheckboxField/AllAgreeCheckboxField';
 import { TermCheckboxField } from '../TermCheckboxField/TermCheckboxField';
 import { PolicySheet } from '../PolicySheet/PolicySheet';
 
 import * as styles from './termsForm.css';
-
-import { AGREE_DATA } from '@/constants';
 
 interface TermsFormData {
   agree1: boolean;
@@ -19,6 +22,9 @@ interface TermsFormData {
 }
 
 export function TermsForm() {
+  const router = useRouter();
+  const { mutate: signup, isPending } = useSignupMutation();
+
   const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
   const selectedPolicy = AGREE_DATA.find((data) => data.id === selectedPolicyId);
 
@@ -60,11 +66,38 @@ export function TermsForm() {
   const isAllChecked = useMemo(() => [agree1, agree2, agree3].every(Boolean), [agree1, agree2, agree3]);
 
   const onSubmit = () => {
-    const termsArray = [agree1, agree2, agree3];
-    localStorage.setItem('terms', JSON.stringify(termsArray));
+    const registrationToken = registrationTokenStore.get();
+    const draft = signupDraftStore.get();
 
-    // TODO: 여기서 POST /api/v1/auth/signup 호출 후 홈
-    //router.push('/home');
+    // 가입 정보가 비어 있으면 처음부터
+    if (!registrationToken || !draft.nickname || !draft.receiveGender) {
+      router.replace('/signup/nickname');
+      return;
+    }
+
+    const kakaoGender = kakaoProfileStore.get()?.gender;
+    const payload: SignupPayload = {
+      registrationToken,
+      nickname: draft.nickname,
+      receiveGender: draft.receiveGender,
+      useKakaoProfileImage: draft.useKakaoProfileImage ?? false,
+      // 카카오 응답에 성별이 없을 때만 gender 전달
+      ...(!kakaoGender && draft.gender ? { gender: draft.gender } : {}),
+    };
+
+    signup(payload, {
+      onSuccess: (result) => {
+        setTokens(result);
+        signupDraftStore.clear();
+        registrationTokenStore.clear();
+        kakaoProfileStore.clear();
+        router.replace('/home');
+      },
+      onError: (error) => {
+        // TODO: 닉네임 중복 · 가입 토큰 만료 등 에러 안내
+        console.error('[signup]', error);
+      },
+    });
   };
 
   return (
@@ -89,7 +122,7 @@ export function TermsForm() {
         </div>
 
         <div className={styles.bottomButtonWrapper}>
-          <Button type="submit" disabled={!isAllRequired}>
+          <Button type="submit" disabled={!isAllRequired || isPending}>
             다음
           </Button>
         </div>

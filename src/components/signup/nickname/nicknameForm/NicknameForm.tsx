@@ -1,16 +1,26 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { signupDraftStore } from '@/common/apis/token';
 import Button from '@/components/common/Button/Button';
 import TextField from '../textField/TextField';
 import * as styles from './nicknameForm.css';
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 function NicknameForm() {
   const router = useRouter();
   const [nickname, setNickname] = useState('');
 
-  const isValidNickname = nickname.length >= 2 && nickname.length <= 12;
+  // 이전에 입력했던 값 복원
+  useEffect(() => {
+    const draft = signupDraftStore.get();
+
+    setNickname(draft.nickname ?? '');
+  }, []);
+
+  const trimmed = nickname.trim();
+  const isValidNickname = trimmed.length >= 2 && trimmed.length <= 12;
 
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -22,7 +32,7 @@ function NicknameForm() {
   const isError = nickname !== '' && !isValidNickname;
 
   const handleNext = () => {
-    // TODO: 닉네임 값 저장/중복확인은 가입 API 붙일 때
+    signupDraftStore.patch({ nickname: trimmed });
     router.push('/signup/my-gender');
   };
 
