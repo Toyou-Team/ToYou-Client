@@ -8,6 +8,10 @@ export const page = style({
   minHeight: '100dvh',
   padding: '11.6rem 4.5rem 4rem',
   backgroundColor: vars.color.neutral_100,
+
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
 });
 
 export const closeButton = style({
@@ -107,4 +111,8 @@ export const submitButtonWrapper = style({
   right: '2.4rem',
   bottom: '3.4rem',
   left: '2.4rem',
+});
+
+export const hiddenInput = style({
+  display: 'none',
 });
