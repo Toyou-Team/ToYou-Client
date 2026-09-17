@@ -2,6 +2,20 @@ import { useMutation } from '@tanstack/react-query';
 
 import { request } from './client';
 import { KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY } from './oAuth';
+import { clearTokens } from './token';
+
+export type Gender = 'MALE' | 'FEMALE';
+export type ReceiveGender = 'MALE' | 'FEMALE' | 'ALL';
+
+// SIGNED_IN 공통 구조 (카카오 로그인·가입 완료 응답이 같은 형식)
+export interface SignedInResult {
+  status: 'SIGNED_IN';
+  accessToken: string;
+  refreshToken: string;
+  user: { id: string };
+}
+
+// 카카오 로그인 시작 · state 검증
 
 const KAKAO_AUTHORIZE_URL = 'https://kauth.kakao.com/oauth/authorize';
 const STATE_KEY = 'toyou_kakao_oauth_state';
@@ -32,17 +46,52 @@ export const consumeKakaoState = (received: string | null) => {
 export interface KakaoProfileSuggestion {
   suggestedNickname?: string;
   profileImageUrl?: string;
-  gender?: 'MALE' | 'FEMALE';
+  gender?: Gender;
 }
 
-// POST /api/v1/auth/kakao 응답 (status 로 분기)
 export type KakaoAuthResult =
-  | { status: 'SIGNED_IN'; accessToken: string; refreshToken: string; user: { id: string } }
+  | SignedInResult
   | { status: 'SIGNUP_REQUIRED'; registrationToken: string; kakaoProfile: KakaoProfileSuggestion }
   | { status: 'SIGNUP_UNAVAILABLE'; reason: 'AGE_VERIFICATION_UNAVAILABLE' };
 
-// 카카오 인가 코드를 백엔드에 넘겨 로그인/가입판정
+// 카카오 로그인 콜백
 export const postKakaoLogin = (authorizationCode: string) =>
-  request<KakaoAuthResult>('post', '/api/v1/auth/kakao', { authorizationCode });
+  request<KakaoAuthResult>('post', '/api/v1/auth/kakao', { authorizationCode }, { auth: false });
 
 export const useKakaoLoginMutation = () => useMutation({ mutationFn: postKakaoLogin });
+
+export interface SignupPayload {
+  registrationToken: string;
+  nickname: string;
+  receiveGender: ReceiveGender;
+  useKakaoProfileImage: boolean;
+  gender?: Gender;
+}
+
+// 회원가입
+export const postSignup = (payload: SignupPayload) =>
+  request<SignedInResult>('post', '/api/v1/auth/signup', payload, { auth: false });
+
+export const useSignupMutation = () => useMutation({ mutationFn: postSignup });
+
+// 로그아웃
+export const postLogout = async () => {
+  try {
+    await request<void>('post', '/api/v1/auth/logout');
+  } finally {
+    clearTokens();
+  }
+};
+
+// 회원 탈퇴
+export const deleteAccount = async () => {
+  try {
+    await request<void>('delete', '/api/v1/auth/account');
+  } finally {
+    clearTokens();
+  }
+};
+
+export const useLogoutMutation = () => useMutation({ mutationFn: postLogout });
+
+export const useDeleteAccountMutation = () => useMutation({ mutationFn: deleteAccount });
