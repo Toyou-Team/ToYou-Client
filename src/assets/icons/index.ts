@@ -22,6 +22,9 @@ import IcLetterBoxNeutral300 from '@/assets/icons/ic_letterbox_neutral300.svg';
 import IcLetterBoxNeutral900 from '@/assets/icons/ic_letterbox_neutral900.svg';
 import IcUserNeutral300 from '@/assets/icons/ic_user_neutral300.svg';
 import IcUserNeutral900 from '@/assets/icons/ic_user_neutral900.svg';
+import IcImage from '@/assets/icons/ic_image.svg';
+import IcMusic from '@/assets/icons/ic_music.svg';
+import IcClose from '@/assets/icons/ic_close.svg';
 
 export {
   IcLogoKakao,
@@ -48,4 +51,7 @@ export {
   IcLetterBoxNeutral900,
   IcUserNeutral300,
   IcUserNeutral900,
+  IcImage,
+  IcMusic,
+  IcClose,
 };
