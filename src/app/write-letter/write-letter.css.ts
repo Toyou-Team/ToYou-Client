@@ -32,7 +32,7 @@ export const letter = style({
   flexDirection: 'column',
 
   width: '100%',
-  height: '40rem',
+  height: '41rem',
   gap: '1.6rem',
 
   backgroundColor: vars.color.neutral_50,
@@ -44,7 +44,6 @@ export const messageWrapper = style({
   gap: '0.8rem',
 
   flex: 1,
-  minHeight: 0,
 });
 
 export const message = style({
@@ -80,7 +79,7 @@ export const attachments = style({
   alignItems: 'center',
   gap: '0.8rem',
 
-  minHeight: '6.4rem',
+  height: '5.5rem',
   padding: '0.8rem 1.1rem',
 
   borderTop: `1px solid ${vars.color.neutral_300}`,
@@ -93,12 +92,10 @@ export const attachmentButton = style({
   gap: '0.8rem',
 
   height: '4rem',
-  padding: '0 1.2rem',
+  padding: '1rem 1.3rem',
 
   border: `1px solid ${vars.color.neutral_300}`,
   borderRadius: '0.8rem',
-
-  backgroundColor: vars.color.neutral_50,
 
   ...vars.fontStyles.caption,
   color: vars.color.neutral_900,
@@ -109,7 +106,7 @@ export const attachmentButton = style({
 export const submitButtonWrapper = style({
   position: 'absolute',
   right: '2.4rem',
-  bottom: '3.4rem',
+  bottom: '4rem',
   left: '2.4rem',
 });
 
