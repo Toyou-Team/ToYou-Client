@@ -3,11 +3,20 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { signupDraftStore } from '@/common/apis/token';
 import Button from '@/components/common/Button/Button';
 import { IcProfileImage, IcTrashCan } from '@/assets/icons';
 import { ImageActionSheet } from '../ImageActionSheet/ImageActionSheet';
 
 import * as styles from './imageUpload.css';
+
+const readFileAsDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
 
 export function ImageUpload() {
   const router = useRouter();
@@ -16,17 +25,24 @@ export function ImageUpload() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
 
+  // 이전에 골랐던 사진 기억
+  useEffect(() => {
+    const draft = signupDraftStore.get();
+
+    if (draft.profileImagePreview) setPreviewUrl(draft.profileImagePreview);
+  }, []);
+
   const openFilePicker = () => {
     fileInputRef.current?.click();
   };
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     // 같은 파일을 다시 선택할 수 있도록 초기화
     e.target.value = '';
 
     if (!file) return;
-    setPreviewUrl(URL.createObjectURL(file));
+    setPreviewUrl(await readFileAsDataUrl(file));
   };
 
   const handleImageClick = () => {
@@ -48,17 +64,12 @@ export function ImageUpload() {
   };
 
   const handleNext = () => {
-    // TODO: 가입 API 연결 시 이미지 파일 전달
+    signupDraftStore.patch({
+      useKakaoProfileImage: false,
+      profileImagePreview: previewUrl ?? undefined,
+    });
     router.push('/signup/terms');
   };
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
 
   return (
     <>

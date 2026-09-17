@@ -13,6 +13,7 @@ export default function SignUpMygenderPage() {
         options={['남성', '여성']}
         description="성별은 선택 후 변경이 불가능합니다."
         nextPath="/signup/target-gender"
+        draftKey="gender"
       />
     </>
   );

@@ -1,3 +1,5 @@
+import type { Gender, KakaoProfileSuggestion, ReceiveGender } from './auth';
+
 /**
  * 토큰 저장 정책
  * - Access Token: 메모리에만 (새로고침하면 사라짐)
@@ -37,16 +39,43 @@ export const registrationTokenStore = webStore(() => window.sessionStorage, 'toy
 const KAKAO_PROFILE_KEY = 'toyou_kakao_profile';
 
 export const kakaoProfileStore = {
-  get: (): unknown => {
+  get: (): KakaoProfileSuggestion | null => {
     if (!isBrowser()) return null;
     const raw = window.sessionStorage.getItem(KAKAO_PROFILE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return raw ? (JSON.parse(raw) as KakaoProfileSuggestion) : null;
   },
-  set: (profile: unknown) => {
+  set: (profile: KakaoProfileSuggestion) => {
     if (isBrowser()) window.sessionStorage.setItem(KAKAO_PROFILE_KEY, JSON.stringify(profile));
   },
   clear: () => {
     if (isBrowser()) window.sessionStorage.removeItem(KAKAO_PROFILE_KEY);
+  },
+};
+
+// 가입 스텝 사이 입력값(닉네임·성별 등)을 들고 다니는 임시 저장소
+const SIGNUP_DRAFT_KEY = 'toyou_signup_draft';
+
+export interface SignupDraft {
+  nickname?: string;
+  gender?: Gender;
+  receiveGender?: ReceiveGender;
+  useKakaoProfileImage?: boolean;
+  /** 뒤로가기 시 미리보기 복원용. API 로는 전송하지 않는다 (카카오 URL 또는 업로드 이미지 data URL) */
+  profileImagePreview?: string;
+}
+
+export const signupDraftStore = {
+  get: (): SignupDraft => {
+    if (!isBrowser()) return {};
+    const raw = window.sessionStorage.getItem(SIGNUP_DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as SignupDraft) : {};
+  },
+  patch: (partial: SignupDraft) => {
+    if (!isBrowser()) return;
+    window.sessionStorage.setItem(SIGNUP_DRAFT_KEY, JSON.stringify({ ...signupDraftStore.get(), ...partial }));
+  },
+  clear: () => {
+    if (isBrowser()) window.sessionStorage.removeItem(SIGNUP_DRAFT_KEY);
   },
 };
 
@@ -60,4 +89,5 @@ export const clearTokens = () => {
   refreshTokenStore.clear();
   registrationTokenStore.clear();
   kakaoProfileStore.clear();
+  signupDraftStore.clear();
 };

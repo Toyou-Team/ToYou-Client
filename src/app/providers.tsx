@@ -1,9 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 import { isServer, MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { restoreSession } from '@/common/apis/refresh';
 import { ModalProvider } from '@/common/providers/ModalProvider';
 
 function makeQueryClient() {
@@ -27,6 +28,11 @@ function getQueryClient() {
 
 export default function Providers({ children }: { children: ReactNode }) {
   const queryClient = getQueryClient();
+
+  // 앱 시작·새로고침 시 refresh token 으로 로그인 복원
+  useEffect(() => {
+    restoreSession();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
