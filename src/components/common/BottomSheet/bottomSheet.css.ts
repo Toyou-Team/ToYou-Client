@@ -1,9 +1,13 @@
 import { vars } from '@/styles/theme.css';
 import { style } from '@vanilla-extract/css';
 
+import { Z_INDEX } from '@/constants/zIndex';
+
 export const overlay = style({
   position: 'fixed',
   inset: 0,
+  zIndex: Z_INDEX.BACKDROP,
+
   backgroundColor: 'rgba(0, 0, 0, 0.4)',
 });
 
@@ -12,6 +16,7 @@ export const sheet = style({
   right: 0,
   bottom: 0,
   left: 0,
+  zIndex: Z_INDEX.BACKDROP,
 
   display: 'flex',
   flexDirection: 'column',
