@@ -6,15 +6,22 @@ import Button from '@/components/common/Button/Button';
 import * as styles from './write-letter.css';
 import { IcClose, IcImage, IcMusic } from '@/assets/icons';
 import { ImageActionSheet } from '@/components/signup/profile-image/ImageActionSheet/ImageActionSheet';
+import { useRouter } from 'next/navigation';
 
 const MAX_LENGTH = 500;
 
 export default function WriteLetterPage() {
+  const router = useRouter();
+
   const [message, setMessage] = useState('');
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [isImageActionSheetOpen, setIsImageActionSheetOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClose = () => {
+    router.back();
+  };
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
@@ -59,7 +66,7 @@ export default function WriteLetterPage() {
           : undefined
       }
     >
-      <button type="button" className={styles.closeButton} aria-label="편지 쓰기 닫기">
+      <button type="button" className={styles.closeButton} aria-label="편지 쓰기 닫기" onClick={handleClose}>
         <IcClose />
       </button>
 
