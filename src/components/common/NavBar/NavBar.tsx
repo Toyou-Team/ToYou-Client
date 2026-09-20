@@ -22,7 +22,7 @@ const navItems = [
     icon: <IcWritingLetterNeutral300 />,
     activeIcon: <IcWritingLetterNeutral900 />,
   },
-  { href: '/letter-list', label: '편지함', icon: <IcLetterBoxNeutral300 />, activeIcon: <IcLetterBoxNeutral900 /> },
+  { href: '/letter-box', label: '편지함', icon: <IcLetterBoxNeutral300 />, activeIcon: <IcLetterBoxNeutral900 /> },
   { href: '/mypage', label: '마이', icon: <IcUserNeutral300 />, activeIcon: <IcUserNeutral900 /> },
 ];
 
