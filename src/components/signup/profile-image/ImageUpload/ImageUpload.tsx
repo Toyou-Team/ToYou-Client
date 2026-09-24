@@ -1,10 +1,7 @@
 'use client';
 
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { ChangeEvent, useRef, useState, type CSSProperties } from 'react';
 
-import { signupDraftStore } from '@/common/apis/token';
-import Button from '@/components/common/Button/Button';
 import { IcProfileImage, IcTrashCan } from '@/assets/icons';
 import { ImageActionSheet } from '../ImageActionSheet/ImageActionSheet';
 
@@ -18,19 +15,18 @@ const readFileAsDataUrl = (file: File) =>
     reader.readAsDataURL(file);
   });
 
-export function ImageUpload() {
-  const router = useRouter();
+interface ImageUploadProps {
+  value: string | null;
+  onChange: (value: string | null) => void;
+  /** 프로필 원 지름 (rem 단위 숫자) */
+  size?: number;
+  /** 상단 여백 (rem 단위 숫자) */
+  topSpacing?: number;
+}
+
+export function ImageUpload({ value, onChange, size = 20, topSpacing = 6.3 }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
-
-  // 이전에 골랐던 사진 기억
-  useEffect(() => {
-    const draft = signupDraftStore.get();
-
-    if (draft.profileImagePreview) setPreviewUrl(draft.profileImagePreview);
-  }, []);
 
   const openFilePicker = () => {
     fileInputRef.current?.click();
@@ -42,11 +38,11 @@ export function ImageUpload() {
     e.target.value = '';
 
     if (!file) return;
-    setPreviewUrl(await readFileAsDataUrl(file));
+    onChange(await readFileAsDataUrl(file));
   };
 
   const handleImageClick = () => {
-    if (previewUrl) {
+    if (value) {
       setIsActionSheetOpen(true);
       return;
     }
@@ -60,51 +56,38 @@ export function ImageUpload() {
 
   const handleDeleteImage = () => {
     setIsActionSheetOpen(false);
-    setPreviewUrl(null);
-  };
-
-  const handleNext = () => {
-    signupDraftStore.patch({
-      useKakaoProfileImage: false,
-      profileImagePreview: previewUrl ?? undefined,
-    });
-    router.push('/signup/terms');
+    onChange(null);
   };
 
   return (
-    <>
-      <section className={styles.profileWrapper}>
-        <div className={styles.profileImageWrapper}>
-          {previewUrl ? (
-            <img src={previewUrl} alt="선택한 프로필 사진" className={styles.profileImage} onClick={handleImageClick} />
-          ) : (
-            <IcProfileImage className={styles.profileImage} onClick={handleImageClick} />
-          )}
+    <section
+      className={styles.profileWrapper}
+      style={
+        {
+          '--profile-wrapper-top-spacing': `${topSpacing}rem`,
+          '--profile-image-size': `${size}rem`,
+          '--profile-image-button-size': `${size * 0.24}rem`,
+        } as CSSProperties
+      }
+    >
+      <div className={styles.profileImageWrapper}>
+        {value ? (
+          <img src={value} alt="선택한 프로필 사진" className={styles.profileImage} onClick={handleImageClick} />
+        ) : (
+          <IcProfileImage className={styles.profileImage} onClick={handleImageClick} />
+        )}
 
-          <button
-            type="button"
-            className={styles.imageChangeButton}
-            onClick={handleImageClick}
-            aria-label={previewUrl ? '프로필 사진 변경 또는 삭제' : '프로필 사진 선택'}
-          >
-            {previewUrl ? <IcTrashCan /> : '+'}
-          </button>
-        </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className={styles.hiddenInput}
-          onChange={handleImageChange}
-        />
-      </section>
-
-      <div className={styles.bottomButtonWrapper}>
-        <Button type="button" onClick={handleNext}>
-          다음
-        </Button>
+        <button
+          type="button"
+          className={styles.imageChangeButton}
+          onClick={handleImageClick}
+          aria-label={value ? '프로필 사진 변경 또는 삭제' : '프로필 사진 선택'}
+        >
+          {value ? <IcTrashCan /> : '+'}
+        </button>
       </div>
+
+      <input ref={fileInputRef} type="file" accept="image/*" className={styles.hiddenInput} onChange={handleImageChange} />
 
       <ImageActionSheet
         isOpen={isActionSheetOpen}
@@ -112,7 +95,7 @@ export function ImageUpload() {
         onChangeImage={handleChangeImage}
         onDeleteImage={handleDeleteImage}
       />
-    </>
+    </section>
   );
 }
 
