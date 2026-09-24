@@ -15,3 +15,11 @@ export const titleWrapper = style({
   marginTop: '5.1rem',
   paddingLeft: '2.4rem',
 });
+
+export const bottomButtonWrapper = style({
+  position: 'absolute',
+  bottom: '3.4rem',
+  left: '0',
+  right: '0',
+  padding: '0 2.4rem',
+});
