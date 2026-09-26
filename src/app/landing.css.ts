@@ -24,5 +24,5 @@ export const landingPageTitle = style({
 
 export const landingPageDescription = style({
   ...vars.fontStyles.body,
-  color: vars.color.neutral_300,
+  color: vars.color.neutral_600,
 });
