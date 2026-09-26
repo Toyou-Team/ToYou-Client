@@ -18,13 +18,20 @@ const readFileAsDataUrl = (file: File) =>
 interface ImageUploadProps {
   value: string | null;
   onChange: (value: string | null) => void;
-  /** 프로필 원 지름 (rem 단위 숫자) */
+  onSelectFile?: (file: File) => void;
+  onRemove?: () => void;
   size?: number;
-  /** 상단 여백 (rem 단위 숫자) */
   topSpacing?: number;
 }
 
-export function ImageUpload({ value, onChange, size = 20, topSpacing = 6.3 }: ImageUploadProps) {
+export function ImageUpload({
+  value,
+  onChange,
+  onSelectFile,
+  onRemove,
+  size = 20,
+  topSpacing = 6.3,
+}: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
 
@@ -39,6 +46,7 @@ export function ImageUpload({ value, onChange, size = 20, topSpacing = 6.3 }: Im
 
     if (!file) return;
     onChange(await readFileAsDataUrl(file));
+    onSelectFile?.(file);
   };
 
   const handleImageClick = () => {
@@ -57,6 +65,7 @@ export function ImageUpload({ value, onChange, size = 20, topSpacing = 6.3 }: Im
   const handleDeleteImage = () => {
     setIsActionSheetOpen(false);
     onChange(null);
+    onRemove?.();
   };
 
   return (
@@ -87,7 +96,13 @@ export function ImageUpload({ value, onChange, size = 20, topSpacing = 6.3 }: Im
         </button>
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" className={styles.hiddenInput} onChange={handleImageChange} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className={styles.hiddenInput}
+        onChange={handleImageChange}
+      />
 
       <ImageActionSheet
         isOpen={isActionSheetOpen}

@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/common/Header/Header';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { IcCheckNeutral900 } from '@/assets/icons';
-import { GENDER_LABEL, mockUserStore, type ReceiveGender } from '@/common/mock/user';
+import type { ReceiveGender } from '@/common/apis/auth';
+import { GENDER_LABEL, useProfileQuery, useUpdateProfileMutation } from '@/common/apis/profile';
 
 import * as styles from './gender.css';
 
@@ -14,19 +15,20 @@ const RECEIVE_GENDER_OPTIONS: ReceiveGender[] = ['MALE', 'FEMALE', 'ALL'];
 
 export default function MyPageGenderPage() {
   const router = useRouter();
+  const { data: profile } = useProfileQuery();
+  const { mutate: updateProfile, isPending } = useUpdateProfileMutation();
+
   const [selected, setSelected] = useState<ReceiveGender | null>(null);
 
-  // TODO: 유저 정보 조회 API 연동 전까지 사용하는 임시 데이터
   useEffect(() => {
-    setSelected(mockUserStore.get().receiveGender);
-  }, []);
+    if (profile) setSelected(profile.receiveGender);
+  }, [profile]);
 
   const handleSelect = (value: ReceiveGender) => {
-    setSelected(value);
+    if (isPending || value === selected) return;
 
-    // TODO: 받는 사람 성별 수정 API 연동
-    mockUserStore.patch({ receiveGender: value });
-    router.back();
+    setSelected(value);
+    updateProfile({ receiveGender: value }, { onSuccess: () => router.back() });
   };
 
   return (
@@ -39,7 +41,7 @@ export default function MyPageGenderPage() {
         <ul className={styles.list}>
           {RECEIVE_GENDER_OPTIONS.map((option) => (
             <li key={option}>
-              <button type="button" className={styles.optionRow} onClick={() => handleSelect(option)}>
+              <button type="button" className={styles.optionRow} onClick={() => handleSelect(option)} disabled={isPending}>
                 <span className={styles.optionLabel}>{GENDER_LABEL[option]}</span>
                 {selected === option && <IcCheckNeutral900 />}
               </button>

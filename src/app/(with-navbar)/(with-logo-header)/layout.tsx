@@ -1,10 +1,15 @@
+'use client';
+
 import { Header } from '@/components/common/Header/Header';
 import Link from 'next/link';
 
 import * as styles from './layout.css';
 import Badge from '@/components/common/Badge/Badge';
+import { useProfileQuery } from '@/common/apis/profile';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const { data: profile } = useProfileQuery();
+
   return (
     <>
       <Header
@@ -13,7 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             to you
           </Link>
         }
-        right={<Badge count={40} />}
+        right={profile && <Badge count={profile.chocolateBalance} />}
         isSticky
       />
       {children}
