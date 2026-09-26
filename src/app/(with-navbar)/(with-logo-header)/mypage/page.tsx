@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useDeleteAccountMutation, useLogoutMutation } from '@/common/apis/auth';
-import { GENDER_LABEL, mockUserStore, type MockUser } from '@/common/mock/user';
+import { GENDER_LABEL, useProfileQuery } from '@/common/apis/profile';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 import { PolicySheet } from '@/components/signup/terms/PolicySheet/PolicySheet';
@@ -20,13 +20,8 @@ export default function MyPage() {
   const { mutate: logout } = useLogoutMutation();
   const { mutate: deleteAccount } = useDeleteAccountMutation();
 
-  const [user, setUser] = useState<MockUser | null>(null);
+  const { data: profile } = useProfileQuery();
   const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
-
-  // TODO: 유저 정보 조회 API 연동 전까지 사용하는 임시 데이터
-  useEffect(() => {
-    setUser(mockUserStore.get());
-  }, []);
 
   const selectedPolicy = AGREE_DATA.find((data) => data.id === selectedPolicyId);
 
@@ -74,21 +69,21 @@ export default function MyPage() {
     ));
   };
 
-  if (!user) return null;
+  if (!profile) return null;
 
   return (
     <div className={styles.mypageWrapper}>
       <Link href="/mypage/edit" className={styles.profileCard}>
         <div className={styles.profileImageWrapper}>
-          {user.profileImageUrl ? (
-            <img src={user.profileImageUrl} alt={`${user.nickname}의 프로필`} className={styles.profileImage} />
+          {profile.profileImage ? (
+            <img src={profile.profileImage.url} alt={`${profile.nickname}의 프로필`} className={styles.profileImage} />
           ) : (
             <IcProfileImage className={styles.profileImage} />
           )}
         </div>
 
         <div className={styles.profileTextWrapper}>
-          <span className={styles.nickname}>{user.nickname}</span>
+          <span className={styles.nickname}>{profile.nickname}</span>
           <span className={styles.profileEditText}>프로필 수정</span>
         </div>
 
@@ -101,7 +96,7 @@ export default function MyPage() {
           <Link href="/mypage/gender" className={styles.row}>
             <span className={styles.settingItem}>받는 사람 성별</span>
             <span className={styles.rowRight}>
-              <span className={styles.rowValue}>{GENDER_LABEL[user.receiveGender]}</span>
+              <span className={styles.rowValue}>{GENDER_LABEL[profile.receiveGender]}</span>
               <IcChevronRight />
             </span>
           </Link>
