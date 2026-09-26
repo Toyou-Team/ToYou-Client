@@ -8,26 +8,32 @@ import { BackButton } from '@/components/common/BackButton/BackButton';
 import { NavBar } from '@/components/common/NavBar/NavBar';
 import TextField from '@/components/signup/nickname/textField/TextField';
 import { ImageUpload } from '@/components/signup/profile-image/ImageUpload/ImageUpload';
-import { GENDER_LABEL, mockUserStore, type Gender } from '@/common/mock/user';
+import {
+  GENDER_LABEL,
+  useDeleteProfileImageMutation,
+  useProfileQuery,
+  useUpdateProfileMutation,
+  useUploadProfileImageMutation,
+} from '@/common/apis/profile';
 
 import * as styles from './edit.css';
 
 export default function MyPageEditPage() {
   const router = useRouter();
 
+  const { data: profile } = useProfileQuery();
+  const { mutate: updateProfile, isPending: isSaving } = useUpdateProfileMutation();
+  const { mutate: uploadProfileImage } = useUploadProfileImageMutation();
+  const { mutate: deleteProfileImage } = useDeleteProfileImageMutation();
+
   const [nickname, setNickname] = useState('');
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const [gender, setGender] = useState<Gender>('FEMALE');
-  const [birthYear, setBirthYear] = useState(0);
 
-  // TODO: 유저 정보 조회 API 연동 전까지 사용하는 임시 데이터
   useEffect(() => {
-    const user = mockUserStore.get();
-    setNickname(user.nickname);
-    setProfileImageUrl(user.profileImageUrl ?? null);
-    setGender(user.gender);
-    setBirthYear(user.birthYear);
-  }, []);
+    if (!profile) return;
+    setNickname(profile.nickname);
+    setProfileImageUrl(profile.profileImage?.url ?? null);
+  }, [profile]);
 
   const trimmed = nickname.trim();
   const isValidNickname = trimmed.length >= 2 && trimmed.length <= 12;
@@ -41,10 +47,27 @@ export default function MyPageEditPage() {
   const handleSave = () => {
     if (!isValidNickname) return;
 
-    // TODO: 프로필 수정 API 연동
-    mockUserStore.patch({ nickname: trimmed, profileImageUrl: profileImageUrl ?? undefined });
-    router.back();
+    if (trimmed === profile?.nickname) {
+      router.back();
+      return;
+    }
+
+    updateProfile({ nickname: trimmed }, { onSuccess: () => router.back() });
   };
+
+  const handleSelectFile = (file: File) => {
+    uploadProfileImage(file, {
+      onSuccess: (updated) => setProfileImageUrl(updated.profileImage?.url ?? null),
+    });
+  };
+
+  const handleRemoveImage = () => {
+    deleteProfileImage(undefined, {
+      onSuccess: (updated) => setProfileImageUrl(updated.profileImage?.url ?? null),
+    });
+  };
+
+  if (!profile) return null;
 
   return (
     <div className={styles.pageWrapper}>
@@ -52,7 +75,12 @@ export default function MyPageEditPage() {
         left={<BackButton />}
         center={<span className={styles.titleText}>프로필 수정</span>}
         right={
-          <button type="button" className={styles.saveButton} onClick={handleSave} disabled={!isValidNickname}>
+          <button
+            type="button"
+            className={styles.saveButton}
+            onClick={handleSave}
+            disabled={!isValidNickname || isSaving}
+          >
             저장
           </button>
         }
@@ -60,7 +88,14 @@ export default function MyPageEditPage() {
       />
 
       <main className={styles.content}>
-        <ImageUpload value={profileImageUrl} onChange={setProfileImageUrl} size={14.8} topSpacing={3.6} />
+        <ImageUpload
+          value={profileImageUrl}
+          onChange={setProfileImageUrl}
+          onSelectFile={handleSelectFile}
+          onRemove={handleRemoveImage}
+          size={14.8}
+          topSpacing={3.6}
+        />
 
         <div className={styles.nicknameFieldWrapper}>
           <span className={styles.fieldLabel}>닉네임</span>
@@ -79,12 +114,12 @@ export default function MyPageEditPage() {
           <div className={styles.infoRowWrapper}>
             <div className={styles.infoRow}>
               <span className={styles.infoLabel}>성별</span>
-              <span className={styles.infoValue}>{GENDER_LABEL[gender]}</span>
+              <span className={styles.infoValue}>{GENDER_LABEL[profile.gender]}</span>
             </div>
 
             <div className={styles.infoRow}>
               <span className={styles.infoLabel}>생년</span>
-              <span className={styles.infoValue}>{birthYear}</span>
+              <span className={styles.infoValue}>{profile.birthDate.slice(0, 4)}</span>
             </div>
           </div>
         </section>
