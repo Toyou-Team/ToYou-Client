@@ -59,7 +59,7 @@ async function dispatch<T>(method: Method, path: string, body: unknown, auth: bo
     const response = await client(`${API_BASE_URL}${path}`, {
       method,
       context: { auth },
-      ...(body === undefined ? {} : { json: body }),
+      ...(body === undefined ? {} : body instanceof FormData ? { body } : { json: body }),
     });
 
     if (response.status === HTTP_STATUS_CODE.NO_CONTENT) return undefined as T;
@@ -78,8 +78,9 @@ async function dispatch<T>(method: Method, path: string, body: unknown, auth: bo
     const requestId = payload?.error?.requestId;
 
     if (status === HTTP_STATUS_CODE.UNAUTHORIZED && auth) {
-      // Access Token 만료/손상 → 재발급 후 원 요청을 딱 한 번만 재시도
-      if (code === AUTH_ERROR_CODE.TOKEN_INVALID && !retried) {
+      // Access Token 만료/손상, 또는 (새로고침 직후 restoreSession 이 아직 안 끝난 경우 등) 아예 없음
+      // → 재발급 후 원 요청을 딱 한 번만 재시도
+      if ((code === AUTH_ERROR_CODE.TOKEN_INVALID || code === AUTH_ERROR_CODE.TOKEN_REQUIRED) && !retried) {
         try {
           await reissueToken();
           return dispatch<T>(method, path, body, auth, true);
