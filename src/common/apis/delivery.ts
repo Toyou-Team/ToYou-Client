@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { ApiError, request } from './client';
+import { ApiError, request, retryOnce } from './client';
 import { HTTP_STATUS_CODE } from './constants/http';
-import { PROFILE_QUERY_KEY, type Profile, type ProfileImage } from './profile';
+import { CONVERSATIONS_QUERY_KEY } from './conversation';
+import { syncChocolateBalance, type ProfileImage } from './profile';
 
 export interface DeliverySpotify {
   trackId: string;
@@ -90,15 +91,6 @@ export const OPEN_DELIVERY_COST = 5;
 
 export const CURRENT_DELIVERY_ROUND_QUERY_KEY = ['delivery-rounds', 'current'] as const;
 
-const syncChocolateBalance = (queryClient: QueryClient, chocolateBalance: number) =>
-  queryClient.setQueryData<Profile>(PROFILE_QUERY_KEY, (profile) => profile && { ...profile, chocolateBalance });
-
-// 응답을 못 받은 경우(네트워크·5xx)만 같은 요청으로 한 번 재시도
-const retryOnce = (failureCount: number, error: Error) =>
-  failureCount < 1 &&
-  error instanceof ApiError &&
-  (error.status === HTTP_STATUS_CODE.NETWORK_ERROR || error.status >= HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR);
-
 // 배달 없음·접근 불가·잔액/후보 부족은 홈 상태가 바뀐 것이므로 다시 불러온다
 const isStaleRoundError = (error: Error) =>
   error instanceof ApiError &&
@@ -181,7 +173,10 @@ export const useReplyMutation = () => {
   return useMutation({
     mutationFn: postReply,
     retry: retryOnce,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY });
+    },
   });
 };
 

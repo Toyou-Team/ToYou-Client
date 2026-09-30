@@ -114,3 +114,9 @@ async function dispatch<T>(
 export function request<T>(method: Method, path: string, body?: unknown, options: RequestOptions = {}): Promise<T> {
   return dispatch<T>(method, path, body, options, false);
 }
+
+// 응답을 못 받은 경우(네트워크·5xx)만 같은 요청으로 한 번 재시도
+export const retryOnce = (failureCount: number, error: Error) =>
+  failureCount < 1 &&
+  error instanceof ApiError &&
+  (error.status === HTTP_STATUS_CODE.NETWORK_ERROR || error.status >= HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR);

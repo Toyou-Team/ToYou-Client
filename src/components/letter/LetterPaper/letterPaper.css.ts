@@ -5,12 +5,17 @@ import { vars } from '@/styles/theme.css';
 export const paper = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '1.6rem',
 
   width: '100%',
-  padding: '2rem 2.5rem',
-
   backgroundColor: vars.color.neutral_50,
+});
+
+export const letter = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1.6rem',
+
+  padding: '2rem 2.5rem',
 });
 
 export const body = style({
@@ -67,6 +72,8 @@ export const song = style({
   alignItems: 'center',
   gap: '1.2rem',
 
+  height: '8rem',
+  margin: '0 1rem 2rem',
   padding: '1rem 1.6rem',
 
   borderRadius: '1.2rem',
@@ -76,8 +83,8 @@ export const song = style({
 export const albumImage = style({
   flexShrink: 0,
 
-  width: '3.8rem',
-  height: '3.8rem',
+  width: '6rem',
+  height: '6rem',
   borderRadius: '0.6rem',
   objectFit: 'cover',
 });

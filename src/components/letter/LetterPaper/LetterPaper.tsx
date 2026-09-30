@@ -3,8 +3,7 @@ import type { LetterContent } from '@/common/apis/delivery';
 import * as styles from './letterPaper.css';
 
 interface LetterPaperProps {
-  letter: LetterContent;
-  // 미리보기
+  letter: Pick<LetterContent, 'body' | 'createdAt' | 'spotify'>;
   isPreview?: boolean;
 }
 
@@ -23,26 +22,28 @@ export function LetterPaper({ letter, isPreview = false }: LetterPaperProps) {
   const { body, createdAt, spotify } = letter;
 
   return (
-    <article className={styles.paper}>
-      {isPreview ? (
-        <>
-          <p className={styles.body}>{body.slice(0, PREVIEW_LENGTH)}</p>
+    <div className={styles.paper}>
+      <article className={styles.letter}>
+        {isPreview ? (
+          <>
+            <p className={styles.body}>{body.slice(0, PREVIEW_LENGTH)}</p>
 
-          <div className={styles.divider}>
-            <span className={styles.dividerText}>편지를 선택하면 온전히 열려요.</span>
-          </div>
+            <div className={styles.divider}>
+              <span className={styles.dividerText}>편지를 선택하면 온전히 열려요.</span>
+            </div>
 
-          <p className={styles.hiddenBody} aria-hidden>
-            {body.slice(PREVIEW_LENGTH)}
-          </p>
-        </>
-      ) : (
-        <p className={styles.body}>{body}</p>
-      )}
+            <p className={styles.hiddenBody} aria-hidden>
+              {body.slice(PREVIEW_LENGTH)}
+            </p>
+          </>
+        ) : (
+          <p className={styles.body}>{body}</p>
+        )}
 
-      <time className={styles.date} dateTime={createdAt}>
-        {formatLetterDate(createdAt)}
-      </time>
+        <time className={styles.date} dateTime={createdAt}>
+          {formatLetterDate(createdAt)}
+        </time>
+      </article>
 
       {spotify && (
         <div className={styles.song}>
@@ -54,6 +55,6 @@ export function LetterPaper({ letter, isPreview = false }: LetterPaperProps) {
           </div>
         </div>
       )}
-    </article>
+    </div>
   );
 }
