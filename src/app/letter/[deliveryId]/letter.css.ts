@@ -14,6 +14,12 @@ export const page = style({
   backgroundPosition: 'center',
 });
 
+// 공통 Header 를 이 화면에서만 낮고 투명하게 쓴다
+globalStyle(`${page} > header`, {
+  height: '5rem',
+  backgroundColor: 'transparent',
+});
+
 export const content = style({
   display: 'flex',
   flexDirection: 'column',
