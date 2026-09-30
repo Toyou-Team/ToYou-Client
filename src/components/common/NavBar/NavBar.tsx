@@ -32,7 +32,7 @@ export function NavBar() {
   return (
     <nav className={styles.navBarWrapper}>
       {navItems.map(({ href, label, icon, activeIcon }) => {
-        const isActive = pathname === href;
+        const isActive = pathname === href || pathname.startsWith(`${href}/`);
 
         return (
           <Link key={href} href={href} className={styles.navItemWrapper}>

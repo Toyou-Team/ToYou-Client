@@ -144,6 +144,9 @@ export const trackArtist = style({
 });
 
 export const artistName = style({
+  flex: 1,
+  minWidth: 0,
+
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textOverflow: 'ellipsis',

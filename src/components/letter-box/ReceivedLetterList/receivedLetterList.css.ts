@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 
 import { vars } from '@/styles/theme.css';
 
@@ -42,13 +43,51 @@ export const list = style({
 });
 
 export const item = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '1.6rem',
-
-  padding: '1rem 0',
+  position: 'relative',
 
   borderBottom: `1px solid ${vars.color.neutral_300}`,
+});
+
+export const exitButton = style({
+  width: '5.8rem',
+
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.8rem',
+
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  bottom: 0,
+
+  ...vars.fontStyles.label,
+  color: vars.color.neutral_50,
+  backgroundColor: vars.color.red_500,
+
+  cursor: 'pointer',
+});
+
+export const itemContent = recipe({
+  base: {
+    height: '8.6rem',
+
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1.6rem',
+
+    padding: '1rem',
+    position: 'relative',
+
+    backgroundColor: vars.color.neutral_50,
+    touchAction: 'pan-y',
+    userSelect: 'none',
+    transition: 'transform 0.2s ease',
+  },
+  variants: {
+    isDragging: {
+      true: { transition: 'none' },
+    },
+  },
 });
 
 export const profileImage = style({
@@ -120,9 +159,8 @@ export const message = style({
 export const unreadDot = style({
   flexShrink: 0,
 
-  width: '0.7rem',
-  height: '0.7rem',
-  marginBottom: '0.4rem',
+  width: '0.8rem',
+  height: '0.8rem',
   borderRadius: '50%',
 
   backgroundColor: vars.color.neutral_950,
