@@ -60,6 +60,34 @@ export interface OpenedDelivery {
   letter: LetterContent & { id: string };
 }
 
+export interface CreateReplyPayload {
+  deliveryId: string;
+  clientMessageId: string;
+  body: string;
+  imageObjectKey?: string;
+  spotifyTrackId?: string;
+}
+
+export interface CreatedReply {
+  conversationId: string;
+  message: {
+    id: string;
+    clientMessageId: string;
+    senderId: string;
+    body: string;
+    spotify: DeliverySpotify | null;
+    createdAt: string;
+  };
+}
+
+export interface ReplyReactivation {
+  replyAvailableUntil: string;
+  canReply: boolean;
+  chocolateBalance: number;
+}
+
+export const OPEN_DELIVERY_COST = 5;
+
 export const CURRENT_DELIVERY_ROUND_QUERY_KEY = ['delivery-rounds', 'current'] as const;
 
 const syncChocolateBalance = (queryClient: QueryClient, chocolateBalance: number) =>
@@ -140,5 +168,35 @@ export const useOpenDeliveryMutation = () => {
     onError: (error) => {
       if (isStaleRoundError(error)) queryClient.invalidateQueries({ queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY });
     },
+  });
+};
+
+// 첫 답장 (재시도 시 같은 clientMessageId 사용)
+export const postReply = ({ deliveryId, ...payload }: CreateReplyPayload) =>
+  request<CreatedReply>('post', `/api/v1/deliveries/${deliveryId}/replies`, payload);
+
+export const useReplyMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: postReply,
+    retry: retryOnce,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY }),
+  });
+};
+
+// 답장 기한 재활성화 (5초코)
+export const postReplyReactivation = ({ deliveryId, idempotencyKey }: { deliveryId: string; idempotencyKey: string }) =>
+  request<ReplyReactivation>('post', `/api/v1/deliveries/${deliveryId}/reply-reactivations`, undefined, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
+
+export const useReplyReactivationMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: postReplyReactivation,
+    retry: retryOnce,
+    onSuccess: ({ chocolateBalance }) => syncChocolateBalance(queryClient, chocolateBalance),
   });
 };

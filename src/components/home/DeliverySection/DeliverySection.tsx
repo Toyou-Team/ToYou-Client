@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { useCurrentDeliveryRoundQuery } from '@/common/apis/delivery';
 import Button from '@/components/common/Button/Button';
 import { ExtraDeliveryButton } from '@/components/home/ExtraDeliveryButton/ExtraDeliveryButton';
@@ -8,6 +10,7 @@ import { LetterCarousel } from '@/components/home/LetterCarousel/LetterCarousel'
 import * as styles from './deliverySection.css';
 
 export function DeliverySection() {
+  const router = useRouter();
   const { data: round, isPending, isError, isFetching, refetch } = useCurrentDeliveryRoundQuery();
 
   if (isPending) {
@@ -35,8 +38,7 @@ export function DeliverySection() {
     <>
       {deliveries.length > 0 ? (
         <div className={styles.carouselWrapper}>
-          {/* TODO: 카드 선택 시 미리보기 화면 연결 */}
-          <LetterCarousel deliveries={deliveries} />
+          <LetterCarousel deliveries={deliveries} onSelect={({ id }) => router.push(`/letter/${id}`)} />
         </div>
       ) : (
         <div className={styles.statusWrapper}>
