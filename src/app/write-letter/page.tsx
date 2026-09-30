@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, use, useRef, useState } from 'react';
 
 import Button from '@/components/common/Button/Button';
 import * as styles from './write-letter.css';
@@ -9,6 +9,9 @@ import { ImageActionSheet } from '@/components/signup/profile-image/ImageActionS
 import { MusicPicker } from '@/components/write-letter/MusicPicker/MusicPicker';
 import type { SpotifyTrack } from '@/common/apis/music';
 import { useCreateLetterMutation } from '@/common/apis/letter';
+import { ApiError } from '@/common/apis/client';
+import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
+import { useReplyMutation } from '@/common/apis/delivery';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 import { useRouter } from 'next/navigation';
@@ -16,10 +19,18 @@ import { useRouter } from 'next/navigation';
 const MIN_LENGTH = 30;
 const MAX_LENGTH = 500;
 
-export default function WriteLetterPage() {
+interface WriteLetterPageProps {
+  // 답장이면 답장할 편지의 deliveryId
+  searchParams: Promise<{ replyTo?: string }>;
+}
+
+export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) {
+  const { replyTo } = use(searchParams);
   const router = useRouter();
   const { open } = useModal();
-  const { mutate: createLetter, isPending: isSending } = useCreateLetterMutation();
+  const { mutate: createLetter, isPending: isCreating } = useCreateLetterMutation();
+  const { mutate: sendReply, isPending: isReplying } = useReplyMutation();
+  const isSending = isCreating || isReplying;
 
   const [message, setMessage] = useState('');
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -28,6 +39,8 @@ export default function WriteLetterPage() {
   const [isMusicPickerOpen, setIsMusicPickerOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // 같은 답장을 재전송할 때는 같은 id 를 쓰고, 내용을 고치면 새로 만든다
+  const clientMessageIdRef = useRef<string | null>(null);
 
   const isValidBody = message.trim().length >= MIN_LENGTH;
 
@@ -36,7 +49,64 @@ export default function WriteLetterPage() {
   };
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    clientMessageIdRef.current = null;
     setMessage(e.target.value.slice(0, MAX_LENGTH));
+  };
+
+  const handleSelectTrack = (track: SpotifyTrack | null) => {
+    clientMessageIdRef.current = null;
+    setSelectedTrack(track);
+  };
+
+  const openAlertModal = (title: string, description: string, onConfirm?: () => void) => {
+    open(({ close }) => (
+      <Modal
+        title={title}
+        description={description}
+        confirmText="확인"
+        onConfirm={() => {
+          close();
+          onConfirm?.();
+        }}
+        onClose={close}
+      />
+    ));
+  };
+
+  const submit = () => {
+    const body = message.trim();
+    const spotifyTrackId = selectedTrack?.id;
+
+    if (!replyTo) {
+      createLetter({ body, spotifyTrackId }, { onSuccess: () => router.push('/home') });
+      return;
+    }
+
+    clientMessageIdRef.current ??= crypto.randomUUID();
+
+    sendReply(
+      { deliveryId: replyTo, clientMessageId: clientMessageIdRef.current, body, spotifyTrackId },
+      {
+        onSuccess: () => router.replace('/home'),
+        onError: (error) => {
+          if (!(error instanceof ApiError)) return;
+
+          if (error.status === HTTP_STATUS_CODE.CONFLICT) {
+            openAlertModal('이미 답장을 보냈어요', '이 편지에는 이미 답장이 전송됐어요.', () =>
+              router.replace('/home'),
+            );
+            return;
+          }
+
+          if (error.status === HTTP_STATUS_CODE.NOT_FOUND) {
+            openAlertModal('답장할 수 없어요', error.message, () => router.replace('/home'));
+            return;
+          }
+
+          openAlertModal('답장을 보내지 못했어요', error.message);
+        },
+      },
+    );
   };
 
   const handlePhotoButtonClick = () => {
@@ -82,10 +152,7 @@ export default function WriteLetterPage() {
         cancelText="다음에"
         onConfirm={() => {
           close();
-          createLetter(
-            { body: message.trim(), spotifyTrackId: selectedTrack?.id },
-            { onSuccess: () => router.push('/home') },
-          );
+          submit();
         }}
         onClose={close}
       />
@@ -135,7 +202,7 @@ export default function WriteLetterPage() {
                 <button
                   type="button"
                   className={styles.removeTrackButton}
-                  onClick={() => setSelectedTrack(null)}
+                  onClick={() => handleSelectTrack(null)}
                   aria-label="음악 제거"
                 >
                   <IcXNeutral600 />
@@ -193,7 +260,7 @@ export default function WriteLetterPage() {
           initialTrack={selectedTrack}
           onClose={() => setIsMusicPickerOpen(false)}
           onConfirm={(track) => {
-            setSelectedTrack(track);
+            handleSelectTrack(track);
             setIsMusicPickerOpen(false);
           }}
         />

@@ -34,6 +34,8 @@ export const slide = style({
   selectors: {
     '&:first-child': { scrollSnapAlign: 'start', scrollMarginLeft: '2.4rem' },
     '&:last-child': { scrollSnapAlign: 'end', scrollMarginRight: '2.4rem' },
+    // 카드가 1장뿐이면 가운데 정렬
+    '&:only-child': { marginInline: 'auto' },
   },
 });
 
