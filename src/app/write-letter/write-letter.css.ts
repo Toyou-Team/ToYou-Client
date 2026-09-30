@@ -5,8 +5,11 @@ import { vars } from '@/styles/theme.css';
 
 export const page = style({
   position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+
   width: '100%',
-  minHeight: '100dvh',
+  height: '100dvh',
   padding: '11.6rem 4.5rem 4rem',
   backgroundColor: vars.color.neutral_100,
 
@@ -35,6 +38,7 @@ export const letter = recipe({
 
     width: '100%',
     gap: '1.6rem',
+    minHeight: 0,
 
     backgroundColor: vars.color.neutral_50,
   },
@@ -55,6 +59,7 @@ export const messageWrapper = style({
   gap: '0.8rem',
 
   flex: 1,
+  minHeight: 0,
 });
 
 export const message = style({
