@@ -10,6 +10,7 @@ export const carouselWrapper = style({
 
 export const moreButtonWrapper = style({
   marginTop: 'auto',
+  paddingTop: '2.4rem',
 });
 
 export const statusWrapper = style({
