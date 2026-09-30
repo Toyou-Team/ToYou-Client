@@ -4,7 +4,6 @@ import * as styles from './letterPaper.css';
 
 interface LetterPaperProps {
   letter: Pick<LetterContent, 'body' | 'createdAt' | 'spotify'>;
-  // 미리보기
   isPreview?: boolean;
 }
 

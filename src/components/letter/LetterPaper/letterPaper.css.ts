@@ -2,7 +2,6 @@ import { style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
 
-// flex 로 두어야 음악 칸의 아래 margin 이 편지지 밖으로 빠져나가지 않는다
 export const paper = style({
   display: 'flex',
   flexDirection: 'column',
