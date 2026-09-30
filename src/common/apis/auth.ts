@@ -56,7 +56,15 @@ export type KakaoAuthResult =
 
 // 카카오 로그인 콜백
 export const postKakaoLogin = (authorizationCode: string) =>
-  request<KakaoAuthResult>('post', '/api/v1/auth/kakao', { authorizationCode }, { auth: false });
+  request<KakaoAuthResult>(
+    'post',
+    '/api/v1/auth/kakao',
+    {
+      authorizationCode,
+      redirectUri: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI,
+    },
+    { auth: false },
+  );
 
 export const useKakaoLoginMutation = () => useMutation({ mutationFn: postKakaoLogin });
 
