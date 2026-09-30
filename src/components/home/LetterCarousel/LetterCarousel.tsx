@@ -4,35 +4,19 @@ import { useRef, useState } from 'react';
 
 import clsx from 'clsx';
 
-import { useModal } from '@/common/hooks/useModal';
+import type { Delivery } from '@/common/apis/delivery';
 import { LetterCard } from '@/components/common/LetterCard/LetterCard';
-import { Modal } from '@/components/common/Modal/Modal';
-import { LetterSong } from '@/types/letterCardTypes';
 
 import * as styles from './letterCarousel.css';
 
-export interface CarouselLetter {
-  id: string;
-  nickname: string;
-  message: string;
-  profileImage?: string;
-  expiresText?: string;
-  song?: LetterSong;
-}
-
 interface LetterCarouselProps {
-  letters: CarouselLetter[];
-  // 보유 초코 (API 연결 전)
-  myChoco: number;
+  deliveries: Delivery[];
+  onSelect?: (delivery: Delivery) => void;
 }
 
-// 편지 오픈하는데 필요한 초코
-const REQUIRED_CHOCO = 5;
-
-export function LetterCarousel({ letters, myChoco }: LetterCarouselProps) {
+export function LetterCarousel({ deliveries, onSelect }: LetterCarouselProps) {
   const trackRef = useRef<HTMLUListElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const { open } = useModal();
 
   const handleScroll = () => {
     const track = trackRef.current;
@@ -63,95 +47,65 @@ export function LetterCarousel({ letters, myChoco }: LetterCarouselProps) {
 
     if (!track || !slide) return;
 
-    const scrollPadding = parseFloat(getComputedStyle(track).scrollPaddingLeft) || 0;
+    const maxScrollLeft = track.scrollWidth - track.clientWidth;
+    const centeredLeft = slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2;
 
     track.scrollTo({
-      left: slide.offsetLeft - scrollPadding,
+      left: Math.min(Math.max(centeredLeft, 0), maxScrollLeft),
       behavior: 'smooth',
     });
-  };
-
-  const handleCardClick = () => {
-    if (myChoco >= REQUIRED_CHOCO) {
-      open(({ close }) => (
-        <Modal
-          title="새 카드 받기"
-          description="편지 두 장을 새로 받을까요?"
-          subDescription={`초코 ${REQUIRED_CHOCO}개를 사용해요.`}
-          cancelText="다음에"
-          confirmText="받기"
-          onConfirm={() => {
-            // TODO: 편지 받기 API 호출 + 초코 차감
-            close();
-          }}
-          onClose={close}
-        />
-      ));
-      return;
-    }
-
-    open(({ close }) => (
-      <Modal
-        title="초코가 부족해요"
-        description={`편지를 새로 받으면 초코 ${REQUIRED_CHOCO}개가 필요해요.`}
-        subDescription={
-          <>
-            지금은 <strong>초코 {myChoco}개</strong>를 가지고 있어요.
-          </>
-        }
-        cancelText="다음에"
-        confirmText="열기"
-        confirmDisabled
-        onConfirm={() => {}}
-        onClose={close}
-      />
-    ));
   };
 
   return (
     <div className={styles.carousel}>
       <ul ref={trackRef} className={styles.track} onScroll={handleScroll}>
-        {letters.map((letter) => (
-          <li key={letter.id} className={styles.slide}>
+        {deliveries.map((delivery) => (
+          <li key={delivery.id} className={styles.slide}>
             <div
               className={styles.cardButton}
               role="button"
               tabIndex={0}
-              onClick={handleCardClick}
+              onClick={() => onSelect?.(delivery)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
-                  handleCardClick();
+                  onSelect?.(delivery);
                 }
               }}
             >
               <LetterCard
-                nickname={letter.nickname}
-                message={letter.message}
-                profileImage={letter.profileImage}
-                expiresText={letter.expiresText}
-                song={letter.song}
+                nickname={delivery.content.author.nickname}
+                message={delivery.content.body}
+                profileImage={delivery.content.author.profileImage?.url}
+                backgroundImage={delivery.content.image?.url}
+                song={
+                  delivery.content.spotify
+                    ? {
+                        title: delivery.content.spotify.title,
+                        artist: delivery.content.spotify.artist,
+                        albumImage: delivery.content.spotify.albumImageUrl ?? undefined,
+                      }
+                    : undefined
+                }
               />
             </div>
           </li>
         ))}
       </ul>
 
-      {letters.length > 1 && (
-        <div className={styles.dots} role="tablist" aria-label="편지 목록">
-          {letters.map((letter, index) => (
-            <button
-              key={letter.id}
-              type="button"
-              role="tab"
-              aria-selected={index === activeIndex}
-              aria-label={`${index + 1}번째 편지 보기`}
-              className={clsx(styles.dot, index === activeIndex && styles.dotActive)}
-              onClick={() => scrollToIndex(index)}
-            />
-          ))}
-        </div>
-      )}
+      <div className={styles.dots} role="tablist" aria-label="편지 목록">
+        {deliveries.map((delivery, index) => (
+          <button
+            key={delivery.id}
+            type="button"
+            role="tab"
+            aria-selected={index === activeIndex}
+            aria-label={`${index + 1}번째 편지 보기`}
+            className={clsx(styles.dot, index === activeIndex && styles.dotActive)}
+            onClick={() => scrollToIndex(index)}
+          />
+        ))}
+      </div>
     </div>
   );
 }

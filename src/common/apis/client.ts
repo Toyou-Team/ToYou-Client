@@ -31,6 +31,7 @@ export class ApiError extends Error {
 interface RequestOptions {
   // Authorization 헤더 첨부 + 401 자동 갱신 대상 여부 (기본 true)
   auth?: boolean;
+  headers?: Record<string, string>;
 }
 
 const client = ky.create({
@@ -54,10 +55,19 @@ const redirectToLogin = () => {
   if (typeof window !== 'undefined') window.location.href = '/';
 };
 
-async function dispatch<T>(method: Method, path: string, body: unknown, auth: boolean, retried: boolean): Promise<T> {
+async function dispatch<T>(
+  method: Method,
+  path: string,
+  body: unknown,
+  options: RequestOptions,
+  retried: boolean,
+): Promise<T> {
+  const auth = options.auth ?? true;
+
   try {
     const response = await client(`${API_BASE_URL}${path}`, {
       method,
+      headers: options.headers,
       context: { auth },
       ...(body === undefined ? {} : body instanceof FormData ? { body } : { json: body }),
     });
@@ -83,7 +93,7 @@ async function dispatch<T>(method: Method, path: string, body: unknown, auth: bo
       if ((code === AUTH_ERROR_CODE.TOKEN_INVALID || code === AUTH_ERROR_CODE.TOKEN_REQUIRED) && !retried) {
         try {
           await reissueToken();
-          return dispatch<T>(method, path, body, auth, true);
+          return dispatch<T>(method, path, body, options, true);
         } catch {
           clearTokens();
           redirectToLogin();
@@ -102,5 +112,5 @@ async function dispatch<T>(method: Method, path: string, body: unknown, auth: bo
 }
 
 export function request<T>(method: Method, path: string, body?: unknown, options: RequestOptions = {}): Promise<T> {
-  return dispatch<T>(method, path, body, options.auth ?? true, false);
+  return dispatch<T>(method, path, body, options, false);
 }

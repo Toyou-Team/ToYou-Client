@@ -27,7 +27,7 @@ export const navItemWrapper = style({
   width: '100%',
   height: '100%',
 
-  borderTop: `2px solid ${vars.color.neutral_300}`,
+  borderTop: `1px solid ${vars.color.neutral_300}`,
 });
 
 export const navItemLabel = recipe({

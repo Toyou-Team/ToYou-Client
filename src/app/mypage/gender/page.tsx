@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Header } from '@/components/common/Header/Header';
@@ -18,11 +18,8 @@ export default function MyPageGenderPage() {
   const { data: profile } = useProfileQuery();
   const { mutate: updateProfile, isPending } = useUpdateProfileMutation();
 
-  const [selected, setSelected] = useState<ReceiveGender | null>(null);
-
-  useEffect(() => {
-    if (profile) setSelected(profile.receiveGender);
-  }, [profile]);
+  const [picked, setSelected] = useState<ReceiveGender | null>(null);
+  const selected = picked ?? profile?.receiveGender ?? null;
 
   const handleSelect = (value: ReceiveGender) => {
     if (isPending || value === selected) return;

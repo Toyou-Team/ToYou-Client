@@ -11,20 +11,10 @@ export const homeWrapper = style({
   padding: '0 2.4rem 2.6rem',
 });
 
-export const carouselWrapper = style({
-  width: '100%',
-
-  marginTop: '2.6rem',
-});
-
 export const titleText = style({
   marginTop: '1.2rem',
 
   ...vars.fontStyles.title,
   color: vars.color.neutral_950,
   whiteSpace: 'pre-line',
-});
-
-export const moreButtonWrapper = style({
-  marginTop: 'auto',
 });

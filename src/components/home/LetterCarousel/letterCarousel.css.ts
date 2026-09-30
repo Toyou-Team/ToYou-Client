@@ -2,6 +2,8 @@ import { style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
 
+const SLIDE_WIDTH = '30rem';
+
 export const carousel = style({
   width: '100%',
 });
@@ -14,7 +16,6 @@ export const track = style({
 
   marginInline: '-2.4rem',
   paddingInline: '2.4rem',
-  scrollPaddingInline: '2.4rem',
 
   overflowX: 'auto',
   scrollSnapType: 'x mandatory',
@@ -26,10 +27,16 @@ export const track = style({
 });
 
 export const slide = style({
-  flex: '0 0 auto',
-  width: '90%',
+  flex: `0 0 ${SLIDE_WIDTH}`,
 
-  scrollSnapAlign: 'start',
+  scrollSnapAlign: 'center',
+
+  selectors: {
+    '&:first-child': { scrollSnapAlign: 'start', scrollMarginLeft: '2.4rem' },
+    '&:last-child': { scrollSnapAlign: 'end', scrollMarginRight: '2.4rem' },
+    // 카드가 1장뿐이면 가운데 정렬
+    '&:only-child': { marginInline: 'auto' },
+  },
 });
 
 export const cardButton = style({

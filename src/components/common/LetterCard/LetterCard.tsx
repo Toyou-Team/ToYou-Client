@@ -8,6 +8,7 @@ interface LetterCardProps {
   nickname: string;
   message: string;
   profileImage?: string | StaticImageData;
+  backgroundImage?: string | StaticImageData;
   profileImageSize?: number;
   expiresText?: string;
   width?: number;
@@ -19,6 +20,7 @@ export function LetterCard({
   nickname,
   message,
   profileImage,
+  backgroundImage = ImgMockCard,
   profileImageSize = 4.3,
   expiresText = '3일 후 사라져요!',
   width,
@@ -33,7 +35,7 @@ export function LetterCard({
         height: `${height}rem`,
       }}
     >
-      <Image src={ImgMockCard} alt="" fill className={styles.letterCardBackground} />
+      <Image src={backgroundImage} alt="" fill unoptimized className={styles.letterCardBackground} />
 
       <section className={styles.profileWrapper}>
         <div
@@ -43,7 +45,7 @@ export function LetterCard({
             height: `${profileImageSize}rem`,
           }}
         >
-          {profileImage && <Image src={profileImage} alt={`${nickname}의 프로필`} fill />}
+          {profileImage && <Image src={profileImage} alt={`${nickname}의 프로필`} fill unoptimized />}
         </div>
 
         <span className={styles.nickname}>{nickname}</span>
@@ -56,7 +58,7 @@ export function LetterCard({
         {song && (
           <div className={styles.songWrapper}>
             <div className={styles.songImageWrapper}>
-              <Image src={song.albumImage} alt="" fill className={styles.songImage} />
+              {song.albumImage && <Image src={song.albumImage} alt="" fill unoptimized className={styles.songImage} />}
             </div>
 
             <div className={styles.songInfo}>

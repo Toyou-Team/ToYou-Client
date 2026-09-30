@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Header } from '@/components/common/Header/Header';
@@ -26,14 +26,12 @@ export default function MyPageEditPage() {
   const { mutate: uploadProfileImage } = useUploadProfileImageMutation();
   const { mutate: deleteProfileImage } = useDeleteProfileImageMutation();
 
-  const [nickname, setNickname] = useState('');
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  // 사용자가 바꾸기 전까지는 프로필 값을 그대로 보여준다
+  const [nicknameInput, setNickname] = useState<string | null>(null);
+  const [imageInput, setProfileImageUrl] = useState<string | null | undefined>(undefined);
 
-  useEffect(() => {
-    if (!profile) return;
-    setNickname(profile.nickname);
-    setProfileImageUrl(profile.profileImage?.url ?? null);
-  }, [profile]);
+  const nickname = nicknameInput ?? profile?.nickname ?? '';
+  const profileImageUrl = imageInput === undefined ? (profile?.profileImage?.url ?? null) : imageInput;
 
   const trimmed = nickname.trim();
   const isValidNickname = trimmed.length >= 2 && trimmed.length <= 12;
