@@ -16,7 +16,7 @@ export const page = style({
 
 // 공통 Header 를 이 화면에서만 낮고 투명하게 쓴다
 globalStyle(`${page} > header`, {
-  height: '5rem',
+  height: '8rem',
   backgroundColor: 'transparent',
 });
 
