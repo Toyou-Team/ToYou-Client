@@ -3,13 +3,10 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/styles/theme.css';
 
 export const loginButtonSectionWrapper = style({
-  position: 'absolute',
   width: '100%',
-  padding: '0 2.4rem',
-
-  left: 0,
-  right: 0,
-  bottom: '7rem',
+  marginTop: 'auto',
+  paddingTop: '3.2rem',
+  paddingInline: '2.4rem',
 });
 
 export const kakaoLoginButton = style({
