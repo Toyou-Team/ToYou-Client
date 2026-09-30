@@ -1,8 +1,8 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 
-import { request } from './client';
+import { request, retryOnce } from './client';
 import type { DeliverySpotify } from './delivery';
-import type { ProfileImage } from './profile';
+import { syncChocolateBalance, type ProfileImage } from './profile';
 
 const PAGE_SIZE = 8;
 
@@ -72,6 +72,7 @@ const withCursor = (path: string, cursor: string | null) => {
 };
 
 export const CONVERSATIONS_QUERY_KEY = ['conversations'] as const;
+const conversationQueryKey = (conversationId: string) => [...CONVERSATIONS_QUERY_KEY, conversationId];
 
 // 편지함 목록 (최신순)
 export const getConversations = (cursor: string | null) =>
@@ -92,7 +93,7 @@ export const getConversation = (conversationId: string, cursor: string | null) =
 
 export const useConversationQuery = (conversationId: string) =>
   useInfiniteQuery({
-    queryKey: [...CONVERSATIONS_QUERY_KEY, conversationId],
+    queryKey: conversationQueryKey(conversationId),
     queryFn: ({ pageParam }) => getConversation(conversationId, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.olderCursor,
@@ -111,3 +112,79 @@ export const useConversationQuery = (conversationId: string) =>
       };
     },
   });
+
+// 받은 편지가 화면에 표시된 뒤 읽음 처리
+export const postReadMessage = (conversationId: string, messageId: string) =>
+  request<{ messageId: string; readAt: string; hasUnread: boolean }>(
+    'post',
+    `/api/v1/conversations/${conversationId}/read`,
+    { messageId },
+  );
+
+export const useReadMessageMutation = (conversationId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (messageId: string) => postReadMessage(conversationId, messageId),
+    retry: retryOnce,
+    onSuccess: ({ messageId, hasUnread }) => {
+      queryClient.setQueryData<InfiniteData<ConversationDetail>>(
+        conversationQueryKey(conversationId),
+        (data) =>
+          data && {
+            ...data,
+            pages: data.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) => (item.id === messageId ? { ...item, isUnread: false } : item)),
+            })),
+          },
+      );
+
+      if (!hasUnread) queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY, exact: true });
+    },
+  });
+};
+
+// 후속 편지 답장 권한 재활성화 (5초코)
+export const postConversationReactivation = (conversationId: string, idempotencyKey: string) =>
+  request<{ conversationId: string; replyAvailableUntil: string; canReply: boolean; chocolateBalance: number }>(
+    'post',
+    `/api/v1/conversations/${conversationId}/reply-reactivations`,
+    undefined,
+    { headers: { 'Idempotency-Key': idempotencyKey } },
+  );
+
+export const useConversationReactivationMutation = (conversationId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (idempotencyKey: string) => postConversationReactivation(conversationId, idempotencyKey),
+    retry: retryOnce,
+    onSuccess: ({ chocolateBalance }) => {
+      syncChocolateBalance(queryClient, chocolateBalance);
+      queryClient.invalidateQueries({ queryKey: conversationQueryKey(conversationId) });
+    },
+  });
+};
+
+export interface SendMessagePayload {
+  conversationId: string;
+  clientMessageId: string;
+  body: string;
+  imageObjectKey?: string;
+  spotifyTrackId?: string;
+}
+
+// 대화방에서 편지 보내기
+export const postConversationMessage = ({ conversationId, ...payload }: SendMessagePayload) =>
+  request<{ messageId: string }>('post', `/api/v1/conversations/${conversationId}/messages`, payload);
+
+export const useSendMessageMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: postConversationMessage,
+    retry: retryOnce,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY }),
+  });
+};

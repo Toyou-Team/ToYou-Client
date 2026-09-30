@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 
 import { request } from './client';
 import type { Gender, ReceiveGender } from './auth';
@@ -26,6 +26,10 @@ export interface Profile {
 }
 
 export const PROFILE_QUERY_KEY = ['profile'] as const;
+
+// 초코를 쓰는 API 응답의 잔액을 헤더 배지에 바로 반영
+export const syncChocolateBalance = (queryClient: QueryClient, chocolateBalance: number) =>
+  queryClient.setQueryData<Profile>(PROFILE_QUERY_KEY, (profile) => profile && { ...profile, chocolateBalance });
 
 // 프로필 조회
 export const getProfile = () => request<Profile>('get', '/api/v1/profile');
