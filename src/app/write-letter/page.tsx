@@ -8,9 +8,10 @@ import { IcClose, IcImage, IcMusic, IcXNeutral600 } from '@/assets/icons';
 import { ImageActionSheet } from '@/components/signup/profile-image/ImageActionSheet/ImageActionSheet';
 import { MusicPicker } from '@/components/write-letter/MusicPicker/MusicPicker';
 import type { SpotifyTrack } from '@/common/apis/music';
-import { useCreateLetterMutation } from '@/common/apis/letter';
+import { deleteLetterImage, useCreateLetterMutation, useUploadLetterImageMutation } from '@/common/apis/letter';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
+import { useSendMessageMutation } from '@/common/apis/conversation';
 import { useReplyMutation } from '@/common/apis/delivery';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
@@ -20,20 +21,24 @@ const MIN_LENGTH = 30;
 const MAX_LENGTH = 500;
 
 interface WriteLetterPageProps {
-  // 답장이면 답장할 편지의 deliveryId
-  searchParams: Promise<{ replyTo?: string }>;
+  // replyTo: 첫 답장할 편지의 deliveryId, conversationId: 대화방에서 이어 보내는 답장
+  searchParams: Promise<{ replyTo?: string; conversationId?: string }>;
 }
 
 export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) {
-  const { replyTo } = use(searchParams);
+  const { replyTo, conversationId } = use(searchParams);
   const router = useRouter();
   const { open } = useModal();
   const { mutate: createLetter, isPending: isCreating } = useCreateLetterMutation();
   const { mutate: sendReply, isPending: isReplying } = useReplyMutation();
-  const isSending = isCreating || isReplying;
+  const { mutate: sendMessage, isPending: isSendingMessage } = useSendMessageMutation();
+  const { mutate: uploadImage, isPending: isUploadingImage } = useUploadLetterImageMutation();
+  const isSending = isCreating || isReplying || isSendingMessage;
 
   const [message, setMessage] = useState('');
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  // 업로드가 끝난 사진의 key. 편지를 보내기 전까지는 편지에 연결되지 않은 상태
+  const [imageObjectKey, setImageObjectKey] = useState<string | null>(null);
   const [isImageActionSheetOpen, setIsImageActionSheetOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
   const [isMusicPickerOpen, setIsMusicPickerOpen] = useState(false);
@@ -44,7 +49,15 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
 
   const isValidBody = message.trim().length >= MIN_LENGTH;
 
+  // 사진을 지우거나 바꾸거나 작성을 취소하면, 편지에 연결되지 않은 업로드 사진을 지운다
+  const discardUploadedImage = () => {
+    if (imageObjectKey) deleteLetterImage(imageObjectKey);
+    setImageObjectKey(null);
+    clientMessageIdRef.current = null;
+  };
+
   const handleClose = () => {
+    discardUploadedImage();
     router.back();
   };
 
@@ -76,37 +89,41 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const submit = () => {
     const body = message.trim();
     const spotifyTrackId = selectedTrack?.id;
+    const attachment = { spotifyTrackId, imageObjectKey: imageObjectKey ?? undefined };
 
-    if (!replyTo) {
-      createLetter({ body, spotifyTrackId }, { onSuccess: () => router.push('/home') });
+    if (!replyTo && !conversationId) {
+      createLetter({ body, ...attachment }, { onSuccess: () => router.push('/home') });
       return;
     }
 
     clientMessageIdRef.current ??= crypto.randomUUID();
+    const clientMessageId = clientMessageIdRef.current;
 
-    sendReply(
-      { deliveryId: replyTo, clientMessageId: clientMessageIdRef.current, body, spotifyTrackId },
-      {
-        onSuccess: () => router.replace('/home'),
-        onError: (error) => {
-          if (!(error instanceof ApiError)) return;
+    // 답장은 성공·실패 모두 답장 화면을 열기 직전 페이지로 돌아간다
+    const replyOptions = {
+      onSuccess: () => router.back(),
+      onError: (error: Error) => {
+        if (!(error instanceof ApiError)) return;
 
-          if (error.status === HTTP_STATUS_CODE.CONFLICT) {
-            openAlertModal('이미 답장을 보냈어요', '이 편지에는 이미 답장이 전송됐어요.', () =>
-              router.replace('/home'),
-            );
-            return;
-          }
+        if (error.status === HTTP_STATUS_CODE.CONFLICT) {
+          openAlertModal('답장을 보낼 수 없어요', error.message, () => router.back());
+          return;
+        }
 
-          if (error.status === HTTP_STATUS_CODE.NOT_FOUND) {
-            openAlertModal('답장할 수 없어요', error.message, () => router.replace('/home'));
-            return;
-          }
+        if (error.status === HTTP_STATUS_CODE.NOT_FOUND) {
+          openAlertModal('답장할 수 없어요', error.message, () => router.back());
+          return;
+        }
 
-          openAlertModal('답장을 보내지 못했어요', error.message);
-        },
+        openAlertModal('답장을 보내지 못했어요', error.message);
       },
-    );
+    };
+
+    if (conversationId) {
+      sendMessage({ conversationId, clientMessageId, body, ...attachment }, replyOptions);
+    } else if (replyTo) {
+      sendReply({ deliveryId: replyTo, clientMessageId, body, ...attachment }, replyOptions);
+    }
   };
 
   const handlePhotoButtonClick = () => {
@@ -124,7 +141,16 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
 
     if (!file) return;
 
+    discardUploadedImage();
     setBackgroundImage(URL.createObjectURL(file));
+
+    uploadImage(file, {
+      onSuccess: ({ key }) => setImageObjectKey(key),
+      onError: (error) => {
+        setBackgroundImage(null);
+        openAlertModal('사진을 올리지 못했어요', error.message);
+      },
+    });
   };
 
   const handleChangeImage = () => {
@@ -133,6 +159,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   };
 
   const handleDeleteImage = () => {
+    discardUploadedImage();
     setBackgroundImage(null);
     setIsImageActionSheetOpen(false);
   };
@@ -236,7 +263,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
       </section>
 
       <div className={styles.submitButtonWrapper}>
-        <Button type="button" disabled={!isValidBody || isSending} onClick={handleSubmitClick}>
+        <Button type="button" disabled={!isValidBody || isSending || isUploadingImage} onClick={handleSubmitClick}>
           보내기
         </Button>
       </div>
