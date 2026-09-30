@@ -2,15 +2,21 @@ import { style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
 
+// flex 로 두어야 음악 칸의 아래 margin 이 편지지 밖으로 빠져나가지 않는다
 export const paper = style({
+  display: 'flex',
+  flexDirection: 'column',
+
+  width: '100%',
+  backgroundColor: vars.color.neutral_50,
+});
+
+export const letter = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '1.6rem',
 
-  width: '100%',
   padding: '2rem 2.5rem',
-
-  backgroundColor: vars.color.neutral_50,
 });
 
 export const body = style({
@@ -67,6 +73,8 @@ export const song = style({
   alignItems: 'center',
   gap: '1.2rem',
 
+  height: '8rem',
+  margin: '0 1rem 2rem',
   padding: '1rem 1.6rem',
 
   borderRadius: '1.2rem',
@@ -76,8 +84,8 @@ export const song = style({
 export const albumImage = style({
   flexShrink: 0,
 
-  width: '3.8rem',
-  height: '3.8rem',
+  width: '6rem',
+  height: '6rem',
   borderRadius: '0.6rem',
   objectFit: 'cover',
 });

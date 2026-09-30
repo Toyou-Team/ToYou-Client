@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { IcMore } from '@/assets/icons';
 import { useConversationQuery, type ConversationMessage } from '@/common/apis/conversation';
@@ -26,6 +26,7 @@ const groupByDay = (messages: ConversationMessage[]) =>
 
 export default function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>();
+  const router = useRouter();
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useConversationQuery(conversationId);
 
   // 불러오는 동안 잠시 멈췄다가, 끝나면 끝 요소가 아직 보이는지 다시 확인
@@ -51,8 +52,11 @@ export default function ConversationPage() {
 
           <ul>
             {messages.map((message) => (
-              // TODO: 선택 시 편지 전체 보기 연결
-              <li key={message.id} className={styles.messageItem}>
+              <li
+                key={message.id}
+                className={styles.messageItem}
+                onClick={() => router.push(`/conversations/${conversationId}/${message.id}`)}
+              >
                 <div className={styles.messageContent}>
                   <p className={styles.metaText}>
                     {[message.isMine ? '나' : message.sender.nickname, formatTime(message.createdAt)]
