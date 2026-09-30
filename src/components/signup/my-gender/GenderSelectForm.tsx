@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import type { Gender, ReceiveGender } from '@/common/apis/auth';
 import { signupDraftStore } from '@/common/apis/token';
+import { useSignupDraft } from '@/common/hooks/useSignupDraft';
 import Button from '@/components/common/Button/Button';
 import * as styles from './genderSelectForm.css';
 
@@ -27,17 +28,12 @@ interface GenderSelectFormProps {
 
 function GenderSelectForm({ options, description, nextPath, draftKey }: GenderSelectFormProps) {
   const router = useRouter();
-  const [selectedGender, setSelectedGender] = useState<string | null>(null);
+  const [pickedGender, setSelectedGender] = useState<string | null>(null);
 
   // 이전에 선택했던 값 복원
-  useEffect(() => {
-    const saved = signupDraftStore.get()[draftKey];
-    if (!saved) return;
-
-    const label = (Object.keys(LABEL_TO_VALUE) as GenderLabel[]).find((key) => LABEL_TO_VALUE[key] === saved);
-
-    if (label && options.includes(label)) setSelectedGender(label);
-  }, [draftKey, options]);
+  const saved = useSignupDraft(draftKey);
+  const savedLabel = (Object.keys(LABEL_TO_VALUE) as GenderLabel[]).find((key) => LABEL_TO_VALUE[key] === saved);
+  const selectedGender = pickedGender ?? (savedLabel && options.includes(savedLabel) ? savedLabel : null);
 
   const handleNext = () => {
     if (selectedGender === null) return;

@@ -1,23 +1,20 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { signupDraftStore } from '@/common/apis/token';
+import { useSignupDraft } from '@/common/hooks/useSignupDraft';
 import Button from '@/components/common/Button/Button';
 import TextField from '../textField/TextField';
 import * as styles from './nicknameForm.css';
 
 function NicknameForm() {
   const router = useRouter();
-  const [nickname, setNickname] = useState('');
-
   // 이전에 입력했던 값 복원
-  useEffect(() => {
-    const draft = signupDraftStore.get();
-
-    setNickname(draft.nickname ?? '');
-  }, []);
+  const savedNickname = useSignupDraft('nickname');
+  const [nicknameInput, setNickname] = useState<string | null>(null);
+  const nickname = nicknameInput ?? savedNickname ?? '';
 
   const trimmed = nickname.trim();
   const isValidNickname = trimmed.length >= 2 && trimmed.length <= 12;
