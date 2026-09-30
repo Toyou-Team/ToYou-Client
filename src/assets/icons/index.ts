@@ -30,6 +30,7 @@ import IcSearch from '@/assets/icons/ic_search.svg';
 import IcSpotify from '@/assets/icons/ic_spotify.svg';
 import IcXNeutral600 from '@/assets/icons/ic_x_neutral600.svg';
 import IcMore from '@/assets/icons/ic_more.svg';
+import IcExit from '@/assets/icons/ic_exit.svg';
 
 export {
   IcLogoKakao,
@@ -64,4 +65,5 @@ export {
   IcSpotify,
   IcXNeutral600,
   IcMore,
+  IcExit,
 };
