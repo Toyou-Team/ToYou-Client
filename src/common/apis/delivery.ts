@@ -28,6 +28,7 @@ export interface Delivery {
   id: string;
   // null 이면 아직 열지 않은 카드
   selectedAt: string | null;
+  expiresAt: string;
   content: LetterContent;
 }
 
