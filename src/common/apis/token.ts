@@ -79,9 +79,22 @@ export const signupDraftStore = {
   },
 };
 
+// 랜딩에서 서버가 로그인 여부를 알 수 있게 남기는 표시용 쿠키
+export const LOGGED_IN_COOKIE = 'toyou_logged_in';
+
+const loggedInCookie = {
+  set: () => {
+    if (isBrowser()) document.cookie = `${LOGGED_IN_COOKIE}=1; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`;
+  },
+  clear: () => {
+    if (isBrowser()) document.cookie = `${LOGGED_IN_COOKIE}=; path=/; max-age=0`;
+  },
+};
+
 export const setTokens = ({ accessToken, refreshToken }: { accessToken: string; refreshToken: string }) => {
   accessTokenStore.set(accessToken);
   refreshTokenStore.set(refreshToken);
+  loggedInCookie.set();
 };
 
 export const clearTokens = () => {
@@ -90,4 +103,5 @@ export const clearTokens = () => {
   registrationTokenStore.clear();
   kakaoProfileStore.clear();
   signupDraftStore.clear();
+  loggedInCookie.clear();
 };

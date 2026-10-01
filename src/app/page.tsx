@@ -1,8 +1,14 @@
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+
 import { LoginButtonSection } from '@/components/landing/KaKaoLoginSection/KaKaoLoginSection';
 import * as styles from './landing.css';
 import { LetterCard } from '@/components/common/LetterCard/LetterCard';
+import { LOGGED_IN_COOKIE } from '@/common/apis/token';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  if ((await cookies()).has(LOGGED_IN_COOKIE)) redirect('/home');
+
   return (
     <div className={styles.landingPageWrapper}>
       <LetterCard
