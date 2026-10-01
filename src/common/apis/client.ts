@@ -82,7 +82,8 @@ async function dispatch<T>(
     }
 
     const { status } = error.response;
-    const payload = (await error.response.json().catch(() => null)) as ErrorPayload | null;
+    // ky v2 는 에러 응답 body 를 미리 읽어 error.data 에 담아 둔다 (response.json() 은 이미 소비돼 실패함)
+    const payload = error.data as ErrorPayload | undefined;
     const code = payload?.error?.code;
     const message = payload?.error?.message || HTTP_ERROR_MESSAGE[status] || `요청에 실패했습니다. (${status})`;
     const requestId = payload?.error?.requestId;

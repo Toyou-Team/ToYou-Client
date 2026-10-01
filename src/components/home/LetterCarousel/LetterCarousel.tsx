@@ -6,6 +6,7 @@ import clsx from 'clsx';
 
 import type { Delivery } from '@/common/apis/delivery';
 import { LetterCard } from '@/components/common/LetterCard/LetterCard';
+import { formatExpiresIn } from '@/utils/date';
 
 import * as styles from './letterCarousel.css';
 
@@ -78,6 +79,7 @@ export function LetterCarousel({ deliveries, onSelect }: LetterCarouselProps) {
                 message={delivery.content.body}
                 profileImage={delivery.content.author.profileImage?.url}
                 backgroundImage={delivery.content.image?.url}
+                expiresText={formatExpiresIn(delivery.expiresAt)}
                 song={
                   delivery.content.spotify
                     ? {

@@ -29,3 +29,16 @@ export const formatRelativeDay = (isoString: string) => {
 
   return `${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
+
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
+
+// 3일 후 사라져요! / 5시간 후 사라져요! / 20분 후 사라져요!
+export const formatExpiresIn = (isoString: string) => {
+  const remaining = new Date(isoString).getTime() - Date.now();
+
+  if (remaining >= DAY) return `${Math.ceil(remaining / DAY)}일 후 사라져요!`;
+  if (remaining >= HOUR) return `${Math.ceil(remaining / HOUR)}시간 후 사라져요!`;
+
+  return `${Math.max(1, Math.ceil(remaining / (60 * 1000)))}분 후 사라져요!`;
+};
