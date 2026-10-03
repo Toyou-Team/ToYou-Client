@@ -14,6 +14,7 @@ interface ModalProps {
   onConfirm: () => void;
   confirmDisabled?: boolean;
   cancelText?: string;
+  isVertical?: boolean;
   onClose: () => void;
 }
 
@@ -25,6 +26,7 @@ export function Modal({
   onConfirm,
   confirmDisabled = false,
   cancelText,
+  isVertical = false,
   onClose,
 }: ModalProps) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -43,7 +45,14 @@ export function Modal({
   }, [onClose]);
 
   return (
-    <div ref={cardRef} className={styles.card} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
+    <div
+      ref={cardRef}
+      className={clsx(styles.card, isVertical && styles.verticalCard)}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      tabIndex={-1}
+    >
       <section className={styles.textGroup}>
         <h1 id={titleId} className={styles.title}>
           {title}
@@ -55,7 +64,7 @@ export function Modal({
         </div>
       </section>
 
-      <section className={styles.buttonWrapper}>
+      <section className={clsx(styles.buttonWrapper, isVertical && styles.verticalButtonWrapper)}>
         {cancelText != null && (
           <button type="button" className={clsx(styles.button, styles.cancelButton)} onClick={onClose}>
             {cancelText}
