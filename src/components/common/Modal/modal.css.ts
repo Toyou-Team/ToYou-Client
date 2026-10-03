@@ -6,7 +6,7 @@ export const card = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '2.5rem',
+  gap: '2.4rem',
 
   width: '34.2rem',
   padding: '2rem 3.2rem',
@@ -15,11 +15,19 @@ export const card = style({
   backgroundColor: vars.color.neutral_50,
 });
 
+export const verticalCard = style({
+  padding: '2rem',
+});
+
 export const textGroup = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   gap: '1.6rem',
+});
+
+globalStyle(`${verticalCard} ${textGroup}`, {
+  gap: '1.5rem',
 });
 
 export const title = style({
@@ -60,6 +68,14 @@ export const buttonWrapper = style({
   display: 'flex',
   gap: '0.8rem',
   width: '100%',
+});
+
+export const verticalButtonWrapper = style({
+  flexDirection: 'column-reverse',
+});
+
+globalStyle(`${verticalButtonWrapper} > button`, {
+  flex: 'none',
 });
 
 export const button = style({

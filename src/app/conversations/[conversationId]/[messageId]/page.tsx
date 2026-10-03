@@ -13,6 +13,7 @@ import {
 } from '@/common/apis/conversation';
 import { useReplyReactivationMutation } from '@/common/apis/delivery';
 import { useProfileQuery } from '@/common/apis/profile';
+import { useBlockConversation } from '@/common/hooks/useBlockConversation';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
@@ -39,6 +40,7 @@ export default function ConversationLetterPage() {
 
   const [activeId, setActiveId] = useState(messageId);
   const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
+  const openBlockConfirm = useBlockConversation(conversationId);
   const trackRef = useRef<HTMLDivElement>(null);
   const hasPositionedRef = useRef(false);
   const readIdsRef = useRef(new Set<string>());
@@ -181,7 +183,11 @@ export default function ConversationLetterPage() {
       <Header
         left={<BackButton />}
         center={<span className={styles.titleText}>{conversation.partner.nickname}</span>}
-        right={<IconButton icon={<IcMore />} label="더보기" onClick={() => setIsReportBlockSheetOpen(true)} />}
+        right={
+          !activeMessage.isMine && (
+            <IconButton icon={<IcMore />} label="더보기" onClick={() => setIsReportBlockSheetOpen(true)} />
+          )
+        }
       />
 
       <div ref={trackRef} className={styles.track} onScroll={handleScroll}>
@@ -208,16 +214,22 @@ export default function ConversationLetterPage() {
 
       <div className={styles.bottom}>{renderReplyButton()}</div>
 
-      {/* TODO: 신고·차단 화면 연결 */}
       <BottomSheet isOpen={isReportBlockSheetOpen} onClose={closeReportBlockSheet}>
         <div className={actionSheetStyles.actionList}>
-          <button type="button" className={actionSheetStyles.actionButton} onClick={closeReportBlockSheet}>
+          <button
+            type="button"
+            className={actionSheetStyles.actionButton}
+            onClick={() => router.push(`/conversations/${conversationId}/${activeMessage.id}/report`)}
+          >
             신고
           </button>
           <button
             type="button"
             className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
-            onClick={closeReportBlockSheet}
+            onClick={() => {
+              closeReportBlockSheet();
+              openBlockConfirm();
+            }}
           >
             차단
           </button>
