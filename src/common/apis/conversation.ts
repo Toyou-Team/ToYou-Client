@@ -188,3 +188,37 @@ export const useSendMessageMutation = () => {
     onSettled: () => queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY }),
   });
 };
+
+export type ReportReason =
+  'SEXUAL_OR_UNCOMFORTABLE_CONTENT' | 'ABUSE_THREAT_OR_HATE' | 'FRAUD_SPAM_OR_PROMOTION' | 'OTHER';
+
+export interface ReportPayload {
+  messageId: string;
+  reason: ReportReason;
+  // 기타(OTHER)는 공백 제외 1~500자 필수, 나머지는 선택
+  detail?: string;
+}
+
+// 편지 신고
+export const postReport = (conversationId: string, payload: ReportPayload) =>
+  request<{ reportId: string; alreadyReportedUser: boolean }>(
+    'post',
+    `/api/v1/conversations/${conversationId}/reports`,
+    payload,
+  );
+
+export const useReportMutation = (conversationId: string) =>
+  useMutation({ mutationFn: (payload: ReportPayload) => postReport(conversationId, payload) });
+
+// 대화 상대 차단 (대화 목록에서 사라짐)
+export const postBlock = (conversationId: string) =>
+  request<void>('post', `/api/v1/conversations/${conversationId}/block`);
+
+export const useBlockMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: postBlock,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY }),
+  });
+};
