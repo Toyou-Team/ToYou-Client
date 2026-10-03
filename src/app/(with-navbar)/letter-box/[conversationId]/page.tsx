@@ -1,13 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import clsx from 'clsx';
 
 import { IcMore } from '@/assets/icons';
 import { useConversationQuery, type ConversationMessage } from '@/common/apis/conversation';
+import { useBlockConversation } from '@/common/hooks/useBlockConversation';
 import { useInfiniteScroll } from '@/common/hooks/useInfiniteScroll';
 import { BackButton } from '@/components/common/BackButton/BackButton';
+import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
+import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 import { formatDay, formatTime } from '@/utils/date';
 
 import * as styles from './conversation.css';
@@ -28,6 +33,8 @@ export default function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const router = useRouter();
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useConversationQuery(conversationId);
+  const openBlockConfirm = useBlockConversation(conversationId);
+  const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
 
   // 불러오는 동안 잠시 멈췄다가, 끝나면 끝 요소가 아직 보이는지 다시 확인
   const loadMoreRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage);
@@ -35,6 +42,9 @@ export default function ConversationPage() {
   if (!data) return null;
 
   const { conversation, items } = data;
+  // TODO: 목록에서의 신고 대상(사용자 vs 특정 편지) 기획 확정 후 수정. 지금은 가장 최근에 받은 편지를 신고
+  const latestReceived = items.find(({ isMine }) => !isMine);
+  const closeReportBlockSheet = () => setIsReportBlockSheetOpen(false);
 
   return (
     <div className={styles.pageWrapper}>
@@ -42,8 +52,7 @@ export default function ConversationPage() {
         bordered
         left={<BackButton link="/letter-box" />}
         center={<span className={styles.titleText}>{conversation.partner.nickname}</span>}
-        // TODO: 신고·차단 바텀시트 연결
-        right={<IconButton icon={<IcMore />} label="더보기" />}
+        right={<IconButton icon={<IcMore />} label="더보기" onClick={() => setIsReportBlockSheetOpen(true)} />}
       />
 
       {groupByDay(items).map(({ day, messages }) => (
@@ -74,6 +83,33 @@ export default function ConversationPage() {
       ))}
 
       {hasNextPage && <div ref={loadMoreRef} aria-hidden />}
+
+      <BottomSheet isOpen={isReportBlockSheetOpen} onClose={closeReportBlockSheet}>
+        <div className={actionSheetStyles.actionList}>
+          {latestReceived && (
+            <button
+              type="button"
+              className={actionSheetStyles.actionButton}
+              onClick={() => router.push(`/conversations/${conversationId}/${latestReceived.id}/report`)}
+            >
+              신고
+            </button>
+          )}
+          <button
+            type="button"
+            className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
+            onClick={() => {
+              closeReportBlockSheet();
+              openBlockConfirm();
+            }}
+          >
+            차단
+          </button>
+          <button type="button" className={actionSheetStyles.actionButton} onClick={closeReportBlockSheet}>
+            취소
+          </button>
+        </div>
+      </BottomSheet>
     </div>
   );
 }
