@@ -86,7 +86,21 @@ export default function LetterPage() {
           openDelivery(deliveryId, {
             onError: (error) => {
               if (!(error instanceof ApiError)) return;
-              if (error.status === HTTP_STATUS_CODE.NOT_FOUND) router.replace('/home');
+              // 배달이 없거나, 탈퇴/차단으로 열 수 없는 편지
+              if (error.status === HTTP_STATUS_CODE.NOT_FOUND) {
+                open(({ close }) => (
+                  <Modal
+                    title="편지를 열 수 없어요"
+                    description={error.message}
+                    confirmText="확인"
+                    onConfirm={() => {
+                      close();
+                      router.replace('/home');
+                    }}
+                    onClose={close}
+                  />
+                ));
+              }
               if (error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY) {
                 openShortageModal('편지를 열려면', OPEN_DELIVERY_COST, round.chocolateBalance);
               }
