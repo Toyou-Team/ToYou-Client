@@ -71,38 +71,6 @@ export const buttonWrapper = style({
 });
 
 export const verticalButtonWrapper = style({
+  display: 'flex',
   flexDirection: 'column-reverse',
-});
-
-globalStyle(`${verticalButtonWrapper} > button`, {
-  flex: 'none',
-});
-
-export const button = style({
-  flex: 1,
-  height: '4.8rem',
-
-  borderRadius: '0.8rem',
-  ...vars.fontStyles.subtitle,
-
-  cursor: 'pointer',
-});
-
-export const cancelButton = style({
-  backgroundColor: vars.color.neutral_50,
-  boxShadow: `inset 0 0 0 1px ${vars.color.neutral_300}`,
-  color: vars.color.neutral_900,
-});
-
-export const confirmButton = style({
-  backgroundColor: vars.color.neutral_900,
-  color: vars.color.neutral_50,
-
-  selectors: {
-    '&:disabled': {
-      backgroundColor: vars.color.neutral_300,
-      color: vars.color.neutral_600,
-      cursor: 'not-allowed',
-    },
-  },
 });

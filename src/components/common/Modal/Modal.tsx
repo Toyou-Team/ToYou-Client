@@ -4,6 +4,8 @@ import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 import clsx from 'clsx';
 
+import Button from '@/components/common/Button/Button';
+
 import * as styles from './modal.css';
 
 interface ModalProps {
@@ -66,18 +68,13 @@ export function Modal({
 
       <section className={clsx(styles.buttonWrapper, isVertical && styles.verticalButtonWrapper)}>
         {cancelText != null && (
-          <button type="button" className={clsx(styles.button, styles.cancelButton)} onClick={onClose}>
+          <Button type="button" variant="secondary" size="medium" onClick={onClose}>
             {cancelText}
-          </button>
+          </Button>
         )}
-        <button
-          type="button"
-          className={clsx(styles.button, styles.confirmButton)}
-          onClick={onConfirm}
-          disabled={confirmDisabled}
-        >
+        <Button type="button" size="medium" onClick={onConfirm} disabled={confirmDisabled}>
           {confirmText}
-        </button>
+        </Button>
       </section>
     </div>
   );
