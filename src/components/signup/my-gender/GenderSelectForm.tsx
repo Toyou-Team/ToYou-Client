@@ -52,15 +52,15 @@ function GenderSelectForm({ options, description, nextPath, draftKey }: GenderSe
           const isSelected = selectedGender === gender;
 
           return (
-            <Button
+            <button
               key={gender}
               type="button"
-              variant={isSelected ? 'primary' : 'secondary'}
+              className={styles.choiceButton({ selected: isSelected })}
               aria-pressed={isSelected}
               onClick={() => setSelectedGender(gender)}
             >
               {gender}
-            </Button>
+            </button>
           );
         })}
 
