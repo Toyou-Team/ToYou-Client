@@ -55,9 +55,9 @@ function GenderSelectForm({ options, description, nextPath, draftKey }: GenderSe
             <Button
               key={gender}
               type="button"
+              variant={isSelected ? 'primary' : 'secondary'}
+              aria-pressed={isSelected}
               onClick={() => setSelectedGender(gender)}
-              outlined={!isSelected}
-              selected={isSelected}
             >
               {gender}
             </Button>

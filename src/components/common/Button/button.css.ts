@@ -1,20 +1,21 @@
 import { vars } from '@/styles/theme.css';
-import { recipe } from '@vanilla-extract/recipes';
+import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
 
 export const buttonStyle = recipe({
   base: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     width: '100%',
-    height: '5.8rem',
-    borderRadius: '1.2rem',
 
     ...vars.fontStyles.subtitle,
 
-    background: vars.color.neutral_900,
-    color: vars.color.neutral_50,
+    cursor: 'pointer',
 
     selectors: {
       '&:disabled': {
         background: vars.color.neutral_300,
+        boxShadow: 'none',
         color: vars.color.neutral_600,
         cursor: 'not-allowed',
       },
@@ -22,23 +23,39 @@ export const buttonStyle = recipe({
   },
 
   variants: {
-    outlined: {
-      true: {
+    variant: {
+      primary: {
+        background: vars.color.neutral_900,
+        color: vars.color.neutral_50,
+      },
+      outline: {
+        background: vars.color.neutral_50,
+        boxShadow: `inset 0 0 0 1px ${vars.color.neutral_900}`,
+        color: vars.color.neutral_900,
+      },
+      secondary: {
         background: vars.color.neutral_50,
         boxShadow: `inset 0 0 0 1px ${vars.color.neutral_300}`,
         color: vars.color.neutral_900,
       },
     },
 
-    selected: {
-      true: {
-        backgroundColor: vars.color.neutral_900,
-        color: vars.color.neutral_50,
+    size: {
+      large: {
+        height: '5.8rem',
+        borderRadius: '1.2rem',
+      },
+      medium: {
+        height: '4.8rem',
+        borderRadius: '0.8rem',
       },
     },
   },
 
   defaultVariants: {
-    outlined: false,
+    variant: 'primary',
+    size: 'large',
   },
 });
+
+export type ButtonVariants = NonNullable<RecipeVariants<typeof buttonStyle>>;
