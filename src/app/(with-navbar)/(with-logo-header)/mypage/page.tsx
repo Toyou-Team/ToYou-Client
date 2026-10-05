@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-import { useDeleteAccountMutation, useLogoutMutation } from '@/common/apis/auth';
+import { useLogoutMutation } from '@/common/apis/auth';
 import { GENDER_LABEL, useProfileQuery } from '@/common/apis/profile';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
@@ -18,7 +18,6 @@ export default function MyPage() {
   const router = useRouter();
   const { open } = useModal();
   const { mutate: logout } = useLogoutMutation();
-  const { mutate: deleteAccount } = useDeleteAccountMutation();
 
   const { data: profile } = useProfileQuery();
   const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
@@ -41,28 +40,6 @@ export default function MyPage() {
         onConfirm={() => {
           close();
           logout(undefined, { onSuccess: () => router.replace('/') });
-        }}
-        onClose={close}
-      />
-    ));
-  };
-
-  const handleWithdraw = () => {
-    open(({ close }) => (
-      <Modal
-        title="탈퇴하기"
-        description={
-          <>
-            탈퇴하면 편지와 초코가 모두 사라지고
-            <br />
-            복구할 수 없어요.
-          </>
-        }
-        confirmText="탈퇴"
-        cancelText="취소"
-        onConfirm={() => {
-          close();
-          deleteAccount(undefined, { onSuccess: () => router.replace('/') });
         }}
         onClose={close}
       />
@@ -120,7 +97,7 @@ export default function MyPage() {
           </button>
         </div>
 
-        <button type="button" className={styles.withdrawButton} onClick={handleWithdraw}>
+        <button type="button" className={styles.withdrawButton} onClick={() => router.push('/mypage/withdraw')}>
           탈퇴하기
         </button>
       </div>
