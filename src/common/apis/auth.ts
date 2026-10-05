@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { request } from './client';
 import { KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY } from './oAuth';
@@ -91,15 +91,20 @@ export const postLogout = async () => {
   }
 };
 
-// 회원 탈퇴
+// 회원 탈퇴 (성공 시 토큰 삭제)
 export const deleteAccount = async () => {
-  try {
-    await request<void>('delete', '/api/v1/auth/account');
-  } finally {
-    clearTokens();
-  }
+  await request<void>('delete', '/api/v1/auth/account');
+  clearTokens();
 };
 
-export const useLogoutMutation = () => useMutation({ mutationFn: postLogout });
+export const useLogoutMutation = () => {
+  const queryClient = useQueryClient();
 
-export const useDeleteAccountMutation = () => useMutation({ mutationFn: deleteAccount });
+  return useMutation({ mutationFn: postLogout, onSettled: () => queryClient.clear() });
+};
+
+export const useDeleteAccountMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({ mutationFn: deleteAccount, onSuccess: () => queryClient.clear() });
+};

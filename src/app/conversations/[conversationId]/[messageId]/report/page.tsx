@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import clsx from 'clsx';
 
-import { IcCheckNeutral300 } from '@/assets/icons';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useReportMutation, type ReportReason } from '@/common/apis/conversation';
@@ -12,6 +10,7 @@ import { useBlockConversation } from '@/common/hooks/useBlockConversation';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import Button from '@/components/common/Button/Button';
+import { CheckBox } from '@/components/common/CheckBox/CheckBox';
 import { Header } from '@/components/common/Header/Header';
 import { Modal } from '@/components/common/Modal/Modal';
 
@@ -123,9 +122,7 @@ export default function ReportPage() {
                   className={styles.reasonButton}
                   onClick={() => setReason(value)}
                 >
-                  <span className={clsx(styles.checkBox, isSelected && styles.checkBoxSelected)}>
-                    <IcCheckNeutral300 aria-hidden />
-                  </span>
+                  <CheckBox isChecked={isSelected} />
                   <span className={styles.reasonOption}>{label}</span>
                 </button>
               </li>
