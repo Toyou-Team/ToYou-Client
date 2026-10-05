@@ -71,16 +71,6 @@ export const buttonWrapper = style({
 });
 
 export const verticalButtonWrapper = style({
+  display: 'flex',
   flexDirection: 'column-reverse',
-});
-
-globalStyle(`${verticalButtonWrapper} > button`, {
-  flex: 'none',
-});
-
-export const buttonText = style({
-  ...vars.fontStyles.subtitle,
-  fontSize: '1.6rem',
-  fontWeight: 500,
-  flex: 1,
 });

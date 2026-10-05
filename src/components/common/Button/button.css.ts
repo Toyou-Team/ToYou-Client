@@ -48,6 +48,7 @@ export const buttonStyle = recipe({
       medium: {
         height: '4.8rem',
         borderRadius: '0.8rem',
+        fontSize: '1.6rem',
       },
     },
   },

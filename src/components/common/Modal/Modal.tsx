@@ -68,17 +68,11 @@ export function Modal({
 
       <section className={clsx(styles.buttonWrapper, isVertical && styles.verticalButtonWrapper)}>
         {cancelText != null && (
-          <Button type="button" variant="secondary" size="medium" className={styles.buttonText} onClick={onClose}>
+          <Button type="button" variant="secondary" size="medium" onClick={onClose}>
             {cancelText}
           </Button>
         )}
-        <Button
-          type="button"
-          size="medium"
-          className={styles.buttonText}
-          onClick={onConfirm}
-          disabled={confirmDisabled}
-        >
+        <Button type="button" size="medium" onClick={onConfirm} disabled={confirmDisabled}>
           {confirmText}
         </Button>
       </section>
