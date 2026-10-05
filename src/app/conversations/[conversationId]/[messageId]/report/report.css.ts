@@ -1,4 +1,4 @@
-import { globalStyle, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
 
@@ -55,28 +55,8 @@ export const reasonButton = style({
   cursor: 'pointer',
 });
 
-export const checkBox = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-
-  width: '3rem',
-  height: '3rem',
-  borderRadius: '0.4rem',
-
-  backgroundColor: vars.color.neutral_100,
-});
-
 export const reasonOption = style({
   ...vars.fontStyles.subtitle,
-});
-
-export const checkBoxSelected = style({
-  backgroundColor: vars.color.neutral_900,
-});
-
-globalStyle(`${checkBoxSelected} path`, {
-  stroke: vars.color.neutral_50,
 });
 
 export const detailInput = style({
