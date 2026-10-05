@@ -20,19 +20,6 @@ export const emptyText = style({
 
 export const writeLetterButton = style({
   width: '26rem',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-
-  height: '5.6rem',
-  padding: '0 3.2rem',
-
-  border: `1px solid ${vars.color.neutral_900}`,
-  borderRadius: '1.2rem',
-  backgroundColor: vars.color.neutral_50,
-
-  ...vars.fontStyles.subtitle,
-  color: vars.color.neutral_900,
 });
 
 export const list = style({

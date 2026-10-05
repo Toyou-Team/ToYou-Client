@@ -2,9 +2,11 @@
 
 import { useRef, useState, type PointerEvent } from 'react';
 import Link from 'next/link';
+import clsx from 'clsx';
 
 import { IcExit, IcProfileImage } from '@/assets/icons';
 import type { ConversationListItem } from '@/common/apis/conversation';
+import { buttonStyle } from '@/components/common/Button/button.css';
 import { formatRelativeDay } from '@/utils/date';
 
 import * as styles from './receivedLetterList.css';
@@ -26,7 +28,7 @@ export function ReceivedLetterList({ conversations, onLeave }: ReceivedLetterLis
       <div className={styles.emptyWrapper}>
         <p className={styles.emptyText}>주고받은 편지가 없어요.</p>
 
-        <Link href="/write-letter" className={styles.writeLetterButton}>
+        <Link href="/write-letter" className={clsx(buttonStyle({ variant: 'outline' }), styles.writeLetterButton)}>
           편지 쓰기
         </Link>
       </div>
