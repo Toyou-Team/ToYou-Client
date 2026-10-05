@@ -19,7 +19,7 @@ export const emptyText = style({
 });
 
 export const writeLetterButton = style({
-  width: '26rem',
+  width: '24rem',
 });
 
 export const list = style({
