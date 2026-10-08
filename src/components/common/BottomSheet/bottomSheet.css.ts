@@ -1,7 +1,17 @@
 import { vars } from '@/styles/theme.css';
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 
 import { Z_INDEX } from '@/constants/zIndex';
+
+const fadeIn = keyframes({
+  from: { opacity: 0 },
+  to: { opacity: 1 },
+});
+
+const slideUp = keyframes({
+  from: { transform: 'translateY(100%)' },
+  to: { transform: 'translateY(0)' },
+});
 
 export const overlay = style({
   position: 'fixed',
@@ -9,6 +19,14 @@ export const overlay = style({
   zIndex: Z_INDEX.BACKDROP,
 
   backgroundColor: 'rgba(0, 0, 0, 0.4)',
+
+  animation: `${fadeIn} 0.25s ease-out`,
+
+  '@media': {
+    '(prefers-reduced-motion: reduce)': {
+      animation: 'none',
+    },
+  },
 });
 
 export const sheet = style({
@@ -27,8 +45,17 @@ export const sheet = style({
   borderRadius: '2.4rem 2.4rem 0 0',
   backgroundColor: vars.color.neutral_50,
 
+  animation: `${slideUp} 0.25s cubic-bezier(0.32, 0.72, 0, 1)`,
+  transition: 'transform 0.2s ease-out',
+
   '@media': {
+    '(prefers-reduced-motion: reduce)': {
+      animation: 'none',
+    },
+
     '(min-width: 768px)': {
+      animation: 'none',
+
       top: '50%',
       right: 'auto',
       bottom: 'auto',
@@ -44,20 +71,29 @@ export const sheet = style({
   },
 });
 
-export const handle = style({
-  width: '10rem',
-  height: '0.6rem',
+export const handleArea = style({
   flexShrink: 0,
-  margin: '1.7rem auto 0',
 
-  borderRadius: '1rem',
-  backgroundColor: vars.color.neutral_900,
+  padding: '1.7rem 0 1rem',
+  marginBottom: '-1rem',
+
+  touchAction: 'none',
+  cursor: 'grab',
 
   '@media': {
     '(min-width: 768px)': {
       display: 'none',
     },
   },
+});
+
+export const handle = style({
+  width: '10rem',
+  height: '0.6rem',
+  margin: '0 auto',
+
+  borderRadius: '1rem',
+  backgroundColor: vars.color.neutral_900,
 });
 
 export const header = style({
