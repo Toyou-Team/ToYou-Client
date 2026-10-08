@@ -8,6 +8,7 @@ export const letterCardWrapper = style({
 
   margin: '0 auto',
   borderRadius: '2.4rem',
+  backgroundColor: vars.color.neutral_100,
 });
 
 export const letterCardBackground = style({
