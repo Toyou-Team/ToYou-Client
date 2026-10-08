@@ -1,6 +1,5 @@
 import Image, { StaticImageData } from 'next/image';
 
-import ImgMockCard from '@/assets/imgs/img_mock_card.png';
 import * as styles from './letterCard.css';
 import { LetterSong } from '@/types/letterCardTypes';
 
@@ -20,7 +19,7 @@ export function LetterCard({
   nickname,
   message,
   profileImage,
-  backgroundImage = ImgMockCard,
+  backgroundImage,
   profileImageSize = 4.3,
   expiresText = '3일 후 사라져요!',
   width,
@@ -35,7 +34,9 @@ export function LetterCard({
         height: `${height}rem`,
       }}
     >
-      <Image src={backgroundImage} alt="" fill unoptimized className={styles.letterCardBackground} />
+      {backgroundImage && (
+        <Image src={backgroundImage} alt="" fill unoptimized className={styles.letterCardBackground} />
+      )}
 
       <section className={styles.profileWrapper}>
         <div
