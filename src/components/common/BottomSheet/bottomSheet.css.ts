@@ -88,7 +88,7 @@ export const handleArea = style({
 });
 
 export const handle = style({
-  width: '10rem',
+  width: '8rem',
   height: '0.6rem',
   margin: '0 auto',
 

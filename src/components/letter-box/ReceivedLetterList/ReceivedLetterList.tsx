@@ -7,6 +7,7 @@ import { IcExit, IcProfileImage } from '@/assets/icons';
 import type { ConversationListItem } from '@/common/apis/conversation';
 import { buttonStyle } from '@/components/common/Button/button.css';
 import { formatRelativeDay } from '@/utils/date';
+import { getPartnerNickname, getPartnerProfileImage } from '@/utils/partner';
 
 import * as styles from './receivedLetterList.css';
 
@@ -63,6 +64,8 @@ interface LetterItemProps {
 
 function LetterItem({ conversation, isOpen, onOpenChange, onLeave }: LetterItemProps) {
   const { id, partner, hasUnread, lastMessage } = conversation;
+  const nickname = getPartnerNickname(partner);
+  const profileImage = getPartnerProfileImage(partner);
 
   const dragStartRef = useRef<{ x: number; offset: number } | null>(null);
   const isDraggedRef = useRef(false);
@@ -124,8 +127,8 @@ function LetterItem({ conversation, isOpen, onOpenChange, onLeave }: LetterItemP
         onClick={handleClick}
       >
         <div className={styles.profileImage}>
-          {partner.profileImage ? (
-            <img src={partner.profileImage.url} alt={`${partner.nickname}의 프로필`} className={styles.profileImg} />
+          {profileImage ? (
+            <img src={profileImage.url} alt={`${nickname}의 프로필`} className={styles.profileImg} />
           ) : (
             <IcProfileImage className={styles.profileImg} />
           )}
@@ -133,7 +136,7 @@ function LetterItem({ conversation, isOpen, onOpenChange, onLeave }: LetterItemP
 
         <section className={styles.content}>
           <div className={styles.topRow}>
-            <span className={styles.nickname}>{partner.nickname}</span>
+            <span className={styles.nickname}>{nickname}</span>
             <span className={styles.receivedAt}>{formatRelativeDay(lastMessage.createdAt)}</span>
           </div>
 

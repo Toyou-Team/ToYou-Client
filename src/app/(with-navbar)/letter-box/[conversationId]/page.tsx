@@ -14,6 +14,7 @@ import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
 import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 import { formatDay, formatTime } from '@/utils/date';
+import { getPartnerNickname } from '@/utils/partner';
 
 import * as styles from './conversation.css';
 
@@ -51,7 +52,7 @@ export default function ConversationPage() {
       <Header
         bordered
         left={<BackButton link="/letter-box" />}
-        center={<span className={styles.titleText}>{conversation.partner.nickname}</span>}
+        center={<span className={styles.titleText}>{getPartnerNickname(conversation.partner)}</span>}
         right={<IconButton icon={<IcMore />} label="더보기" onClick={() => setIsReportBlockSheetOpen(true)} />}
       />
 
@@ -68,7 +69,7 @@ export default function ConversationPage() {
               >
                 <div className={styles.messageContent}>
                   <p className={styles.metaText}>
-                    {[message.isMine ? '나' : message.sender.nickname, formatTime(message.createdAt)]
+                    {[message.isMine ? '나' : getPartnerNickname(message.sender), formatTime(message.createdAt)]
                       .concat(message.image ? '사진' : [])
                       .join(' • ')}
                   </p>
@@ -86,25 +87,39 @@ export default function ConversationPage() {
 
       <BottomSheet isOpen={isReportBlockSheetOpen} onClose={closeReportBlockSheet}>
         <div className={actionSheetStyles.actionList}>
-          {latestReceived && (
+          {conversation.partner.isWithdrawn ? (
+            // 탈퇴한 상대는 채팅방 나가기만 제공
             <button
               type="button"
-              className={actionSheetStyles.actionButton}
-              onClick={() => router.push(`/conversations/${conversationId}/${latestReceived.id}/report`)}
+              className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
+              // TODO: 나가기 API 확인 후 연결
+              onClick={closeReportBlockSheet}
             >
-              신고
+              나가기
             </button>
+          ) : (
+            <>
+              {latestReceived && (
+                <button
+                  type="button"
+                  className={actionSheetStyles.actionButton}
+                  onClick={() => router.push(`/conversations/${conversationId}/${latestReceived.id}/report`)}
+                >
+                  신고
+                </button>
+              )}
+              <button
+                type="button"
+                className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
+                onClick={() => {
+                  closeReportBlockSheet();
+                  openBlockConfirm();
+                }}
+              >
+                차단
+              </button>
+            </>
           )}
-          <button
-            type="button"
-            className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
-            onClick={() => {
-              closeReportBlockSheet();
-              openBlockConfirm();
-            }}
-          >
-            차단
-          </button>
           <button type="button" className={actionSheetStyles.actionButton} onClick={closeReportBlockSheet}>
             취소
           </button>

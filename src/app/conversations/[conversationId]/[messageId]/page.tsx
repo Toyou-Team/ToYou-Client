@@ -23,6 +23,7 @@ import { IconButton } from '@/components/common/IconButton';
 import { Modal } from '@/components/common/Modal/Modal';
 import { LetterPaper } from '@/components/letter/LetterPaper/LetterPaper';
 import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
+import { getPartnerNickname } from '@/utils/partner';
 
 import * as styles from './conversationLetter.css';
 
@@ -182,9 +183,10 @@ export default function ConversationLetterPage() {
     <main className={styles.page}>
       <Header
         left={<BackButton />}
-        center={<span className={styles.titleText}>{conversation.partner.nickname}</span>}
+        center={<span className={styles.titleText}>{getPartnerNickname(conversation.partner)}</span>}
         right={
-          !activeMessage.isMine && (
+          !activeMessage.isMine &&
+          !conversation.partner.isWithdrawn && (
             <IconButton icon={<IcMore />} label="더보기" onClick={() => setIsReportBlockSheetOpen(true)} />
           )
         }
