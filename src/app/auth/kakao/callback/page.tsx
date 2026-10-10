@@ -47,7 +47,7 @@ export default function KakaoCallbackPage() {
           case 'SIGNUP_REQUIRED':
             registrationTokenStore.set(result.registrationToken);
             kakaoProfileStore.set(result.kakaoProfile);
-            router.replace('/signup/nickname');
+            router.replace('/signup/terms');
             return;
           case 'SIGNUP_UNAVAILABLE':
             setBlockedMessage(BLOCKED_MESSAGE.AGE_VERIFICATION_UNAVAILABLE);

@@ -6,7 +6,7 @@ export const layoutWrapper = style({
 
   width: '100%',
   minHeight: '100dvh',
-  paddingTop: '5.7rem',
+  paddingTop: '6.8rem',
 });
 
 export const mainContent = style({
