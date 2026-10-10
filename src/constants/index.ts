@@ -11,7 +11,7 @@ export const AGREE_DATA = [
   {
     id: 2,
     type: 'required',
-    text: '개인정보처리방침',
+    text: '개인정보 처리방침',
     content: PRIVACY_POLICY,
   },
   {
