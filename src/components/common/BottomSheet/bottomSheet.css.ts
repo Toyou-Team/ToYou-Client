@@ -40,7 +40,7 @@ export const sheet = style({
   flexDirection: 'column',
 
   width: '100%',
-  maxHeight: '80dvh',
+  maxHeight: 'calc(100dvh - 6.8rem)',
 
   borderRadius: '2.4rem 2.4rem 0 0',
   backgroundColor: vars.color.neutral_50,
