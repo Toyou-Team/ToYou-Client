@@ -13,6 +13,7 @@ import {
   IcWritingLetterNeutral300,
   IcWritingLetterNeutral900,
 } from '@/assets/icons';
+import { useConversationsQuery } from '@/common/apis/conversation';
 
 const navItems = [
   { href: '/home', label: '홈', icon: <IcHomeNeutral300 />, activeIcon: <IcHomeNeutral900 /> },
@@ -28,15 +29,26 @@ const navItems = [
 
 export function NavBar() {
   const pathname = usePathname();
+  const { data: conversations } = useConversationsQuery();
+  const hasUnreadLetter = conversations?.some(({ hasUnread }) => hasUnread) ?? false;
 
   return (
     <nav className={styles.navBarWrapper}>
       {navItems.map(({ href, label, icon, activeIcon }) => {
         const isActive = pathname === href || pathname.startsWith(`${href}/`);
+        const showUnreadDot = href === '/letter-box' && hasUnreadLetter;
 
         return (
-          <Link key={href} href={href} className={styles.navItemWrapper}>
-            {isActive ? activeIcon : icon}
+          <Link
+            key={href}
+            href={href}
+            className={styles.navItemWrapper}
+            aria-label={showUnreadDot ? `${label}, 읽지 않은 편지 있음` : undefined}
+          >
+            <span className={styles.navItemIcon}>
+              {isActive ? activeIcon : icon}
+              {showUnreadDot && <span className={styles.unreadDot} />}
+            </span>
             <span className={styles.navItemLabel({ isActive })}>{label}</span>
           </Link>
         );
