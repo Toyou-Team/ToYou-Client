@@ -30,6 +30,23 @@ export const navItemWrapper = style({
   borderTop: `1px solid ${vars.color.neutral_300}`,
 });
 
+export const navItemIcon = style({
+  position: 'relative',
+  display: 'flex',
+});
+
+export const unreadDot = style({
+  position: 'absolute',
+  top: '-0.5rem',
+  right: '-0.9rem',
+
+  width: '0.5rem',
+  height: '0.5rem',
+  borderRadius: '50%',
+
+  backgroundColor: vars.color.neutral_950,
+});
+
 export const navItemLabel = recipe({
   base: {
     ...vars.fontStyles.label,
