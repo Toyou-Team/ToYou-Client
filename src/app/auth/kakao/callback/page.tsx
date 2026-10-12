@@ -62,6 +62,12 @@ export default function KakaoCallbackPage() {
           return;
         }
 
+        // TODO: 영구 정지와 재가입 제한 기간을 서버가 구분해 주면 영구 정지일 때만 이 안내를 띄운다
+        if (code === AUTH_ERROR_CODE.ACCOUNT_UNAVAILABLE) {
+          router.replace('/?blocked=restricted');
+          return;
+        }
+
         // 인가 코드 만료·카카오 교환 실패 등 → 다시 로그인할 수 있도록 랜딩으로
         router.replace('/');
       },
