@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { LoginButtonSection } from '@/components/landing/KaKaoLoginSection/KaKaoLoginSection';
+import { RestrictedSignupModal } from '@/components/landing/RestrictedSignupModal/RestrictedSignupModal';
 import * as styles from './landing.css';
 import ImgMockCard from '@/assets/imgs/img_mock_card.png';
 import { LetterCard } from '@/components/common/LetterCard/LetterCard';
@@ -30,6 +31,8 @@ export default async function LandingPage() {
       </h1>
 
       <LoginButtonSection />
+
+      <RestrictedSignupModal />
     </div>
   );
 }

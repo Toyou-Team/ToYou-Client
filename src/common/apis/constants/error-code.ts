@@ -15,6 +15,8 @@ export const AUTH_ERROR_CODE = {
   AGE_RESTRICTED: 'AUTH_AGE_RESTRICTED',
   // 가입을 중단하고 카카오 연령정보 확인 안내 표시
   AGE_VERIFICATION_UNAVAILABLE: 'AUTH_AGE_VERIFICATION_UNAVAILABLE',
+  // 정지 계정 또는 재가입 제한 기간이 남은 계정은 랜딩에서 가입 제한 모달 표시
+  ACCOUNT_UNAVAILABLE: 'AUTH_ACCOUNT_UNAVAILABLE',
 } as const;
 
 export const PROFILE_ERROR_CODE = {
