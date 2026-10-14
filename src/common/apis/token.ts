@@ -59,9 +59,6 @@ export interface SignupDraft {
   nickname?: string;
   gender?: Gender;
   receiveGender?: ReceiveGender;
-  useKakaoProfileImage?: boolean;
-  /** 뒤로가기 시 미리보기 복원용. API 로는 전송하지 않는다 (카카오 URL 또는 업로드 이미지 data URL) */
-  profileImagePreview?: string;
 }
 
 export const signupDraftStore = {
