@@ -115,6 +115,8 @@ export const albumImage = style({
   width: '5rem',
   height: '5rem',
   objectFit: 'cover',
+  // 앨범 이미지가 없을 경우
+  backgroundColor: vars.color.neutral_100,
 });
 
 export const trackInfo = style({

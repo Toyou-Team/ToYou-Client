@@ -5,7 +5,12 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import Button from '@/components/common/Button/Button';
 import { IcCheckCircleNeutral900, IcChevronLeft, IcSearch, IcSpotify } from '@/assets/icons';
 import { useDebouncedValue } from '@/common/hooks/useDebouncedValue';
-import { SEARCH_QUERY_MAX_LENGTH, useSpotifyTrackSearchQuery, type SpotifyTrack } from '@/common/apis/music';
+import {
+  SEARCH_QUERY_MAX_LENGTH,
+  useSpotifyRecommendationsQuery,
+  useSpotifyTrackSearchQuery,
+  type SpotifyTrack,
+} from '@/common/apis/music';
 
 import * as styles from './musicPicker.css';
 import { Header } from '@/components/common/Header/Header';
@@ -25,8 +30,9 @@ export function MusicPicker({ initialTrack, onClose, onConfirm }: MusicPickerPro
   const listRef = useRef<HTMLUListElement>(null);
   const sentinelRef = useRef<HTMLLIElement>(null);
 
+  const recommendations = useSpotifyRecommendationsQuery();
   const {
-    data: tracks = [],
+    data: searchedTracks = [],
     isLoading,
     isError,
     hasNextPage,
@@ -35,6 +41,8 @@ export function MusicPicker({ initialTrack, onClose, onConfirm }: MusicPickerPro
     refetch,
   } = useSpotifyTrackSearchQuery(debouncedQuery);
   const hasSearched = debouncedQuery.trim().length > 0;
+
+  const tracks = hasSearched ? searchedTracks : (recommendations.data ?? []);
 
   const handleQueryChange = (e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
@@ -88,7 +96,23 @@ export function MusicPicker({ initialTrack, onClose, onConfirm }: MusicPickerPro
       </div>
 
       <ul ref={listRef} className={styles.list}>
-        {!hasSearched && <li className={styles.emptyText}>노래 제목이나 가수를 검색해보세요.</li>}
+        {!hasSearched && recommendations.isPending && <li className={styles.loadingText}>불러오는 중...</li>}
+
+        {!hasSearched && recommendations.isError && (
+          <li className={styles.emptyText}>
+            추천곡을 불러오지 못했어요.
+            <br />
+            잠시 후 다시 시도해주세요.
+            <br />
+            <button type="button" className={styles.retryButton} onClick={() => recommendations.refetch()}>
+              다시 시도
+            </button>
+          </li>
+        )}
+
+        {!hasSearched && recommendations.isSuccess && tracks.length === 0 && (
+          <li className={styles.emptyText}>노래 제목이나 가수를 검색해보세요.</li>
+        )}
 
         {hasSearched && isError && (
           <li className={styles.emptyText}>
@@ -110,7 +134,11 @@ export function MusicPicker({ initialTrack, onClose, onConfirm }: MusicPickerPro
           return (
             <li key={track.id}>
               <button type="button" className={styles.trackRow} onClick={() => setSelectedTrack(track)}>
-                <img src={track.albumImageUrl} alt="" className={styles.albumImage} />
+                {track.albumImageUrl ? (
+                  <img src={track.albumImageUrl} alt="" className={styles.albumImage} />
+                ) : (
+                  <span className={styles.albumImage} />
+                )}
 
                 <div className={styles.trackInfo}>
                   <p className={styles.trackTitle}>{track.title}</p>

@@ -32,6 +32,8 @@ interface RequestOptions {
   // Authorization 헤더 첨부 + 401 자동 갱신 대상 여부 (기본 true)
   auth?: boolean;
   headers?: Record<string, string>;
+  // ky 기본값은 GET 이 429·5xx 로 실패하면 2번 자동 재시도
+  retry?: number;
 }
 
 const client = ky.create({
@@ -69,6 +71,7 @@ async function dispatch<T>(
       method,
       headers: options.headers,
       context: { auth },
+      ...(options.retry === undefined ? {} : { retry: options.retry }),
       ...(body === undefined ? {} : body instanceof FormData ? { body } : { json: body }),
     });
 
