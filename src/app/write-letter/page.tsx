@@ -220,7 +220,11 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
 
         {selectedTrack && (
           <div className={styles.selectedTrackChip}>
-            <img src={selectedTrack.albumImageUrl} alt="" className={styles.selectedTrackImage} />
+            {selectedTrack.albumImageUrl ? (
+              <img src={selectedTrack.albumImageUrl} alt="" className={styles.selectedTrackImage} />
+            ) : (
+              <span className={styles.selectedTrackImage} />
+            )}
 
             <div className={styles.selectedTrackInfo}>
               <div className={styles.selectedTrackTitleRow}>

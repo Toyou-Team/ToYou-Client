@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import { request } from './client';
 
@@ -6,7 +6,7 @@ export interface SpotifyTrack {
   id: string;
   title: string;
   artists: string[];
-  albumImageUrl: string;
+  albumImageUrl: string | null;
   externalUrl: string;
   durationMs: number;
 }
@@ -18,6 +18,20 @@ export interface SpotifyTrackSearchResult {
   hasMore: boolean;
   nextOffset: number | null;
 }
+
+// 검색 전에 보여줄 추천곡 (최대 20곡)
+export const getSpotifyRecommendations = () =>
+  request<{ items: SpotifyTrack[] }>('get', '/api/v1/music/spotify/recommendations', undefined, { retry: 0 });
+
+export const useSpotifyRecommendationsQuery = () =>
+  useQuery({
+    queryKey: ['spotify-recommendations'],
+    queryFn: getSpotifyRecommendations,
+    select: (data) => data.items,
+    // 서버 캐시(5분)에 맞추고, 자동으로 다시 부르지 않는다
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
 const SEARCH_PAGE_SIZE = 10;
 export const SEARCH_QUERY_MAX_LENGTH = 100;

@@ -107,9 +107,9 @@ export const selectedTrackChip = style({
 export const selectedTrackImage = style({
   flexShrink: 0,
 
-  width: '3.8rem',
-  height: '3.8rem',
-  borderRadius: '0.6rem',
+  width: '6rem',
+  height: '6rem',
+  borderRadius: '0.8rem',
   objectFit: 'cover',
 
   backgroundColor: vars.color.neutral_100,
