@@ -2,7 +2,6 @@ import ky, { HTTPError } from 'ky';
 
 import { API_BASE_URL } from './oAuth';
 
-import { AUTH_ERROR_CODE } from './constants/error-code';
 import { HTTP_ERROR_MESSAGE, HTTP_STATUS_CODE } from './constants/http';
 import { reissueToken } from './refresh';
 import { accessTokenStore, clearTokens } from './token';
@@ -57,6 +56,12 @@ const redirectToLogin = () => {
   if (typeof window !== 'undefined') window.location.href = '/';
 };
 
+const tryReissueToken = () =>
+  reissueToken().then(
+    () => true,
+    () => false,
+  );
+
 async function dispatch<T>(
   method: Method,
   path: string,
@@ -91,24 +96,13 @@ async function dispatch<T>(
     const message = payload?.error?.message || HTTP_ERROR_MESSAGE[status] || `요청에 실패했습니다. (${status})`;
     const requestId = payload?.error?.requestId;
 
+    // 401 이면 에러 코드와 상관없이 재발급 후 원 요청을 한 번만 다시 보낸다
     if (status === HTTP_STATUS_CODE.UNAUTHORIZED && auth) {
-      // Access Token 만료/손상, 또는 (새로고침 직후 restoreSession 이 아직 안 끝난 경우 등) 아예 없음
-      // → 재발급 후 원 요청을 딱 한 번만 재시도
-      if ((code === AUTH_ERROR_CODE.TOKEN_INVALID || code === AUTH_ERROR_CODE.TOKEN_REQUIRED) && !retried) {
-        try {
-          await reissueToken();
-          return dispatch<T>(method, path, body, options, true);
-        } catch {
-          clearTokens();
-          redirectToLogin();
-        }
-      }
+      if (!retried && (await tryReissueToken())) return dispatch<T>(method, path, body, options, true);
 
-      // Refresh Token 만료/손상 → 토큰 전체 삭제 후 카카오 로그인부터
-      if (code === AUTH_ERROR_CODE.REFRESH_TOKEN_INVALID) {
-        clearTokens();
-        redirectToLogin();
-      }
+      // 재발급에 실패했거나 새 토큰으로도 401 이면 다시 로그인
+      clearTokens();
+      redirectToLogin();
     }
 
     throw new ApiError(status, message, code, requestId);
