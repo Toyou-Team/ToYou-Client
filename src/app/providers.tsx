@@ -6,6 +6,7 @@ import { isServer, MutationCache, QueryCache, QueryClient, QueryClientProvider }
 
 import { restoreSession } from '@/common/apis/refresh';
 import { ModalProvider } from '@/common/providers/ModalProvider';
+import { AppToaster } from '@/components/common/Toast/Toast';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -37,6 +38,7 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ModalProvider>{children}</ModalProvider>
+      <AppToaster />
     </QueryClientProvider>
   );
 }

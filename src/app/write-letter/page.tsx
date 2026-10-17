@@ -15,6 +15,7 @@ import { useSendMessageMutation } from '@/common/apis/conversation';
 import { useReplyMutation } from '@/common/apis/delivery';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
+import { showToast } from '@/components/common/Toast/Toast';
 import { useRouter } from 'next/navigation';
 
 const MIN_LENGTH = 30;
@@ -92,7 +93,15 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     const attachment = { spotifyTrackId, imageObjectKey: imageObjectKey ?? undefined };
 
     if (!replyTo && !conversationId) {
-      createLetter({ body, ...attachment }, { onSuccess: () => router.push('/home') });
+      createLetter(
+        { body, ...attachment },
+        {
+          onSuccess: ({ bonusChocolateAmount }) => {
+            if (bonusChocolateAmount > 0) showToast(`${bonusChocolateAmount}초코가 지급됐어요.`);
+            router.push('/home');
+          },
+        },
+      );
       return;
     }
 
