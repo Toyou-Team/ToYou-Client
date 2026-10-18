@@ -16,7 +16,7 @@ const ACTION_WIDTH = 60;
 
 interface ReceivedLetterListProps {
   conversations: ConversationListItem[];
-  onLeave: (conversationId: string) => void;
+  onLeave: (conversation: ConversationListItem) => void;
 }
 
 export function ReceivedLetterList({ conversations, onLeave }: ReceivedLetterListProps) {
@@ -45,10 +45,7 @@ export function ReceivedLetterList({ conversations, onLeave }: ReceivedLetterLis
           conversation={conversation}
           isOpen={openedId === conversation.id}
           onOpenChange={(isOpen) => setOpenedId(isOpen ? conversation.id : null)}
-          onLeave={() => {
-            setOpenedId(null);
-            onLeave(conversation.id);
-          }}
+          onLeave={() => onLeave(conversation)}
         />
       ))}
     </ul>
