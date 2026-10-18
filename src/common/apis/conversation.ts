@@ -1,4 +1,10 @@
-import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+  type QueryClient,
+} from '@tanstack/react-query';
 
 import { request, retryOnce } from './client';
 import type { DeliverySpotify } from './delivery';
@@ -91,8 +97,10 @@ export const useConversationsQuery = () =>
 export const getConversation = (conversationId: string, cursor: string | null) =>
   request<ConversationDetail>('get', withCursor(`/api/v1/conversations/${conversationId}`, cursor));
 
-export const useConversationQuery = (conversationId: string) =>
+// enabled 를 false 로 두면 나간 대화처럼 더 이상 조회하지 않는다
+export const useConversationQuery = (conversationId: string, enabled = true) =>
   useInfiniteQuery({
+    enabled,
     queryKey: conversationQueryKey(conversationId),
     queryFn: ({ pageParam }) => getConversation(conversationId, pageParam),
     initialPageParam: null as string | null,
@@ -222,3 +230,24 @@ export const useBlockMutation = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY }),
   });
 };
+
+// 대화방 나가기 (양쪽에서 대화가 사라지고 복구할 수 없음)
+export const postLeaveConversation = (conversationId: string) =>
+  request<{ left: boolean }>('post', `/api/v1/conversations/${conversationId}/leave`);
+
+// 나간 대화는 상세 캐시를 지우고 목록에서도 뺀다
+export const removeConversationFromCache = (queryClient: QueryClient, conversationId: string) => {
+  queryClient.cancelQueries({ queryKey: conversationQueryKey(conversationId) });
+  queryClient.removeQueries({ queryKey: conversationQueryKey(conversationId) });
+  queryClient.setQueryData<InfiniteData<ConversationList>>(
+    CONVERSATIONS_QUERY_KEY,
+    (data) =>
+      data && {
+        ...data,
+        pages: data.pages.map((page) => ({ ...page, items: page.items.filter(({ id }) => id !== conversationId) })),
+      },
+  );
+};
+
+// 이미 나간 대화도 같은 성공 응답을 주므로 네트워크·5xx 는 한 번 다시 보낸다
+export const useLeaveConversationMutation = () => useMutation({ mutationFn: postLeaveConversation, retry: retryOnce });
