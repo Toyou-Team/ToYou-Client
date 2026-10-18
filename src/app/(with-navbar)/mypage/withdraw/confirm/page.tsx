@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
-import { useDeleteAccountMutation } from '@/common/apis/auth';
-import { useProfileQuery } from '@/common/apis/profile';
+import { useDeleteAccountMutation, useWithdrawalSummaryQuery } from '@/common/apis/auth';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import Button from '@/components/common/Button/Button';
@@ -27,7 +26,7 @@ const getRejoinDateText = () => {
 export default function WithdrawConfirmPage() {
   const router = useRouter();
   const { open } = useModal();
-  const { data: profile } = useProfileQuery();
+  const { data: summary, isError: isSummaryError, refetch: refetchSummary } = useWithdrawalSummaryQuery();
   const { mutate: deleteAccount, isPending } = useDeleteAccountMutation();
   const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -37,7 +36,7 @@ export default function WithdrawConfirmPage() {
       onError: (error) =>
         open(({ close }) => (
           <Modal
-            title="탈퇴하지 못했어요"
+            title="탈퇴를 완료하지 못했어요"
             description={error.message}
             confirmText="확인"
             onConfirm={close}
@@ -62,18 +61,26 @@ export default function WithdrawConfirmPage() {
           <dl className={styles.infoCard}>
             <div className={styles.infoRow}>
               <dt>내 편지함의 편지</dt>
-              {/* TODO: 편지 수를 주는 API 가 생기면 연결 */}
-              <dd className={styles.infoValue}>-</dd>
+              <dd className={styles.infoValue}>{summary ? `${summary.letterCount}개` : '-'}</dd>
             </div>
             <div className={styles.infoRow}>
               <dt>보유한 초코</dt>
-              <dd className={styles.infoValue}>{profile?.chocolateBalance ?? 0}개</dd>
+              <dd className={styles.infoValue}>{summary ? `${summary.chocolateBalance}개` : '-'}</dd>
             </div>
             <div className={styles.infoRow}>
               <dt>프로필과 계정 정보</dt>
               <dd className={styles.infoValue}>전체</dd>
             </div>
           </dl>
+
+          {isSummaryError && (
+            <p className={styles.subText}>
+              정보를 불러오지 못했어요.{' '}
+              <button type="button" className={styles.retryButton} onClick={() => refetchSummary()}>
+                다시 시도
+              </button>
+            </p>
+          )}
         </section>
 
         <section className={styles.section}>

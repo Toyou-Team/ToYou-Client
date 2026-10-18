@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { request } from './client';
 import { KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY } from './oAuth';
@@ -91,9 +91,25 @@ export const postLogout = async () => {
   }
 };
 
-// 회원 탈퇴 (성공 시 토큰 삭제)
+export interface WithdrawalSummary {
+  letterCount: number;
+  chocolateBalance: number;
+}
+
+// 탈퇴 화면에 보여줄 사라지는 편지 수와 초코 잔액. 실패하면 '다시 시도' 버튼
+export const getWithdrawalSummary = () =>
+  request<WithdrawalSummary>('get', '/api/v1/auth/account/withdrawal-summary', undefined, { retry: 0 });
+
+export const useWithdrawalSummaryQuery = () =>
+  useQuery({ queryKey: ['withdrawal-summary'], queryFn: getWithdrawalSummary });
+
+// 회원 탈퇴
 export const deleteAccount = async () => {
-  await request<void>('delete', '/api/v1/auth/account');
+  const { withdrawn } = await request<{ withdrawn: boolean }>('delete', '/api/v1/auth/account', undefined, {
+    retry: 0,
+  });
+  if (!withdrawn) throw new Error('탈퇴 처리가 완료되지 않았어요.');
+
   clearTokens();
 };
 
