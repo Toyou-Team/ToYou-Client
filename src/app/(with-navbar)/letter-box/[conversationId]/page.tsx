@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { IcMore } from '@/assets/icons';
 import { useConversationQuery, type ConversationMessage } from '@/common/apis/conversation';
 import { useBlockConversation } from '@/common/hooks/useBlockConversation';
+import { useLeaveConversation } from '@/common/hooks/useLeaveConversation';
 import { useInfiniteScroll } from '@/common/hooks/useInfiniteScroll';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
@@ -33,9 +34,10 @@ const groupByDay = (messages: ConversationMessage[]) =>
 export default function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const router = useRouter();
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useConversationQuery(conversationId);
+  const { openLeaveConfirm, hasLeft } = useLeaveConversation();
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useConversationQuery(conversationId, !hasLeft);
   const openBlockConfirm = useBlockConversation(conversationId);
-  const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
+  const [isMenuSheetOpen, setIsMenuSheetOpen] = useState(false);
 
   // 불러오는 동안 잠시 멈췄다가, 끝나면 끝 요소가 아직 보이는지 다시 확인
   const loadMoreRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage);
@@ -43,9 +45,7 @@ export default function ConversationPage() {
   if (!data) return null;
 
   const { conversation, items } = data;
-  // TODO: 목록에서의 신고 대상(사용자 vs 특정 편지) 기획 확정 후 수정. 지금은 가장 최근에 받은 편지를 신고
-  const latestReceived = items.find(({ isMine }) => !isMine);
-  const closeReportBlockSheet = () => setIsReportBlockSheetOpen(false);
+  const closeMenuSheet = () => setIsMenuSheetOpen(false);
 
   return (
     <div className={styles.pageWrapper}>
@@ -53,7 +53,7 @@ export default function ConversationPage() {
         bordered
         left={<BackButton link="/letter-box" />}
         center={<span className={styles.titleText}>{getPartnerNickname(conversation.partner)}</span>}
-        right={<IconButton icon={<IcMore />} label="더보기" onClick={() => setIsReportBlockSheetOpen(true)} />}
+        right={<IconButton icon={<IcMore />} label="더보기" onClick={() => setIsMenuSheetOpen(true)} />}
       />
 
       {groupByDay(items).map(({ day, messages }) => (
@@ -85,42 +85,32 @@ export default function ConversationPage() {
 
       {hasNextPage && <div ref={loadMoreRef} aria-hidden />}
 
-      <BottomSheet isOpen={isReportBlockSheetOpen} onClose={closeReportBlockSheet}>
+      <BottomSheet isOpen={isMenuSheetOpen} onClose={closeMenuSheet}>
         <div className={actionSheetStyles.actionList}>
-          {conversation.partner.isWithdrawn ? (
-            // 탈퇴한 상대는 채팅방 나가기만 제공
+          {/* 탈퇴한 상대는 차단할 대상이 없어 나가기만 제공 */}
+          {!conversation.partner.isWithdrawn && (
             <button
               type="button"
-              className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
-              // TODO: 나가기 API 확인 후 연결
-              onClick={closeReportBlockSheet}
+              className={actionSheetStyles.actionButton}
+              onClick={() => {
+                closeMenuSheet();
+                openBlockConfirm();
+              }}
             >
-              나가기
+              차단
             </button>
-          ) : (
-            <>
-              {latestReceived && (
-                <button
-                  type="button"
-                  className={actionSheetStyles.actionButton}
-                  onClick={() => router.push(`/conversations/${conversationId}/${latestReceived.id}/report`)}
-                >
-                  신고
-                </button>
-              )}
-              <button
-                type="button"
-                className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
-                onClick={() => {
-                  closeReportBlockSheet();
-                  openBlockConfirm();
-                }}
-              >
-                차단
-              </button>
-            </>
           )}
-          <button type="button" className={actionSheetStyles.actionButton} onClick={closeReportBlockSheet}>
+          <button
+            type="button"
+            className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
+            onClick={() => {
+              closeMenuSheet();
+              openLeaveConfirm(conversationId, getPartnerNickname(conversation.partner));
+            }}
+          >
+            나가기
+          </button>
+          <button type="button" className={actionSheetStyles.actionButton} onClick={closeMenuSheet}>
             취소
           </button>
         </div>
