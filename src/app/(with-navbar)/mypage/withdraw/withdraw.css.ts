@@ -131,6 +131,16 @@ export const subText = style({
   color: vars.color.neutral_600,
 });
 
+export const retryButton = style({
+  display: 'inline',
+
+  ...vars.fontStyles.body,
+  color: vars.color.neutral_950,
+  textDecoration: 'underline',
+
+  cursor: 'pointer',
+});
+
 export const confirmCheck = style({
   alignSelf: 'flex-start',
 
