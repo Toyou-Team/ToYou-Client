@@ -55,7 +55,10 @@ export const slide = style({
   flex: '0 0 100%',
   overflowY: 'auto',
 
-  padding: '11.6rem 2.4rem 4rem',
+  display: 'flex',
+  flexDirection: 'column',
+
+  padding: '11.6rem 2.4rem 16rem',
 
   backgroundSize: 'cover',
   backgroundPosition: 'center',
@@ -66,6 +69,10 @@ export const slide = style({
 // 하단에 답장 버튼이 뜨는 편지는 버튼에 가리지 않도록 아래 여백 추가
 export const slideWithButton = style({
   paddingBottom: '12.2rem',
+});
+
+export const letterWrapper = style({
+  marginBlock: 'auto',
 });
 
 export const bottom = style({
@@ -91,7 +98,7 @@ export const dots = style({
   justifyContent: 'center',
   gap: '0.6rem',
 
-  marginTop: '7.1rem',
+  marginBottom: '9rem',
 });
 
 export const dot = style({
