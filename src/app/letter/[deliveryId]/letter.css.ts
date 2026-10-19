@@ -20,6 +20,11 @@ globalStyle(`${page} > header`, {
   backgroundColor: 'transparent',
 });
 
+export const titleText = style({
+  ...vars.fontStyles.title,
+  color: vars.color.neutral_950,
+});
+
 export const content = style({
   display: 'flex',
   flexDirection: 'column',

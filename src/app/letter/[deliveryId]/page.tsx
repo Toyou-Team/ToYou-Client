@@ -169,6 +169,7 @@ export default function LetterPage() {
     <main className={styles.page} style={{ backgroundImage: `url(${letter.image?.url ?? ImgMockCard.src})` }}>
       <Header
         left={<BackButton />}
+        center={<span className={styles.titleText}>{letter.author.nickname}</span>}
         right={<IconButton icon={<IcMore />} label="더보기" onClick={() => setIsReportBlockSheetOpen(true)} />}
       />
 
