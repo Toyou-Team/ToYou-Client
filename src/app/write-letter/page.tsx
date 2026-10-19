@@ -220,11 +220,11 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
             className={styles.message}
           />
 
-          {message.length > 0 && (
-            <span className={styles.characterCount}>
-              {message.length} / {MAX_LENGTH}
-            </span>
-          )}
+          <span className={styles.characterCount}>
+            {message.length === 0
+              ? `${MIN_LENGTH}자 이상 써야 보낼 수 있어요`
+              : `${message.length} / ${message.length > MIN_LENGTH ? MAX_LENGTH : MIN_LENGTH}`}
+          </span>
         </div>
 
         {selectedTrack && (
