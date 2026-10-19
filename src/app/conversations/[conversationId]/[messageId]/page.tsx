@@ -200,21 +200,24 @@ export default function ConversationLetterPage() {
               className={clsx(styles.slide, index === 0 && canReplyToLatest && styles.slideWithButton)}
               style={{ backgroundImage: `url(${message.image?.url ?? ImgMockCard.src})` }}
             >
-              <LetterPaper letter={message} />
-
-              {items.length > 1 && !(index === 0 && canReplyToLatest) && (
-                <div className={styles.dots} aria-hidden>
-                  {items.map(({ id }, dotIndex) => (
-                    <span key={id} className={clsx(styles.dot, dotIndex === activeIndex && styles.dotActive)} />
-                  ))}
-                </div>
-              )}
+              <div className={styles.letterWrapper}>
+                <LetterPaper letter={message} />
+              </div>
             </section>
           ))}
         </div>
       </div>
 
-      <div className={styles.bottom}>{renderReplyButton()}</div>
+      <div className={styles.bottom}>
+        {renderReplyButton() ??
+          (items.length > 1 && (
+            <div className={styles.dots} aria-hidden>
+              {items.map(({ id }, dotIndex) => (
+                <span key={id} className={clsx(styles.dot, dotIndex === activeIndex && styles.dotActive)} />
+              ))}
+            </div>
+          ))}
+      </div>
 
       <BottomSheet isOpen={isReportBlockSheetOpen} onClose={closeReportBlockSheet}>
         <div className={actionSheetStyles.actionList}>
