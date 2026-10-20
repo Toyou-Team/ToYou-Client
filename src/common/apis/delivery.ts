@@ -110,6 +110,7 @@ export const useCurrentDeliveryRoundQuery = () => {
       syncChocolateBalance(queryClient, round.chocolateBalance);
       return round;
     },
+    staleTime: 60 * 1000,
   });
 };
 

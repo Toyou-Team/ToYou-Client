@@ -41,6 +41,11 @@ export default function LetterPage() {
   const letter = opened?.letter ?? delivery?.content;
   const isNotFound = round && !delivery && !opened;
 
+  // 편지를 열면 같은 사진도 새 임시 주소로 와서 배경이 깜빡이므로, 처음 받은 주소를 계속 쓴다
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+  const letterImageUrl = letter?.image?.url ?? null;
+  if (backgroundUrl === null && letterImageUrl) setBackgroundUrl(letterImageUrl);
+
   useEffect(() => {
     if (isNotFound) router.replace('/home');
   }, [isNotFound, router]);
@@ -166,7 +171,7 @@ export default function LetterPage() {
   };
 
   return (
-    <main className={styles.page} style={{ backgroundImage: `url(${letter.image?.url ?? ImgMockCard.src})` }}>
+    <main className={styles.page} style={{ backgroundImage: `url(${backgroundUrl ?? ImgMockCard.src})` }}>
       <Header
         left={<BackButton />}
         center={<span className={styles.titleText}>{letter.author.nickname}</span>}
