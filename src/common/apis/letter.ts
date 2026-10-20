@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { request } from './client';
 import { PROFILE_QUERY_KEY } from './profile';
@@ -41,6 +41,19 @@ export const useCreateLetterMutation = () => {
     },
   });
 };
+
+// 편지쓰기 랜덤 문구
+export const getWritingPrompt = () => request<{ phrase: string | null }>('get', '/api/v1/letters/writing-prompt');
+
+export const useWritingPromptQuery = () =>
+  useQuery({
+    queryKey: ['writing-prompt'],
+    queryFn: getWritingPrompt,
+    select: (data) => data.phrase,
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 
 // 편지 작성 시 백그라운드 이미지 업로드
 export const uploadLetterImage = (file: File) => {

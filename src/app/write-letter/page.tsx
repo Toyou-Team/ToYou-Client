@@ -8,7 +8,12 @@ import { IcClose, IcImage, IcMusic, IcXNeutral600 } from '@/assets/icons';
 import { ImageActionSheet } from '@/components/signup/profile-image/ImageActionSheet/ImageActionSheet';
 import { MusicPicker } from '@/components/write-letter/MusicPicker/MusicPicker';
 import type { SpotifyTrack } from '@/common/apis/music';
-import { deleteLetterImage, useCreateLetterMutation, useUploadLetterImageMutation } from '@/common/apis/letter';
+import {
+  deleteLetterImage,
+  useCreateLetterMutation,
+  useUploadLetterImageMutation,
+  useWritingPromptQuery,
+} from '@/common/apis/letter';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useSendMessageMutation } from '@/common/apis/conversation';
@@ -30,6 +35,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const { replyTo, conversationId } = use(searchParams);
   const router = useRouter();
   const { open } = useModal();
+  const { data: writingPrompt } = useWritingPromptQuery();
   const { mutate: createLetter, isPending: isCreating } = useCreateLetterMutation();
   const { mutate: sendReply, isPending: isReplying } = useReplyMutation();
   const { mutate: sendMessage, isPending: isSendingMessage } = useSendMessageMutation();
@@ -216,7 +222,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
             value={message}
             onChange={handleMessageChange}
             maxLength={MAX_LENGTH}
-            placeholder="오늘 어떤 하루를 보냈나요?"
+            placeholder={writingPrompt ?? undefined}
             className={styles.message}
           />
 
