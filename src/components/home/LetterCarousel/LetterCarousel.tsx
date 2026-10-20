@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -15,9 +15,40 @@ interface LetterCarouselProps {
   onSelect?: (delivery: Delivery) => void;
 }
 
+// 편지를 보고 홈으로 돌아왔을 때 보던 편지에서 다시 시작하도록, 마지막으로 누른 편지를 기억한다
+const LAST_SELECTED_KEY = 'toyou_home_last_letter';
+
+const getLastSelectedId = () => (typeof window === 'undefined' ? null : sessionStorage.getItem(LAST_SELECTED_KEY));
+
+const scrollTrackToIndex = (track: HTMLUListElement | null, index: number, behavior: ScrollBehavior) => {
+  const slide = track?.children[index] as HTMLElement | undefined;
+  if (!track || !slide) return;
+
+  const maxScrollLeft = track.scrollWidth - track.clientWidth;
+  const centeredLeft = slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2;
+
+  track.scrollTo({ left: Math.min(Math.max(centeredLeft, 0), maxScrollLeft), behavior });
+};
+
 export function LetterCarousel({ deliveries, onSelect }: LetterCarouselProps) {
   const trackRef = useRef<HTMLUListElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [initialIndex] = useState(() =>
+    Math.max(
+      0,
+      deliveries.findIndex(({ id }) => id === getLastSelectedId()),
+    ),
+  );
+  const [activeIndex, setActiveIndex] = useState(initialIndex);
+
+  // 돌아온 위치로 애니메이션 없이 바로 이동
+  useEffect(() => {
+    scrollTrackToIndex(trackRef.current, initialIndex, 'instant');
+  }, [initialIndex]);
+
+  const handleSelect = (delivery: Delivery) => {
+    sessionStorage.setItem(LAST_SELECTED_KEY, delivery.id);
+    onSelect?.(delivery);
+  };
 
   const handleScroll = () => {
     const track = trackRef.current;
@@ -42,20 +73,7 @@ export function LetterCarousel({ deliveries, onSelect }: LetterCarouselProps) {
     setActiveIndex(closestIndex);
   };
 
-  const scrollToIndex = (index: number) => {
-    const track = trackRef.current;
-    const slide = track?.children[index] as HTMLElement | undefined;
-
-    if (!track || !slide) return;
-
-    const maxScrollLeft = track.scrollWidth - track.clientWidth;
-    const centeredLeft = slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2;
-
-    track.scrollTo({
-      left: Math.min(Math.max(centeredLeft, 0), maxScrollLeft),
-      behavior: 'smooth',
-    });
-  };
+  const scrollToIndex = (index: number) => scrollTrackToIndex(trackRef.current, index, 'smooth');
 
   return (
     <div className={styles.carousel}>
@@ -66,11 +84,11 @@ export function LetterCarousel({ deliveries, onSelect }: LetterCarouselProps) {
               className={styles.cardButton}
               role="button"
               tabIndex={0}
-              onClick={() => onSelect?.(delivery)}
+              onClick={() => handleSelect(delivery)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
-                  onSelect?.(delivery);
+                  handleSelect(delivery);
                 }
               }}
             >
