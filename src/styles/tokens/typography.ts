@@ -30,5 +30,10 @@ export const typography = {
 
   letterSpacing: {
     default: '-2.5%',
+    wide: '10%',
+  },
+
+  fontFamily: {
+    english: 'var(--font-montserrat), var(--font-pretendard), sans-serif',
   },
 } as const;
