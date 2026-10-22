@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { request } from './client';
+import { CURRENT_DELIVERY_ROUND_QUERY_KEY } from './delivery';
 import { PROFILE_QUERY_KEY } from './profile';
 
 export interface CreatedLetterSpotify {
@@ -38,6 +39,7 @@ export const useCreateLetterMutation = () => {
     mutationFn: createLetter,
     onSuccess: ({ bonusChocolateAmount }) => {
       if (bonusChocolateAmount > 0) queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY });
     },
   });
 };

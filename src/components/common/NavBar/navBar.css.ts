@@ -61,3 +61,44 @@ export const navItemLabel = recipe({
     isActive: false,
   },
 });
+
+export const tooltip = style({
+  position: 'absolute',
+  bottom: 'calc(100% + 1.2rem)',
+  left: '37.5%',
+  transform: 'translateX(-50%)',
+
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+
+  width: '16.5rem',
+  height: '3rem',
+  padding: '0.4rem 1.2rem',
+
+  borderRadius: '0.8rem',
+  backgroundColor: vars.color.neutral_950,
+
+  ...vars.fontStyles.caption,
+  color: vars.color.neutral_50,
+  whiteSpace: 'nowrap',
+
+  pointerEvents: 'none',
+
+  // 툴팁 꼬리(▼)
+  '::after': {
+    content: '""',
+    position: 'absolute',
+    top: '100%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+
+    borderWidth: '0.6rem 0.5rem 0',
+    borderStyle: 'solid',
+    borderColor: `${vars.color.neutral_950} transparent transparent`,
+  },
+});
+
+export const tooltipStrong = style({
+  fontWeight: 600,
+});

@@ -39,6 +39,7 @@ export interface ExtraAvailability {
 }
 
 export interface CurrentDeliveryRound {
+  hasWrittenFirstLetter: boolean;
   chocolateBalance: number;
   status: 'DELIVERED' | 'EMPTY';
   deliveries: Delivery[];
@@ -100,10 +101,12 @@ const isStaleRoundError = (error: Error) =>
 // 홈 배달 상태 조회
 export const postCurrentDeliveryRound = () => request<CurrentDeliveryRound>('post', '/api/v1/delivery-rounds/current');
 
-export const useCurrentDeliveryRoundQuery = () => {
+// enabled = false 인 경우 홈이 아닌 NavBar에서는 회차 조회/생성 요청을 보내지 않음
+export const useCurrentDeliveryRoundQuery = (enabled = true) => {
   const queryClient = useQueryClient();
 
   return useQuery({
+    enabled,
     queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY,
     queryFn: async () => {
       const round = await postCurrentDeliveryRound();
