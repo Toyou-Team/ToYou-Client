@@ -57,6 +57,7 @@ export const slide = style({
 
   display: 'flex',
   flexDirection: 'column',
+  justifyContent: 'center',
 
   padding: '11.6rem 2.4rem 16rem',
 
