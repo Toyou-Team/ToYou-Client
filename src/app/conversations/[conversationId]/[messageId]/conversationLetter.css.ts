@@ -53,7 +53,7 @@ export const peekNext = style({
 
 export const slide = style({
   flex: '0 0 100%',
-  overflowY: 'auto',
+  overflow: 'hidden',
 
   display: 'flex',
   flexDirection: 'column',
@@ -72,7 +72,11 @@ export const slideWithButton = style({
 });
 
 export const letterWrapper = style({
-  marginBlock: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+
+  minHeight: 0,
+  maxHeight: '100%',
 });
 
 export const bottom = style({

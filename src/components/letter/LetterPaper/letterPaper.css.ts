@@ -7,6 +7,8 @@ export const paper = style({
   flexDirection: 'column',
 
   width: '100%',
+  maxHeight: '55rem',
+  minHeight: 0,
   backgroundColor: vars.color.neutral_50,
 });
 
@@ -14,11 +16,16 @@ export const letter = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '1.6rem',
+  minHeight: 0,
 
   padding: '2rem 2.5rem',
 });
 
 export const body = style({
+  minHeight: 0,
+  overflowY: 'auto',
+  overscrollBehavior: 'contain',
+
   ...vars.fontStyles.body,
   color: vars.color.neutral_900,
   whiteSpace: 'pre-line',
@@ -61,6 +68,7 @@ export const hiddenBody = style([
 ]);
 
 export const date = style({
+  flexShrink: 0,
   alignSelf: 'flex-end',
 
   ...vars.fontStyles.caption,
@@ -68,6 +76,7 @@ export const date = style({
 });
 
 export const song = style({
+  flexShrink: 0,
   display: 'flex',
   alignItems: 'center',
   gap: '1.2rem',
