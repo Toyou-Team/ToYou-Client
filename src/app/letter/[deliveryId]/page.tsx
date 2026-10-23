@@ -21,7 +21,7 @@ import Button from '@/components/common/Button/Button';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
 import { Modal } from '@/components/common/Modal/Modal';
-import { LetterPaper } from '@/components/letter/LetterPaper/LetterPaper';
+import { LetterPaper, PREVIEW_LENGTH } from '@/components/letter/LetterPaper/LetterPaper';
 import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 
 import * as styles from './letter.css';
@@ -54,6 +54,10 @@ export default function LetterPage() {
 
   const goToReply = () => router.push(`/write-letter?replyTo=${deliveryId}`);
 
+  // 짧은 편지는 열기 전에도 전체가 보이므로, 열면서 바로 답장한다
+  const isShortLetter = letter.body.length <= PREVIEW_LENGTH;
+  const isPreview = !opened && !isShortLetter;
+
   const openShortageModal = (purpose: string, cost: number, chocolateBalance: number) => {
     open(({ close }) => (
       <Modal
@@ -81,14 +85,17 @@ export default function LetterPage() {
 
     open(({ close }) => (
       <Modal
-        title="편지 열기"
-        description="편지를 열면 전체 내용을 볼 수 있어요."
+        title={isShortLetter ? '답장하기' : '편지 열기'}
+        description={isShortLetter ? '편지에 답장할까요?' : '편지를 열면 전체 내용을 볼 수 있어요.'}
         subDescription={`초코 ${OPEN_DELIVERY_COST}개가 사용돼요.`}
         cancelText="다음에"
-        confirmText="열기"
+        confirmText={isShortLetter ? '답장하기' : '열기'}
         onConfirm={() => {
           close();
           openDelivery(deliveryId, {
+            onSuccess: ({ replyStatus }) => {
+              if (isShortLetter && replyStatus === 'AVAILABLE') goToReply();
+            },
             onError: (error) => {
               if (!(error instanceof ApiError)) return;
               // 배달이 없거나, 탈퇴/차단으로 열 수 없는 편지
@@ -144,7 +151,7 @@ export default function LetterPage() {
     if (!opened) {
       return (
         <Button type="button" disabled={isPending} onClick={handleOpenClick}>
-          편지 열기 · 초코 {OPEN_DELIVERY_COST}개
+          {isShortLetter ? '답장하기' : '편지 열기'} · 초코 {OPEN_DELIVERY_COST}개
         </Button>
       );
     }
@@ -179,7 +186,9 @@ export default function LetterPage() {
       />
 
       <div className={styles.content}>
-        <LetterPaper letter={letter} isPreview={!opened} />
+        <div className={clsx(styles.letterWrapper, !isPreview && styles.centered)}>
+          <LetterPaper letter={letter} isPreview={isPreview} />
+        </div>
 
         <div className={styles.bottomButtonWrapper}>{renderBottomButton()}</div>
       </div>
