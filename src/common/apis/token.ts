@@ -94,11 +94,20 @@ export const setTokens = ({ accessToken, refreshToken }: { accessToken: string; 
   loggedInCookie.set();
 };
 
-export const clearTokens = () => {
+// 로그인 토큰만 삭제
+export const clearAuthTokens = () => {
   accessTokenStore.clear();
   refreshTokenStore.clear();
+  loggedInCookie.clear();
+};
+
+export const clearSignupData = () => {
   registrationTokenStore.clear();
   kakaoProfileStore.clear();
   signupDraftStore.clear();
-  loggedInCookie.clear();
+};
+
+export const clearTokens = () => {
+  clearAuthTokens();
+  clearSignupData();
 };
