@@ -46,7 +46,9 @@ export function LetterCard({
             height: `${profileImageSize}rem`,
           }}
         >
-          {profileImage && <Image src={profileImage} alt={`${nickname}의 프로필`} fill unoptimized />}
+          {profileImage && (
+            <Image src={profileImage} alt={`${nickname}의 프로필`} fill unoptimized className={styles.profileImg} />
+          )}
         </div>
 
         <span className={styles.nickname}>{nickname}</span>

@@ -38,6 +38,10 @@ export const profileImage = style({
   backgroundColor: vars.color.neutral_900,
 });
 
+export const profileImg = style({
+  objectFit: 'cover',
+});
+
 export const nickname = style({
   flex: 1,
   minWidth: 0,
