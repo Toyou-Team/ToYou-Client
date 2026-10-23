@@ -33,11 +33,21 @@ export const content = style({
   padding: '3.6rem 4.5rem 0',
 });
 
+export const letterWrapper = style({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+});
+
+// 긴 편지는 위에 붙이고, 짧은 편지만 세로 중앙 정렬
+export const centered = style({
+  justifyContent: 'center',
+});
+
 export const bottomButtonWrapper = style({
   position: 'sticky',
   bottom: 0,
 
-  marginTop: 'auto',
   marginInline: '-2.1rem',
   padding: '3.2rem 0 4rem',
 });

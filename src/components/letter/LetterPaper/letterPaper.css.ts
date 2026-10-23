@@ -16,7 +16,7 @@ export const letter = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '1.6rem',
-  minHeight: 0,
+  minHeight: '14.7rem',
 
   padding: '2rem 2.5rem',
 });
@@ -70,6 +70,7 @@ export const hiddenBody = style([
 export const date = style({
   flexShrink: 0,
   alignSelf: 'flex-end',
+  marginTop: 'auto',
 
   ...vars.fontStyles.caption,
   color: vars.color.neutral_600,

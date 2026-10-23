@@ -7,8 +7,8 @@ interface LetterPaperProps {
   isPreview?: boolean;
 }
 
-// TODO: 본문이 이보다 짧을 때 미리보기 처리는 기획 논의 후 결정
-const PREVIEW_LENGTH = 79;
+// 이보다 긴 편지만 열기 전에 미리보기로 보여준다
+export const PREVIEW_LENGTH = 79;
 
 const formatLetterDate = (isoString: string) => {
   const date = new Date(isoString);
