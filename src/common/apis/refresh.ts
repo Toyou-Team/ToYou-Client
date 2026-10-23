@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './oAuth';
-import { clearAuthTokens, refreshTokenStore, setTokens } from './token';
+import { clearTokens, refreshTokenStore, setTokens } from './token';
 
 interface RefreshResponse {
   data: { accessToken: string; refreshToken: string };
@@ -20,7 +20,7 @@ export function reissueToken(): Promise<void> {
     const refreshToken = refreshTokenStore.get();
 
     if (!refreshToken) {
-      clearAuthTokens();
+      clearTokens();
       throw new Error('NO_REFRESH_TOKEN');
     }
 
@@ -36,7 +36,7 @@ export function reissueToken(): Promise<void> {
       const json = (await response.json()) as RefreshResponse;
       setTokens(json.data);
     } catch (error) {
-      clearAuthTokens();
+      clearTokens();
       throw error;
     } finally {
       inflight = null;

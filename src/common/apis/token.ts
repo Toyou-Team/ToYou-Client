@@ -94,8 +94,8 @@ export const setTokens = ({ accessToken, refreshToken }: { accessToken: string; 
   loggedInCookie.set();
 };
 
-// 로그인 토큰만 삭제
-export const clearAuthTokens = () => {
+// 로그인 토큰만 지운다. 로그인 복원에 실패해도 진행 중인 가입 정보는 남겨 둔다
+export const clearTokens = () => {
   accessTokenStore.clear();
   refreshTokenStore.clear();
   loggedInCookie.clear();
@@ -105,9 +105,4 @@ export const clearSignupData = () => {
   registrationTokenStore.clear();
   kakaoProfileStore.clear();
   signupDraftStore.clear();
-};
-
-export const clearTokens = () => {
-  clearAuthTokens();
-  clearSignupData();
 };
