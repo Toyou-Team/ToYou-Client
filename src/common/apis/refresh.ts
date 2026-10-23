@@ -10,7 +10,7 @@ let inflight: Promise<void> | null = null;
 
 /**
  * Refresh Token 으로 새 Access/Refresh Token 을 발급받아 교체한다.
- * 실패 시 저장된 토큰을 모두 삭제하고 throw.
+ * 실패 시 로그인 토큰을 삭제하고 throw. 진행 중인 가입 정보는 지우지 않는다.
  * client 를 거치지 않고 순수 fetch 사용 (401 인터셉터 무한루프 방지).
  */
 export function reissueToken(): Promise<void> {

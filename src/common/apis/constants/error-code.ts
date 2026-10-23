@@ -17,6 +17,10 @@ export const AUTH_ERROR_CODE = {
   AGE_VERIFICATION_UNAVAILABLE: 'AUTH_AGE_VERIFICATION_UNAVAILABLE',
   // 정지 계정 또는 재가입 제한 기간이 남은 계정은 랜딩에서 가입 제한 모달 표시
   ACCOUNT_UNAVAILABLE: 'AUTH_ACCOUNT_UNAVAILABLE',
+  // 이미 가입된 계정. 카카오 로그인부터 다시 해서 계정 생성 여부 확인
+  ACCOUNT_EXISTS: 'AUTH_ACCOUNT_EXISTS',
+  // 성별 선택 화면으로
+  GENDER_REQUIRED: 'AUTH_GENDER_REQUIRED',
 } as const;
 
 export const PROFILE_ERROR_CODE = {
