@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
 import { IcMore } from '@/assets/icons';
-import { ImgMockCard } from '@/assets/imgs';
 import {
   useConversationQuery,
   useConversationReactivationMutation,
@@ -198,7 +197,7 @@ export default function ConversationLetterPage() {
             <section
               key={message.id}
               className={clsx(styles.slide, index === 0 && canReplyToLatest && styles.slideWithButton)}
-              style={{ backgroundImage: `url(${message.image?.url ?? ImgMockCard.src})` }}
+              style={message.image ? { backgroundImage: `url(${message.image.url})` } : undefined}
             >
               <div className={styles.letterWrapper}>
                 <LetterPaper letter={message} />
