@@ -16,6 +16,14 @@ export const titleWrapper = style({
   paddingLeft: '2.4rem',
 });
 
+export const guideText = style({
+  ...vars.fontStyles.caption,
+  color: vars.color.neutral_600,
+
+  marginBottom: '1.6rem',
+  paddingLeft: '1rem',
+});
+
 export const bottomButtonWrapper = style({
   position: 'absolute',
   bottom: '3.4rem',
