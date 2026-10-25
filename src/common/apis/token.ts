@@ -1,4 +1,4 @@
-import type { Gender, KakaoProfileSuggestion, ReceiveGender } from './auth';
+import type { KakaoProfileSuggestion, ReceiveGender } from './auth';
 
 /**
  * 토큰 저장 정책
@@ -57,7 +57,6 @@ const SIGNUP_DRAFT_KEY = 'toyou_signup_draft';
 
 export interface SignupDraft {
   nickname?: string;
-  gender?: Gender;
   receiveGender?: ReceiveGender;
 }
 

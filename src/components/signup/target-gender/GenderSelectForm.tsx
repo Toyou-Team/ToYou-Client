@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import type { Gender, ReceiveGender } from '@/common/apis/auth';
+import type { ReceiveGender } from '@/common/apis/auth';
 import { signupDraftStore } from '@/common/apis/token';
 import { useSignupDraft } from '@/common/hooks/useSignupDraft';
 import Button from '@/components/common/Button/Button';
@@ -21,26 +21,22 @@ const LABEL_TO_VALUE: Record<GenderLabel, ReceiveGender> = {
 
 interface GenderSelectFormProps {
   options: readonly string[];
-  description?: string;
   nextPath: string;
-  draftKey: 'gender' | 'receiveGender';
 }
 
-function GenderSelectForm({ options, description, nextPath, draftKey }: GenderSelectFormProps) {
+function GenderSelectForm({ options, nextPath }: GenderSelectFormProps) {
   const router = useRouter();
   const [pickedGender, setSelectedGender] = useState<string | null>(null);
 
   // 이전에 선택했던 값 복원
-  const saved = useSignupDraft(draftKey);
+  const saved = useSignupDraft('receiveGender');
   const savedLabel = (Object.keys(LABEL_TO_VALUE) as GenderLabel[]).find((key) => LABEL_TO_VALUE[key] === saved);
   const selectedGender = pickedGender ?? (savedLabel && options.includes(savedLabel) ? savedLabel : null);
 
   const handleNext = () => {
     if (selectedGender === null) return;
 
-    const value = LABEL_TO_VALUE[selectedGender as GenderLabel];
-    // my-gender 스텝(options: 남성/여성)에서는 항상 MALE/FEMALE
-    signupDraftStore.patch(draftKey === 'gender' ? { gender: value as Gender } : { receiveGender: value });
+    signupDraftStore.patch({ receiveGender: LABEL_TO_VALUE[selectedGender as GenderLabel] });
 
     router.push(nextPath);
   };
@@ -63,8 +59,6 @@ function GenderSelectForm({ options, description, nextPath, draftKey }: GenderSe
             </button>
           );
         })}
-
-        {description && <span className={styles.descriptionWrapper}>{description}</span>}
       </div>
 
       <div className={styles.bottomButtonWrapper}>

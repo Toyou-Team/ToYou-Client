@@ -19,7 +19,7 @@ export const AUTH_ERROR_CODE = {
   ACCOUNT_UNAVAILABLE: 'AUTH_ACCOUNT_UNAVAILABLE',
   // 이미 가입된 계정. 카카오 로그인부터 다시 해서 계정 생성 여부 확인
   ACCOUNT_EXISTS: 'AUTH_ACCOUNT_EXISTS',
-  // 성별 선택 화면으로
+  // 카카오에서 성별을 받지 못한 경우. 안내만 표시
   GENDER_REQUIRED: 'AUTH_GENDER_REQUIRED',
 } as const;
 

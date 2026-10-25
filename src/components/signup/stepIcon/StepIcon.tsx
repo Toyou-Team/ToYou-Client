@@ -1,29 +1,19 @@
 import { memo } from 'react';
 
-import {
-  IcDottedLine,
-  IcGreyCircle,
-  IcPreviousStep,
-  IcSolidLine,
-  IcStep1,
-  IcStep2,
-  IcStep3,
-  IcStep4,
-} from '@/assets/icons';
+import { IcDottedLine, IcGreyCircle, IcPreviousStep, IcSolidLine, IcStep1, IcStep2, IcStep3 } from '@/assets/icons';
 
 import * as styles from './stepIcon.css';
 
 interface StepIconProps {
-  step: 1 | 2 | 3 | 4;
+  step: 1 | 2 | 3;
 }
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 const currentStepIcons = {
   1: IcStep1,
   2: IcStep2,
   3: IcStep3,
-  4: IcStep4,
 } as const;
 
 export function StepIcon({ step }: StepIconProps) {
