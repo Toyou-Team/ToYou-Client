@@ -30,7 +30,7 @@ function NicknameForm() {
 
   const handleNext = () => {
     signupDraftStore.patch({ nickname: trimmed });
-    router.push('/signup/my-gender');
+    router.push('/signup/target-gender');
   };
 
   const helperText =

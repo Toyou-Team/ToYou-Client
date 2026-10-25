@@ -2,13 +2,6 @@ import { vars } from '@/styles/theme.css';
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-export const descriptionWrapper = style({
-  ...vars.fontStyles.body,
-  color: vars.color.neutral_600,
-
-  marginLeft: '1.1rem',
-});
-
 export const buttonWrapper = style({
   width: '100%',
 

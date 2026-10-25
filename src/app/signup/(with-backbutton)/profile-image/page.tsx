@@ -7,7 +7,13 @@ import { useSignupMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE, PROFILE_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { useUploadProfileImageMutation } from '@/common/apis/profile';
-import { clearSignupData, registrationTokenStore, setTokens, signupDraftStore } from '@/common/apis/token';
+import {
+  clearSignupData,
+  kakaoProfileStore,
+  registrationTokenStore,
+  setTokens,
+  signupDraftStore,
+} from '@/common/apis/token';
 import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
@@ -20,7 +26,6 @@ import * as styles from './profile-image.css';
 const RETRY_PATH: Record<string, string> = {
   [AUTH_ERROR_CODE.REGISTRATION_TOKEN_INVALID]: '/',
   [AUTH_ERROR_CODE.ACCOUNT_EXISTS]: '/',
-  [AUTH_ERROR_CODE.GENDER_REQUIRED]: '/signup/my-gender',
   [PROFILE_ERROR_CODE.NICKNAME_TAKEN]: '/signup/nickname',
 };
 
@@ -67,7 +72,7 @@ export default function SignUpProfileImagePage() {
     }
 
     // 입력값만 비어 있으면 가입 화면 처음부터
-    if (!draft.nickname || !draft.gender || !draft.receiveGender) {
+    if (!draft.nickname || !draft.receiveGender) {
       router.replace('/signup/terms');
       return;
     }
@@ -76,8 +81,8 @@ export default function SignUpProfileImagePage() {
       {
         registrationToken,
         nickname: draft.nickname,
-        // 카카오 성별이 아닌, 가입 화면에서 고른 성별 사용
-        gender: draft.gender,
+        // 성별 선택 화면이 없어져 카카오에서 받은 성별을 보낸다
+        gender: kakaoProfileStore.get()?.gender,
         receiveGender: draft.receiveGender,
         // 직접 고른 사진은 가입 후 사진 업로드 API로 따로 저장
         useKakaoProfileImage: false,
@@ -107,7 +112,7 @@ export default function SignUpProfileImagePage() {
   return (
     <>
       <div className={styles.profileImagePageWrapper}>
-        <MemoizedStepIcon step={4} />
+        <MemoizedStepIcon step={3} />
         <h1 className={styles.titleWrapper}>프로필 사진을 설정해주세요.</h1>
       </div>
 
@@ -119,6 +124,7 @@ export default function SignUpProfileImagePage() {
       />
 
       <div className={styles.bottomButtonWrapper}>
+        <p className={styles.guideText}>기본 이미지를 원할 경우 완료 버튼을 눌러주세요.</p>
         <Button type="button" disabled={isSigningUp || isUploading} onClick={handleComplete}>
           완료
         </Button>
