@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
 import { IcMore } from '@/assets/icons';
-import { ImgMockCard } from '@/assets/imgs';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import {
@@ -178,7 +177,7 @@ export default function LetterPage() {
   };
 
   return (
-    <main className={styles.page} style={{ backgroundImage: `url(${backgroundUrl ?? ImgMockCard.src})` }}>
+    <main className={styles.page} style={backgroundUrl ? { backgroundImage: `url(${backgroundUrl})` } : undefined}>
       <Header
         left={<BackButton />}
         center={<span className={styles.titleText}>{letter.author.nickname}</span>}
