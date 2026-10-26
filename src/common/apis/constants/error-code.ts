@@ -23,6 +23,9 @@ export const AUTH_ERROR_CODE = {
   GENDER_REQUIRED: 'AUTH_GENDER_REQUIRED',
 } as const;
 
+// 제재 중 막힌 기능 호출 시 403. 로그인 만료 X
+export const ACCOUNT_SUSPENDED = 'ACCOUNT_SUSPENDED';
+
 export const PROFILE_ERROR_CODE = {
   /** 닉네임 입력란에 중복 오류 표시 */
   NICKNAME_TAKEN: 'PROFILE_NICKNAME_TAKEN',

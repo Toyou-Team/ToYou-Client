@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { request } from './client';
 import { KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY } from './oAuth';
@@ -95,6 +95,30 @@ export interface WithdrawalSummary {
   letterCount: number;
   chocolateBalance: number;
 }
+
+export interface AccountSanction {
+  // 제한번호 (예: R-K7M4-P9X2)
+  referenceNumber: string;
+  // 1차 3일 · 2차 7일 · 3차 영구
+  stage: 1 | 2 | 3;
+  reason: string;
+  type: 'TEMPORARY' | 'PERMANENT';
+  startedAt: string;
+  endsAt: string | null;
+}
+
+export interface AccountStatus {
+  status: 'ACTIVE' | 'SUSPENDED' | 'WITHDRAWN';
+  restricted: boolean;
+  sanction: AccountSanction | null;
+  supportUrl: string | null;
+}
+
+export const getAccountStatus = () => request<AccountStatus>('get', '/api/v1/auth/account-status');
+
+export const accountStatusQueryOptions = queryOptions({ queryKey: ['account-status'], queryFn: getAccountStatus });
+
+export const useAccountStatusQuery = () => useQuery(accountStatusQueryOptions);
 
 // 탈퇴 화면에 보여줄 사라지는 편지 수와 초코 잔액. 실패하면 '다시 시도' 버튼
 export const getWithdrawalSummary = () =>
