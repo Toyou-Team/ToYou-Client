@@ -7,6 +7,7 @@ import { consumeKakaoState, useKakaoLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { kakaoProfileStore, registrationTokenStore, setTokens } from '@/common/apis/token';
+import { useAccountStatusCheck } from '@/common/hooks/useAccountStatusCheck';
 
 import * as styles from './callback.css';
 
@@ -20,6 +21,7 @@ export default function KakaoCallbackPage() {
   const router = useRouter();
   const started = useRef(false);
   const { mutate } = useKakaoLoginMutation();
+  const checkAccountStatus = useAccountStatusCheck();
   const [blockedMessage, setBlockedMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function KakaoCallbackPage() {
         switch (result.status) {
           case 'SIGNED_IN':
             setTokens(result);
-            router.replace('/home');
+            checkAccountStatus(() => router.replace('/home'));
             return;
           case 'SIGNUP_REQUIRED':
             registrationTokenStore.set(result.registrationToken);
@@ -72,7 +74,7 @@ export default function KakaoCallbackPage() {
         router.replace('/');
       },
     });
-  }, [router, mutate]);
+  }, [router, mutate, checkAccountStatus]);
 
   if (blockedMessage) {
     return (
