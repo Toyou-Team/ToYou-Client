@@ -3,21 +3,24 @@
 import { useRouter } from 'next/navigation';
 
 import { clearTokens } from '@/common/apis/token';
+import { useRestrictionStatus } from '@/common/hooks/useRestrictionStatus';
 import Button from '@/components/common/Button/Button';
 import { Header } from '@/components/common/Header/Header';
 import { RestrictionInfoCard } from '@/components/restriction/RestrictionInfoCard/RestrictionInfoCard';
-import { KAKAO_CHANNEL_URL, MOCK_RESTRICTION } from '@/constants/restriction';
 
 import * as styles from '../restriction.css';
 
 export default function PermanentRestrictionPage() {
   const router = useRouter();
+  const { restriction, supportUrl } = useRestrictionStatus();
 
   // 영구 정지는 탈퇴 처리된 상태라 토큰을 지우고 첫 화면으로 보낸다
   const handleConfirm = () => {
     clearTokens();
     router.replace('/');
   };
+
+  if (!restriction) return null;
 
   return (
     <div className={styles.pageWrapper}>
@@ -37,7 +40,7 @@ export default function PermanentRestrictionPage() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionLabel}>제한 내용</h2>
-          <RestrictionInfoCard restriction={MOCK_RESTRICTION} />
+          <RestrictionInfoCard restriction={restriction} />
         </section>
 
         <section className={styles.section}>
@@ -54,10 +57,14 @@ export default function PermanentRestrictionPage() {
         <Button type="button" onClick={handleConfirm}>
           확인
         </Button>
-        <a className={styles.contactLink} href={KAKAO_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
-          제한에 이의가 있다면 카카오톡 채널로 문의하기
-        </a>
-        <p className={styles.contactNotice}>제한 번호와 함께 보내주시면 영업일 기준 3일 안에 답변드려요.</p>
+        {supportUrl && (
+          <>
+            <a className={styles.contactLink} href={supportUrl} target="_blank" rel="noopener noreferrer">
+              제한에 이의가 있다면 카카오톡 채널로 문의하기
+            </a>
+            <p className={styles.contactNotice}>제한 번호와 함께 보내주시면 영업일 기준 3일 안에 답변드려요.</p>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,25 +1,26 @@
 'use client';
 
-import type { Restriction } from '@/types/restrictionTypes';
+import type { AccountSanction } from '@/common/apis/auth';
+import { SANCTION_STAGE_LABEL } from '@/constants/restriction';
 import { formatDateTime } from '@/utils/date';
 
 import * as styles from './restrictionInfoCard.css';
 
 interface RestrictionInfoCardProps {
-  restriction: Restriction;
+  restriction: AccountSanction;
 }
 
 export function RestrictionInfoCard({ restriction }: RestrictionInfoCardProps) {
-  const { id, reason, level, releaseAt } = restriction;
+  const { referenceNumber, reason, stage, endsAt } = restriction;
 
-  const handleCopy = () => navigator.clipboard?.writeText(id);
+  const handleCopy = () => navigator.clipboard?.writeText(referenceNumber);
 
   return (
     <dl className={styles.card}>
       <div className={styles.idRow}>
         <dt className={styles.label}>제한 번호</dt>
         <dd className={styles.idValue}>
-          <span className={styles.value}>{id}</span>
+          <span className={styles.value}>{referenceNumber}</span>
           <button type="button" className={styles.copyButton} onClick={handleCopy}>
             복사
           </button>
@@ -33,12 +34,15 @@ export function RestrictionInfoCard({ restriction }: RestrictionInfoCardProps) {
         </div>
         <div className={styles.row}>
           <dt className={styles.label}>제한 단계</dt>
-          <dd className={styles.value}>{level}</dd>
+          <dd className={styles.value}>{SANCTION_STAGE_LABEL[stage]}</dd>
         </div>
-        <div className={styles.row}>
-          <dt className={styles.label}>해제 일시</dt>
-          <dd className={styles.value}>{formatDateTime(releaseAt)}</dd>
-        </div>
+        {/* 영구 정지는 해제 일시 없음 */}
+        {endsAt && (
+          <div className={styles.row}>
+            <dt className={styles.label}>해제 일시</dt>
+            <dd className={styles.value}>{formatDateTime(endsAt)}</dd>
+          </div>
+        )}
       </div>
     </dl>
   );
