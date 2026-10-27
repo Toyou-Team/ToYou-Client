@@ -1,5 +1,8 @@
 'use client';
 
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
 import * as styles from './policySheet.css';
 
@@ -23,7 +26,20 @@ export function PolicySheet({ isOpen, onClose, title, content }: PolicySheetProp
       }
     >
       <div className={styles.scrollArea}>
-        <p className={styles.content}>{content}</p>
+        <div className={styles.content}>
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              table: (props) => (
+                <div className={styles.tableWrapper}>
+                  <table {...props} />
+                </div>
+              ),
+            }}
+          >
+            {content}
+          </Markdown>
+        </div>
       </div>
     </BottomSheet>
   );
