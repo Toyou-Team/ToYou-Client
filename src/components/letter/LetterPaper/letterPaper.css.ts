@@ -61,8 +61,8 @@ export const hiddenBody = style([
     WebkitLineClamp: 6,
     overflow: 'hidden',
 
-    filter: 'blur(2px)',
-    maskImage: 'linear-gradient(to bottom, black, transparent)',
+    filter: 'blur(3px)',
+    maskImage: 'linear-gradient(to bottom, rgb(0 0 0 / 60%), transparent 90%)',
     userSelect: 'none',
   },
 ]);
