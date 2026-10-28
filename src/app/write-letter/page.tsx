@@ -21,6 +21,7 @@ import { useReplyMutation } from '@/common/apis/delivery';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 import { showToast } from '@/components/common/Toast/Toast';
+import { isDarkImageTop } from '@/utils/image';
 import { useRouter } from 'next/navigation';
 
 const MIN_LENGTH = 30;
@@ -46,6 +47,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   // 업로드가 끝난 사진의 key. 편지를 보내기 전까지는 편지에 연결되지 않은 상태
   const [imageObjectKey, setImageObjectKey] = useState<string | null>(null);
+  const [isDarkImage, setIsDarkImage] = useState<boolean>();
   const [isImageActionSheetOpen, setIsImageActionSheetOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
   const [isMusicPickerOpen, setIsMusicPickerOpen] = useState(false);
@@ -96,7 +98,11 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const submit = () => {
     const body = message.trim();
     const spotifyTrackId = selectedTrack?.id;
-    const attachment = { spotifyTrackId, imageObjectKey: imageObjectKey ?? undefined };
+    const attachment = {
+      spotifyTrackId,
+      imageObjectKey: imageObjectKey ?? undefined,
+      isDarkImage: imageObjectKey ? isDarkImage : undefined,
+    };
 
     if (!replyTo && !conversationId) {
       createLetter(
@@ -158,6 +164,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
 
     discardUploadedImage();
     setBackgroundImage(URL.createObjectURL(file));
+    isDarkImageTop(file).then(setIsDarkImage);
 
     uploadImage(file, {
       onSuccess: ({ key }) => setImageObjectKey(key),

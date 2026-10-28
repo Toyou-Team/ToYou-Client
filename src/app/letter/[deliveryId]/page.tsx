@@ -20,7 +20,7 @@ import Button from '@/components/common/Button/Button';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
 import { Modal } from '@/components/common/Modal/Modal';
-import { LetterPaper, PREVIEW_LENGTH } from '@/components/letter/LetterPaper/LetterPaper';
+import { LetterPaper } from '@/components/letter/LetterPaper/LetterPaper';
 import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 
 import * as styles from './letter.css';
@@ -31,7 +31,7 @@ export default function LetterPage() {
   const { open } = useModal();
 
   const { data: round } = useCurrentDeliveryRoundQuery();
-  const { mutate: openDelivery, data: opened, isPending } = useOpenDeliveryMutation();
+  const { mutate: openDelivery, data: opened, isPending, isIdle, isError } = useOpenDeliveryMutation();
   const { mutate: reactivateReply, isPending: isReactivating } = useReplyReactivationMutation();
   const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
   const closeReportBlockSheet = () => setIsReportBlockSheetOpen(false);
@@ -49,12 +49,18 @@ export default function LetterPage() {
     if (isNotFound) router.replace('/home');
   }, [isNotFound, router]);
 
-  if (!round || !letter) return null;
+  // 이미 연 편지는 다시 열어도 차감이 없어 바로 전체 내용을 받아온다
+  const isOpenedCard = Boolean(delivery?.selectedAt) && !opened;
+  useEffect(() => {
+    if (isOpenedCard && isIdle) openDelivery(deliveryId);
+  }, [isOpenedCard, isIdle, openDelivery, deliveryId]);
+
+  if (!round || !letter || (isOpenedCard && !isError)) return null;
 
   const goToReply = () => router.push(`/write-letter?replyTo=${deliveryId}`);
 
   // 짧은 편지는 열기 전에도 전체가 보이므로, 열면서 바로 답장한다
-  const isShortLetter = letter.body.length <= PREVIEW_LENGTH;
+  const isShortLetter = delivery?.content.isTruncated === false;
   const isPreview = !opened && !isShortLetter;
 
   const openShortageModal = (purpose: string, cost: number, chocolateBalance: number) => {
@@ -179,6 +185,7 @@ export default function LetterPage() {
   return (
     <main className={styles.page} style={backgroundUrl ? { backgroundImage: `url(${backgroundUrl})` } : undefined}>
       <Header
+        isOnDark={!!letter.image?.isDark}
         left={<BackButton />}
         center={<span className={styles.titleText}>{letter.author.nickname}</span>}
         right={<IconButton icon={<IcMore />} label="더보기" onClick={() => setIsReportBlockSheetOpen(true)} />}

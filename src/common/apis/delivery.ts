@@ -13,10 +13,14 @@ export interface DeliverySpotify {
   externalUrl: string;
 }
 
+export interface LetterImage extends ProfileImage {
+  isDark: boolean | null;
+}
+
 export interface LetterContent {
   body: string;
   createdAt: string;
-  image: ProfileImage | null;
+  image: LetterImage | null;
   spotify: DeliverySpotify | null;
   author: {
     nickname: string;
@@ -24,12 +28,16 @@ export interface LetterContent {
   };
 }
 
+export interface DeliveryCardContent extends LetterContent {
+  isTruncated: boolean;
+}
+
 export interface Delivery {
   id: string;
   // null 이면 아직 열지 않은 카드
   selectedAt: string | null;
   expiresAt: string;
-  content: LetterContent;
+  content: DeliveryCardContent;
 }
 
 export interface ExtraAvailability {
@@ -68,6 +76,7 @@ export interface CreateReplyPayload {
   clientMessageId: string;
   body: string;
   imageObjectKey?: string;
+  isDarkImage?: boolean;
   spotifyTrackId?: string;
 }
 

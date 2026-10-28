@@ -7,9 +7,6 @@ interface LetterPaperProps {
   isPreview?: boolean;
 }
 
-// 이보다 긴 편지만 열기 전에 미리보기로 보여준다
-export const PREVIEW_LENGTH = 79;
-
 const formatLetterDate = (isoString: string) => {
   const date = new Date(isoString);
   const pad = (value: number) => String(value).padStart(2, '0');
@@ -26,14 +23,15 @@ export function LetterPaper({ letter, isPreview = false }: LetterPaperProps) {
       <article className={styles.letter}>
         {isPreview ? (
           <>
-            <p className={styles.body}>{body.slice(0, PREVIEW_LENGTH)}</p>
+            <p className={styles.body}>{body}</p>
 
             <div className={styles.divider}>
               <span className={styles.dividerText}>편지를 선택하면 온전히 열려요.</span>
             </div>
 
+            {/* 나머지 본문은 서버가 주지 않아 보이는 본문을 흐리게 채운다 */}
             <p className={styles.hiddenBody} aria-hidden>
-              {body.slice(PREVIEW_LENGTH)}
+              {body.repeat(3)}
             </p>
           </>
         ) : (

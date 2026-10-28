@@ -97,6 +97,7 @@ export function LetterCarousel({ deliveries, onSelect }: LetterCarouselProps) {
                 message={delivery.content.body}
                 profileImage={delivery.content.author.profileImage?.url}
                 backgroundImage={delivery.content.image?.url}
+                isDarkBackground={!!delivery.content.image?.isDark}
                 expiresText={formatExpiresIn(delivery.expiresAt)}
                 song={
                   delivery.content.spotify

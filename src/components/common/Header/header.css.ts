@@ -1,6 +1,6 @@
 import { vars } from '@/styles/theme.css';
 import { Z_INDEX } from '@/constants/zIndex';
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
 export const headerWrapper = recipe({
@@ -10,6 +10,7 @@ export const headerWrapper = recipe({
     display: 'flex',
     width: '100%',
     height: '6.8rem',
+    color: vars.color.neutral_950,
     backgroundColor: 'white',
   },
   variants: {
@@ -28,6 +29,15 @@ export const headerWrapper = recipe({
       },
     },
   },
+});
+
+// 어두운 배경사진 첨부 시 흰 텍스트
+export const onDark = style({
+  color: vars.color.neutral_50,
+});
+
+globalStyle(`${onDark} svg [stroke]`, {
+  stroke: vars.color.neutral_50,
 });
 
 export const leftElement = style({
