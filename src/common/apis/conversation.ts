@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 
 import { request, retryOnce } from './client';
-import type { DeliverySpotify } from './delivery';
+import type { DeliverySpotify, LetterImage } from './delivery';
 import { syncChocolateBalance, type ProfileImage } from './profile';
 
 const PAGE_SIZE = 8;
@@ -58,7 +58,7 @@ export interface ConversationMessage {
   sender: ConversationPartner;
   isMine: boolean;
   body: string;
-  image: ProfileImage | null;
+  image: LetterImage | null;
   spotify: DeliverySpotify | null;
   createdAt: string;
   isUnread: boolean;
@@ -180,6 +180,7 @@ export interface SendMessagePayload {
   clientMessageId: string;
   body: string;
   imageObjectKey?: string;
+  isDarkImage?: boolean;
   spotifyTrackId?: string;
 }
 

@@ -25,6 +25,7 @@ export interface CreatedLetter {
 export interface CreateLetterPayload {
   body: string;
   imageObjectKey?: string;
+  isDarkImage?: boolean;
   spotifyTrackId?: string;
 }
 
