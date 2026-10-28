@@ -1,4 +1,5 @@
 import Image, { StaticImageData } from 'next/image';
+import clsx from 'clsx';
 
 import * as styles from './letterCard.css';
 import { LetterSong } from '@/types/letterCardTypes';
@@ -8,6 +9,7 @@ interface LetterCardProps {
   message: string;
   profileImage?: string | StaticImageData;
   backgroundImage?: string | StaticImageData;
+  isDarkBackground?: boolean;
   profileImageSize?: number;
   expiresText?: string;
   width?: number;
@@ -20,6 +22,7 @@ export function LetterCard({
   message,
   profileImage,
   backgroundImage,
+  isDarkBackground = false,
   profileImageSize = 4.3,
   expiresText = '3일 후 사라져요!',
   width,
@@ -51,7 +54,7 @@ export function LetterCard({
           )}
         </div>
 
-        <span className={styles.nickname}>{nickname}</span>
+        <span className={clsx(styles.nickname, isDarkBackground && styles.nicknameOnDark)}>{nickname}</span>
         <span className={styles.expiresText}>{expiresText}</span>
       </section>
 

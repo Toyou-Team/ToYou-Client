@@ -1,3 +1,5 @@
+import clsx from 'clsx';
+
 import * as styles from './header.css';
 
 interface HeaderProps {
@@ -6,11 +8,15 @@ interface HeaderProps {
   right?: React.ReactNode;
   isSticky?: boolean;
   bordered?: boolean;
+  isOnDark?: boolean;
 }
 
-export function Header({ left, center, right, isSticky = false, bordered = false }: HeaderProps) {
+export function Header({ left, center, right, isSticky = false, bordered = false, isOnDark = false }: HeaderProps) {
   return (
-    <header className={styles.headerWrapper({ isSticky, bordered })} aria-label="페이지 헤더">
+    <header
+      className={clsx(styles.headerWrapper({ isSticky, bordered }), isOnDark && styles.onDark)}
+      aria-label="페이지 헤더"
+    >
       <div className={styles.leftElement}>{left}</div>
       <h2 className={styles.centerElement}>{center}</h2>
       <div className={styles.rightElement}>{right}</div>

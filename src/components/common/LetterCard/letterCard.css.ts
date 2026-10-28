@@ -53,6 +53,10 @@ export const nickname = style({
   color: vars.color.neutral_950,
 });
 
+export const nicknameOnDark = style({
+  color: vars.color.neutral_50,
+});
+
 export const expiresText = style({
   marginLeft: 'auto',
   flexShrink: 0,

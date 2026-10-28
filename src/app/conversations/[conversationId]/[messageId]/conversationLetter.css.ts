@@ -21,7 +21,6 @@ globalStyle(`${page} > header`, {
 
 export const titleText = style({
   ...vars.fontStyles.title,
-  color: vars.color.neutral_950,
 });
 
 export const track = style({

@@ -181,6 +181,7 @@ export default function ConversationLetterPage() {
   return (
     <main className={styles.page}>
       <Header
+        isOnDark={!!activeMessage.image?.isDark}
         left={<BackButton />}
         center={<span className={styles.titleText}>{getPartnerNickname(conversation.partner)}</span>}
         right={
