@@ -33,6 +33,11 @@ export const item = style({
   position: 'relative',
 
   borderBottom: `1px solid ${vars.color.neutral_300}`,
+
+  // 마지막 줄은 borderBottom 제외
+  selectors: {
+    '&:last-child': { borderBottom: 'none' },
+  },
 });
 
 export const exitButton = style({
