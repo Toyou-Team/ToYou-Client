@@ -7,6 +7,7 @@ import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
 import { LetterCarousel } from '@/components/home/LetterCarousel/LetterCarousel';
+import { formatNextDeliveryHour } from '@/utils/date';
 
 import * as styles from './deliverySection.css';
 
@@ -43,7 +44,7 @@ export function DeliverySection() {
       open(({ close }) => (
         <Modal
           title="받을 수 있는 편지가 없어요"
-          description="다음 회차 12시를 기다려주세요."
+          description={`다음 회차 ${formatNextDeliveryHour()}를 기다려주세요.`}
           confirmText="확인"
           onConfirm={close}
           onClose={close}
@@ -96,7 +97,7 @@ export function DeliverySection() {
         </div>
       ) : (
         <div className={styles.statusWrapper}>
-          <p className={styles.statusText}>다음 회차 12시를 기다려주세요.</p>
+          <p className={styles.statusText}>다음 회차 {formatNextDeliveryHour()}를 기다려주세요.</p>
         </div>
       )}
 
