@@ -68,6 +68,10 @@ globalStyle(`${content} li`, {
   listStyle: 'inherit',
 });
 
+globalStyle(`${content} a`, {
+  textDecoration: 'underline',
+});
+
 globalStyle(`${content} hr`, {
   width: '100%',
   border: 0,

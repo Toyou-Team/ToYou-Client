@@ -52,3 +52,13 @@ export const formatExpiresIn = (isoString: string) => {
 
   return `${Math.max(1, Math.ceil(remaining / (60 * 1000)))}분 후 사라져요!`;
 };
+
+const DELIVERY_HOURS = [12, 18, 21];
+
+// 다음 배달 회차 시각 (21시 이후면 내일 12시)
+export const formatNextDeliveryHour = () => {
+  const hour = new Date().getHours();
+  const next = DELIVERY_HOURS.find((deliveryHour) => deliveryHour > hour);
+
+  return next ? `${next}시` : `내일 ${DELIVERY_HOURS[0]}시`;
+};
