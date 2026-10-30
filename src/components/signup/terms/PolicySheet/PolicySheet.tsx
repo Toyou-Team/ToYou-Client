@@ -35,6 +35,7 @@ export function PolicySheet({ isOpen, onClose, title, content }: PolicySheetProp
                   <table {...props} />
                 </div>
               ),
+              a: (props) => <a {...props} target="_blank" rel="noopener noreferrer" />,
             }}
           >
             {content}
