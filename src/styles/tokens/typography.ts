@@ -34,6 +34,6 @@ export const typography = {
   },
 
   fontFamily: {
-    english: 'var(--font-montserrat), var(--font-pretendard), sans-serif',
+    english: 'var(--font-montserrat-with-number), var(--font-pretendard), sans-serif',
   },
 } as const;

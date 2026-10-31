@@ -24,6 +24,15 @@ const montserrat = localFont({
   declarations: [{ prop: 'unicode-range', value: 'U+0041-005A, U+0061-007A, U+00C0-024F' }],
 });
 
+// 영문 토큰(en*)은 숫자까지 Montserrat
+const montserratWithNumber = localFont({
+  src: '../fonts/Montserrat-VariableFont_wght.ttf',
+  weight: '100 900',
+  display: 'swap',
+  variable: '--font-montserrat-with-number',
+  adjustFontFallback: false,
+});
+
 export const metadata: Metadata = {
   title: 'To You',
   description: 'To You',
@@ -36,7 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${pretendard.variable} ${montserrat.variable} ${themeClass}`}>
+      <body className={`${pretendard.variable} ${montserrat.variable} ${montserratWithNumber.variable} ${themeClass}`}>
         <Providers>{children}</Providers>
       </body>
     </html>
