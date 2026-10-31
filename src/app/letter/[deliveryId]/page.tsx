@@ -13,6 +13,7 @@ import {
   useOpenDeliveryMutation,
   useReplyReactivationMutation,
 } from '@/common/apis/delivery';
+import { useBlockDelivery } from '@/common/hooks/useBlockConversation';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
@@ -35,6 +36,7 @@ export default function LetterPage() {
   const { mutate: reactivateReply, isPending: isReactivating } = useReplyReactivationMutation();
   const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
   const closeReportBlockSheet = () => setIsReportBlockSheetOpen(false);
+  const openBlockConfirm = useBlockDelivery(deliveryId);
 
   const delivery = round?.deliveries.find(({ id }) => id === deliveryId);
   const letter = opened?.letter ?? delivery?.content;
@@ -199,16 +201,22 @@ export default function LetterPage() {
         <div className={styles.bottomButtonWrapper}>{renderBottomButton()}</div>
       </div>
 
-      {/* TODO: 신고·차단 화면 연결 */}
       <BottomSheet isOpen={isReportBlockSheetOpen} onClose={closeReportBlockSheet}>
         <div className={actionSheetStyles.actionList}>
-          <button type="button" className={actionSheetStyles.actionButton} onClick={closeReportBlockSheet}>
+          <button
+            type="button"
+            className={actionSheetStyles.actionButton}
+            onClick={() => router.push(`/letter/${deliveryId}/report`)}
+          >
             신고
           </button>
           <button
             type="button"
             className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
-            onClick={closeReportBlockSheet}
+            onClick={() => {
+              closeReportBlockSheet();
+              openBlockConfirm();
+            }}
           >
             차단
           </button>

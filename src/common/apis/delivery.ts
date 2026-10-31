@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ApiError, request, retryOnce } from './client';
 import { HTTP_STATUS_CODE } from './constants/http';
-import { CONVERSATIONS_QUERY_KEY } from './conversation';
+import { CONVERSATIONS_QUERY_KEY, type ReportPayload, type ReportResult } from './conversation';
 import { syncChocolateBalance, type ProfileImage } from './profile';
 
 export interface DeliverySpotify {
@@ -207,5 +207,25 @@ export const useReplyReactivationMutation = () => {
     mutationFn: postReplyReactivation,
     retry: retryOnce,
     onSuccess: ({ chocolateBalance }) => syncChocolateBalance(queryClient, chocolateBalance),
+  });
+};
+
+// 첫 답장 전 편지 신고 (대화방이 없어 deliveryId 기준)
+export const postDeliveryReport = (deliveryId: string, payload: Omit<ReportPayload, 'messageId'>) =>
+  request<ReportResult>('post', `/api/v1/deliveries/${deliveryId}/reports`, payload);
+
+export const useDeliveryReportMutation = (deliveryId: string) =>
+  useMutation({ mutationFn: (payload: Omit<ReportPayload, 'messageId'>) => postDeliveryReport(deliveryId, payload) });
+
+// 첫 답장 전 작성자 차단 (홈 카드에서 빠진다)
+export const postDeliveryBlock = (deliveryId: string) =>
+  request<{ blocked: true }>('post', `/api/v1/deliveries/${deliveryId}/block`);
+
+export const useDeliveryBlockMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: postDeliveryBlock,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY }),
   });
 };
