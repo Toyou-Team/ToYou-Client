@@ -8,7 +8,6 @@ import * as styles from './layout.css';
 import Badge from '@/components/common/Badge/Badge';
 import { useProfileQuery } from '@/common/apis/profile';
 import { ChocoSheet } from '@/components/choco/ChocoSheet/ChocoSheet';
-import { chocoSummaryMock } from '@/components/choco/ChocoSheet/chocoSummary.mock';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { data: profile } = useProfileQuery();
@@ -33,7 +32,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       />
       {children}
 
-      <ChocoSheet isOpen={isChocoSheetOpen} onClose={() => setIsChocoSheetOpen(false)} summary={chocoSummaryMock} />
+      <ChocoSheet isOpen={isChocoSheetOpen} onClose={() => setIsChocoSheetOpen(false)} />
     </>
   );
 }
