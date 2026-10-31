@@ -1,3 +1,8 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { request } from './client';
+import { syncChocolateBalance } from './profile';
+
 export interface ChocolateDaily {
   requestedAmount: number;
   grantedAmount: number;
@@ -43,3 +48,22 @@ export interface ChocolateSummary {
     days: ChocolateCalendarDay[];
   };
 }
+
+export const CHOCOLATE_SUMMARY_QUERY_KEY = ['chocolates', 'summary'] as const;
+
+// 내 초코 조회 (잔액, 오늘 초코, 이번 주 기록)
+export const getChocolateSummary = () => request<ChocolateSummary>('get', '/api/v1/chocolates/summary');
+
+// 시트를 열 때마다 새로 조회하고, 헤더 배지 잔액도 맞춘다
+export const useChocolateSummaryQuery = () => {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: CHOCOLATE_SUMMARY_QUERY_KEY,
+    queryFn: async () => {
+      const summary = await getChocolateSummary();
+      syncChocolateBalance(queryClient, summary.balance);
+      return summary;
+    },
+  });
+};

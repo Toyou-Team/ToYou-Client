@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import type { ChocolateSummary } from '@/common/apis/chocolate';
+import { useChocolateSummaryQuery } from '@/common/apis/chocolate';
 import { useModal } from '@/common/hooks/useModal';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
 import Button from '@/components/common/Button/Button';
@@ -16,13 +16,12 @@ import * as styles from './chocoSheet.css';
 interface ChocoSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  summary: ChocolateSummary;
 }
 
 const pad = (value: number) => String(value).padStart(2, '0');
 
 // 23:39:12
-function Countdown({ to }: { to: string }) {
+function Countdown({ to, onEnd }: { to: string; onEnd: () => void }) {
   const [now, setNow] = useState(Date.now);
 
   useEffect(() => {
@@ -31,6 +30,11 @@ function Countdown({ to }: { to: string }) {
   }, []);
 
   const seconds = Math.max(0, Math.floor((new Date(to).getTime() - now) / 1000));
+  const isEnded = seconds === 0;
+
+  useEffect(() => {
+    if (isEnded) onEnd();
+  }, [isEnded, onEnd]);
 
   return (
     <time className={styles.rowValue}>
@@ -41,8 +45,30 @@ function Countdown({ to }: { to: string }) {
 
 const isNotificationGranted = () => typeof Notification !== 'undefined' && Notification.permission === 'granted';
 
-export function ChocoSheet({ isOpen, onClose, summary }: ChocoSheetProps) {
+export function ChocoSheet({ isOpen, onClose }: ChocoSheetProps) {
+  return (
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title="내 초코"
+      headerAction={
+        <button type="button" className={styles.closeText} onClick={onClose}>
+          닫기
+        </button>
+      }
+    >
+      <ChocoSummary />
+    </BottomSheet>
+  );
+}
+
+// 시트가 열릴 때만 마운트되어 열 때마다 새로 조회한다
+function ChocoSummary() {
   const { open } = useModal();
+  const { data: summary, refetch } = useChocolateSummaryQuery();
+
+  if (!summary) return null;
+
   const { balance, todayDaily, permanentBalance, firstLetterWrittenAt, dailyGrantAmount, maximumBalance } = summary;
 
   const hasTodayChoco = todayDaily.remainingAmount > 0;
@@ -100,85 +126,75 @@ export function ChocoSheet({ isOpen, onClose, summary }: ChocoSheetProps) {
       : [`매일 밤 12시에 ${dailyGrantAmount}초코가 새로 채워지고,`, `최대 ${maximumBalance}초코까지 가질 수 있어요.`];
 
   return (
-    <BottomSheet
-      isOpen={isOpen}
-      onClose={onClose}
-      title="내 초코"
-      headerAction={
-        <button type="button" className={styles.closeText} onClick={onClose}>
-          닫기
-        </button>
-      }
-    >
-      <div className={styles.scrollArea}>
-        <div className={styles.balance}>
-          <span className={styles.balanceTitle}>MY CHOCO</span>
-          <p className={styles.balanceAmount}>
-            {balance}
-            <span className={styles.balanceUnit}>초코</span>
-          </p>
-        </div>
-
-        <ChocoWeek summary={summary} />
-
-        {!firstLetterWrittenAt ? (
-          <>
-            <div className={styles.guide}>
-              <p className={styles.guideTitle}>오늘 첫 편지를 쓰면 {summary.firstLetterBonusAmount}초코를 받아요</p>
-              <p className={styles.guideDescription}>다음 날부터는 매일 밤 12시에 {dailyGrantAmount}초코가 채워져요.</p>
-            </div>
-
-            <div className={styles.action}>
-              <Link href="/write-letter" className={buttonStyle()}>
-                첫 편지 쓰러 가기
-              </Link>
-            </div>
-          </>
-        ) : (
-          <>
-            <ul>
-              {todayDaily.grantedAmount > 0 && countdownTo && (
-                <li className={styles.row}>
-                  <div className={styles.rowText}>
-                    <p className={styles.rowTitle}>
-                      {hasTodayChoco ? `오늘 받은 ${todayDaily.grantedAmount}초코` : '다음 초코까지'}
-                    </p>
-                    <p className={styles.rowDescription}>
-                      {hasTodayChoco ? '사라지기까지' : `오늘 밤 12시에 ${dailyGrantAmount}초코가 채워져요`}
-                    </p>
-                  </div>
-                  <Countdown to={countdownTo} />
-                </li>
-              )}
-
-              {/* 첫 편지 초코를 다 쓰면 숨긴다 */}
-              {permanentBalance > 0 && (
-                <li className={styles.row}>
-                  <div className={styles.rowText}>
-                    <p className={styles.rowTitle}>첫 편지 선물</p>
-                    <p className={styles.rowDescription}>기한 없이 쓸 수 있어요</p>
-                  </div>
-                  <span className={styles.rowValue}>{permanentBalance}</span>
-                </li>
-              )}
-            </ul>
-
-            <p className={styles.notice}>
-              {noticeFirstLine}
-              <br />
-              {noticeSecondLine}
-            </p>
-
-            {isOutOfChoco && (
-              <div className={styles.action}>
-                <Button type="button" onClick={handleNotifyClick}>
-                  충전 열리면 알림 받기
-                </Button>
-              </div>
-            )}
-          </>
-        )}
+    <div className={styles.scrollArea}>
+      <div className={styles.balance}>
+        <span className={styles.balanceTitle}>MY CHOCO</span>
+        <p className={styles.balanceAmount}>
+          {balance}
+          <span className={styles.balanceUnit}>초코</span>
+        </p>
       </div>
-    </BottomSheet>
+
+      <ChocoWeek summary={summary} />
+
+      {!firstLetterWrittenAt ? (
+        <>
+          <div className={styles.guide}>
+            <p className={styles.guideTitle}>오늘 첫 편지를 쓰면 {summary.firstLetterBonusAmount}초코를 받아요</p>
+            <p className={styles.guideDescription}>다음 날부터는 매일 밤 12시에 {dailyGrantAmount}초코가 채워져요.</p>
+          </div>
+
+          <div className={styles.action}>
+            <Link href="/write-letter" className={buttonStyle()}>
+              첫 편지 쓰러 가기
+            </Link>
+          </div>
+        </>
+      ) : (
+        <>
+          <ul>
+            {todayDaily.grantedAmount > 0 && countdownTo && (
+              <li className={styles.row}>
+                <div className={styles.rowText}>
+                  <p className={styles.rowTitle}>
+                    {hasTodayChoco ? `오늘 받은 ${todayDaily.grantedAmount}초코` : '다음 초코까지'}
+                  </p>
+                  <p className={styles.rowDescription}>
+                    {hasTodayChoco ? '사라지기까지' : `오늘 밤 12시에 ${dailyGrantAmount}초코가 채워져요`}
+                  </p>
+                </div>
+                {/* 자정이 지나면 잔액·타이머·이번 주를 새로 받는다 */}
+                <Countdown to={countdownTo} onEnd={refetch} />
+              </li>
+            )}
+
+            {/* 첫 편지 초코를 다 쓰면 숨긴다 */}
+            {permanentBalance > 0 && (
+              <li className={styles.row}>
+                <div className={styles.rowText}>
+                  <p className={styles.rowTitle}>첫 편지 선물</p>
+                  <p className={styles.rowDescription}>기한 없이 쓸 수 있어요</p>
+                </div>
+                <span className={styles.rowValue}>{permanentBalance}</span>
+              </li>
+            )}
+          </ul>
+
+          <p className={styles.notice}>
+            {noticeFirstLine}
+            <br />
+            {noticeSecondLine}
+          </p>
+
+          {isOutOfChoco && (
+            <div className={styles.action}>
+              <Button type="button" onClick={handleNotifyClick}>
+                충전 열리면 알림 받기
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
