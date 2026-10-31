@@ -6,20 +6,19 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useBlockMutation } from '@/common/apis/conversation';
-import { CURRENT_DELIVERY_ROUND_QUERY_KEY } from '@/common/apis/delivery';
+import { CURRENT_DELIVERY_ROUND_QUERY_KEY, useDeliveryBlockMutation } from '@/common/apis/delivery';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 
-// 차단 확인 모달을 띄우고, 확인하면 차단한 뒤 편지함 목록으로 이동
-export function useBlockConversation(conversationId: string) {
+// 차단 확인 모달을 띄우고, 확인하면 차단한 뒤 목록으로 이동
+function useBlockConfirm(block: () => Promise<unknown>, redirectPath: string) {
   const router = useRouter();
   const { open } = useModal();
   const queryClient = useQueryClient();
-  const { mutateAsync: block } = useBlockMutation();
 
   const blockAndLeave = async () => {
     try {
-      await block(conversationId);
+      await block();
     } catch (error) {
       if (!(error instanceof ApiError) || error.status !== HTTP_STATUS_CODE.NOT_FOUND) {
         open(({ close }) => (
@@ -36,7 +35,7 @@ export function useBlockConversation(conversationId: string) {
     }
 
     queryClient.invalidateQueries({ queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY });
-    router.replace('/letter-box');
+    router.replace(redirectPath);
   };
 
   return () =>
@@ -55,4 +54,16 @@ export function useBlockConversation(conversationId: string) {
         onClose={close}
       />
     ));
+}
+
+// 대화방 차단 → 편지함
+export function useBlockConversation(conversationId: string) {
+  const { mutateAsync: block } = useBlockMutation();
+  return useBlockConfirm(() => block(conversationId), '/letter-box');
+}
+
+// 첫 답장 전 편지 차단 → 홈
+export function useBlockDelivery(deliveryId: string) {
+  const { mutateAsync: block } = useDeliveryBlockMutation();
+  return useBlockConfirm(() => block(deliveryId), '/home');
 }
