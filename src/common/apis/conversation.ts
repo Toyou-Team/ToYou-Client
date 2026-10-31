@@ -208,13 +208,14 @@ export interface ReportPayload {
   detail?: string;
 }
 
+export interface ReportResult {
+  reportId: string;
+  alreadyReportedUser: boolean;
+}
+
 // 편지 신고
 export const postReport = (conversationId: string, payload: ReportPayload) =>
-  request<{ reportId: string; alreadyReportedUser: boolean }>(
-    'post',
-    `/api/v1/conversations/${conversationId}/reports`,
-    payload,
-  );
+  request<ReportResult>('post', `/api/v1/conversations/${conversationId}/reports`, payload);
 
 export const useReportMutation = (conversationId: string) =>
   useMutation({ mutationFn: (payload: ReportPayload) => postReport(conversationId, payload) });
