@@ -13,6 +13,7 @@ export interface SignedInResult {
   accessToken: string;
   refreshToken: string;
   user: { id: string };
+  onboardingRequired?: boolean;
 }
 
 // 카카오 로그인 시작 · state 검증
@@ -67,6 +68,18 @@ export const postKakaoLogin = (authorizationCode: string) =>
   );
 
 export const useKakaoLoginMutation = () => useMutation({ mutationFn: postKakaoLogin });
+
+// 애플은 kakaoProfile 이 빈 객체로 온다
+export type AppleAuthResult =
+  | SignedInResult
+  | { status: 'SIGNUP_REQUIRED'; registrationToken: string; kakaoProfile: KakaoProfileSuggestion }
+  | { status: 'SIGNUP_UNAVAILABLE' };
+
+// nonce 는 해시 전 원본을 보낸다
+export const postAppleLogin = (payload: { identityToken: string; nonce: string }) =>
+  request<AppleAuthResult>('post', '/api/v1/auth/apple', payload, { auth: false });
+
+export const useAppleLoginMutation = () => useMutation({ mutationFn: postAppleLogin });
 
 export interface SignupPayload {
   registrationToken: string;
