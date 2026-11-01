@@ -9,28 +9,34 @@ export const loginButtonSectionWrapper = style({
   paddingInline: '2.4rem',
 });
 
-export const kakaoLoginButton = style({
-  width: '100%',
-
+const loginButton = style({
   display: 'grid',
   gridTemplateColumns: '1fr auto 1fr',
-  alignItems: 'center',
   columnGap: '6.5rem',
 
-  height: '5.5rem',
-
-  borderRadius: '1.2rem',
-  backgroundColor: '#FFE400',
   padding: '0 2rem',
 });
 
-export const kakaoLoginIcon = style({
-  justifySelf: 'end',
+export const kakaoLoginButton = style([
+  loginButton,
+  {
+    background: '#FFE400',
+    color: vars.color.neutral_950,
+  },
+]);
+
+export const appleLoginButton = style([
+  loginButton,
+  {
+    marginTop: '1.2rem',
+    background: vars.color.neutral_950,
+  },
+]);
+
+export const loginIcon = style({
+  justifySelf: 'start',
 });
 
-export const kakaoLoginButtonText = style({
-  ...vars.fontStyles.subtitle,
-  color: vars.color.neutral_950,
-
+export const loginButtonText = style({
   whiteSpace: 'nowrap',
 });

@@ -1,4 +1,5 @@
 import IcLogoKakao from '@/assets/icons/ic_logo_kakao.svg';
+import IcLogoApple from '@/assets/icons/ic_logo_apple.svg';
 import IcProfileImage from '@/assets/icons/ic_profile_image.svg';
 import IcStep1 from '@/assets/icons/ic_step1.svg';
 import IcStep2 from '@/assets/icons/ic_step2.svg';
@@ -33,6 +34,7 @@ import IcExit from '@/assets/icons/ic_exit.svg';
 
 export {
   IcLogoKakao,
+  IcLogoApple,
   IcProfileImage,
   IcStep1,
   IcStep2,
