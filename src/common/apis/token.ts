@@ -58,6 +58,9 @@ const SIGNUP_DRAFT_KEY = 'toyou_signup_draft';
 export interface SignupDraft {
   nickname?: string;
   receiveGender?: ReceiveGender;
+  // 약관 화면의 선택 동의
+  marketingPushAgreed?: boolean;
+  nightPushAgreed?: boolean;
 }
 
 export const signupDraftStore = {

@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { vars } from '@/styles/theme.css';
 
 export const termsFormWrapper = style({
   flex: 1,
@@ -24,4 +25,11 @@ export const bottomButtonWrapper = style({
   right: '0',
 
   padding: '0 2rem',
+});
+
+export const marketingNote = style({
+  ...vars.fontStyles.label,
+  color: vars.color.neutral_600,
+
+  padding: '0 2.7rem',
 });

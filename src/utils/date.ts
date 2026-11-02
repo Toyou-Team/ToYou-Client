@@ -11,6 +11,9 @@ export const formatTime = (isoString: string) => {
   return `${hours < 12 ? '오전' : '오후'} ${pad(hours % 12 || 12)}:${pad(date.getMinutes())}`;
 };
 
+// 2026.09.03
+export const formatDotDate = (date: Date) => `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
+
 // 2026년 09월 03일
 export const formatDay = (isoString: string) => {
   const date = new Date(isoString);

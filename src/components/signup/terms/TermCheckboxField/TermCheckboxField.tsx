@@ -8,6 +8,7 @@ interface TermCheckboxProps {
   text: string;
   isChecked: boolean;
   isRequired: boolean;
+  isDisabled?: boolean;
   onChangeChecked: (id: number, checked: boolean) => void;
   onClickView?: () => void;
 }
@@ -17,6 +18,7 @@ export const TermCheckboxField = memo(function TermCheckbox({
   text,
   isChecked,
   isRequired,
+  isDisabled = false,
   onChangeChecked,
   onClickView,
 }: TermCheckboxProps) {
@@ -28,8 +30,15 @@ export const TermCheckboxField = memo(function TermCheckbox({
 
   return (
     <div className={styles.termCheckboxFieldWrapper}>
-      <input className={styles.hiddenInput} type="checkbox" id={inputId} checked={isChecked} onChange={handleChange} />
-      <label className={styles.termCheckboxLabel} htmlFor={inputId}>
+      <input
+        className={styles.hiddenInput}
+        type="checkbox"
+        id={inputId}
+        checked={isChecked}
+        disabled={isDisabled}
+        onChange={handleChange}
+      />
+      <label className={styles.termCheckboxLabel({ isDisabled })} htmlFor={inputId}>
         {isChecked ? (
           <IcCheckNeutral900 aria-hidden className={styles.checkIcon} />
         ) : (
@@ -42,7 +51,7 @@ export const TermCheckboxField = memo(function TermCheckbox({
         </span>
       </label>
 
-      {isRequired && (
+      {onClickView && (
         <button type="button" className={styles.descriptionText} onClick={onClickView}>
           보기
         </button>
