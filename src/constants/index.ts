@@ -1,4 +1,5 @@
 import { PRIVACY_POLICY } from './privacy';
+import { MARKETING_PUSH_CONSENT, NIGHT_PUSH_CONSENT } from './pushConsent';
 import { TERMS_OF_SERVICE } from './terms';
 
 export const AGREE_DATA = [
@@ -17,7 +18,13 @@ export const AGREE_DATA = [
   {
     id: 3,
     type: 'optional',
-    text: '푸시 알림 기능',
-    content: '',
+    text: '광고성 정보 수신 동의',
+    content: MARKETING_PUSH_CONSENT,
+  },
+  {
+    id: 4,
+    type: 'optional',
+    text: '야간 수신 동의',
+    content: NIGHT_PUSH_CONSENT,
   },
 ] as const;

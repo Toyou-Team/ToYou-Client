@@ -87,6 +87,9 @@ export interface SignupPayload {
   receiveGender: ReceiveGender;
   useKakaoProfileImage: boolean;
   gender?: Gender;
+  // 선택 동의. 보내지 않으면 미동의
+  marketingPushAgreed?: boolean;
+  nightPushAgreed?: boolean;
 }
 
 // 회원가입
