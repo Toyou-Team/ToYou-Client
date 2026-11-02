@@ -84,6 +84,8 @@ export default function SignUpProfileImagePage() {
         // 성별 선택 화면이 없어져 카카오에서 받은 성별을 보낸다
         gender: kakaoProfileStore.get()?.gender,
         receiveGender: draft.receiveGender,
+        marketingPushAgreed: draft.marketingPushAgreed,
+        nightPushAgreed: draft.nightPushAgreed,
         // 직접 고른 사진은 가입 후 사진 업로드 API로 따로 저장
         useKakaoProfileImage: false,
       },

@@ -1,7 +1,17 @@
 import { PRIVACY_POLICY } from './privacy';
 import { TERMS_OF_SERVICE } from './terms';
 
-export const AGREE_DATA = [
+interface AgreeData {
+  id: number;
+  type: 'required' | 'optional';
+  text: string;
+  content?: string;
+  // 보기를 누르면 이 항목의 약관을 보여준다
+  policyId?: number;
+  detail?: { title: string; description: string };
+}
+
+export const AGREE_DATA: AgreeData[] = [
   {
     id: 1,
     type: 'required',
@@ -17,7 +27,17 @@ export const AGREE_DATA = [
   {
     id: 3,
     type: 'optional',
-    text: '푸시 알림 기능',
-    content: '',
+    text: '광고성 정보 수신 동의',
+    policyId: 1,
+    detail: {
+      title: '광고·이벤트 알림',
+      description: '마케팅 정보 수집에 동의하시면, 기능 업데이트 및 이벤트, 할인 혜택까지 빠르게 받아보실 수 있습니다.',
+    },
   },
-] as const;
+  {
+    id: 4,
+    type: 'optional',
+    text: '야간 수신 동의',
+    policyId: 1,
+  },
+];

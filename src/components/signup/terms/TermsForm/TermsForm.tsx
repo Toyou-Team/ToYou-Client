@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
+import { signupDraftStore } from '@/common/apis/token';
 import Button from '@/components/common/Button/Button';
 import { AGREE_DATA } from '@/constants';
 
@@ -17,6 +18,7 @@ interface TermsFormData {
   agree1: boolean;
   agree2: boolean;
   agree3: boolean;
+  agree4: boolean;
 }
 
 export function TermsForm() {
@@ -30,12 +32,14 @@ export function TermsForm() {
       agree1: false,
       agree2: false,
       agree3: false,
+      agree4: false,
     },
   });
 
   const agree1 = watch('agree1');
   const agree2 = watch('agree2');
   const agree3 = watch('agree3');
+  const agree4 = watch('agree4');
 
   const handleClickAllCheckBox = useCallback(() => {
     const formData = watch();
@@ -60,9 +64,12 @@ export function TermsForm() {
 
   const isAllRequired = useMemo(() => agree1 && agree2, [agree1, agree2]);
 
-  const isAllChecked = useMemo(() => [agree1, agree2, agree3].every(Boolean), [agree1, agree2, agree3]);
+  const isAllChecked = useMemo(() => [agree1, agree2, agree3, agree4].every(Boolean), [agree1, agree2, agree3, agree4]);
 
-  const onSubmit = () => router.push('/signup/nickname');
+  const onSubmit = () => {
+    signupDraftStore.patch({ marketingPushAgreed: agree3, nightPushAgreed: agree4 });
+    router.push('/signup/nickname');
+  };
 
   return (
     <>
@@ -78,8 +85,9 @@ export function TermsForm() {
                 text={data.text}
                 isChecked={watch(`agree${data.id}` as keyof TermsFormData)}
                 isRequired={data.type === 'required'}
+                detail={data.detail}
                 onChangeChecked={handleSingleChecked}
-                onClickView={() => setSelectedPolicyId(data.id)}
+                onClickView={() => setSelectedPolicyId(data.policyId ?? data.id)}
               />
             ))}
           </div>
