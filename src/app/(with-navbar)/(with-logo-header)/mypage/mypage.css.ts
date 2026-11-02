@@ -97,6 +97,26 @@ export const row = style({
   color: vars.color.neutral_950,
 });
 
+export const settingDescription = style({
+  ...vars.fontStyles.label,
+  color: vars.color.neutral_600,
+});
+
+// TODO: 디자인 적용 전 임시. 전역 리셋이 체크박스를 숨겨 기본 모양을 되살린다
+export const switchInput = style({
+  appearance: 'auto',
+  width: '2rem',
+  height: '2rem',
+  margin: 0,
+
+  accentColor: vars.color.neutral_900,
+  cursor: 'pointer',
+
+  selectors: {
+    '&:disabled': { cursor: 'not-allowed', opacity: 0.4 },
+  },
+});
+
 export const rowRight = style({
   display: 'flex',
   alignItems: 'center',

@@ -1,0 +1,112 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
+import {
+  isPushAppSupported,
+  openNotificationSettings,
+  parsePushPermissionResult,
+  parsePushTokenResult,
+  type PushPermission,
+  requestPushPermission,
+  requestPushToken,
+} from '@/common/apis/push';
+import {
+  type PushConsents,
+  type UpdatedPushConsents,
+  usePushConsentsQuery,
+  useUpdatePushConsentsMutation,
+} from '@/common/apis/pushConsent';
+import { useModal } from '@/common/hooks/useModal';
+import { Modal } from '@/components/common/Modal/Modal';
+import { showToast } from '@/components/common/Toast/Toast';
+import { formatDotDate } from '@/utils/date';
+
+// 동의·철회 처리 결과 안내 (정보통신망법). 바뀐 항목이 없으면 null
+const consentChangeMessage = (before: PushConsents, after: UpdatedPushConsents) => {
+  const date = formatDotDate(new Date(after.processedAt));
+  const marketingChanged = before.marketingPush.agreed !== after.marketingPush.agreed;
+  const nightChanged = before.nightPush.agreed !== after.nightPush.agreed;
+
+  if (marketingChanged && after.marketingPush.agreed) return `TO YOU 광고성 정보 수신에 동의했어요. (${date})`;
+  // 광고성을 끄면 서버가 야간도 함께 끈다
+  if (marketingChanged) {
+    const scope = nightChanged ? '광고성 정보(야간 포함)' : '광고성 정보';
+    return `TO YOU ${scope} 수신 동의를 철회했어요. (${date})`;
+  }
+  if (nightChanged) {
+    return after.nightPush.agreed
+      ? `TO YOU 야간 광고성 정보 수신에 동의했어요. (${date})`
+      : `TO YOU 야간 광고성 정보 수신 동의를 철회했어요. (${date})`;
+  }
+  return null;
+};
+
+// 앱 웹뷰에서만 기기 알림 권한을 알 수 있다. 브라우저면 null
+function useDevicePushPermission() {
+  const [permission, setPermission] = useState<PushPermission | null>(null);
+
+  useEffect(() => {
+    if (!isPushAppSupported()) return;
+
+    // 설정 앱에서 알림을 바꾸고 돌아오면 앱이 먼저 보내 주고, 권한 창에 답하면 토큰 결과로 알 수 있다
+    const listener = (event: MessageEvent) => {
+      const next = parsePushPermissionResult(event.data);
+      if (next) {
+        setPermission(next);
+        return;
+      }
+
+      const tokenResult = parsePushTokenResult(event.data);
+      if (tokenResult && tokenResult.status !== 'FAILED') setPermission(tokenResult.status);
+    };
+    window.addEventListener('message', listener);
+    requestPushPermission();
+    return () => window.removeEventListener('message', listener);
+  }, []);
+
+  // 한 번도 묻지 않았으면 권한 창, 이미 거절했으면 iOS 설정으로 보낸다 (권한 창은 다시 띄울 수 없다)
+  const turnOn = () => (permission === 'NOT_DETERMINED' ? requestPushToken() : openNotificationSettings());
+
+  return { permission, turnOn };
+}
+
+// 마이페이지 알림 설정: 광고성·야간 수신 동의 토글 + 기기 알림 상태
+export function usePushSettings() {
+  const { open } = useModal();
+  const { data: consents } = usePushConsentsQuery();
+  const { mutate, isPending } = useUpdatePushConsentsMutation();
+  const device = useDevicePushPermission();
+
+  const change = (payload: { marketingPushAgreed?: boolean; nightPushAgreed?: boolean }) => {
+    if (!consents) return;
+
+    mutate(payload, {
+      onSuccess: (result) => {
+        const message = consentChangeMessage(consents, result);
+        if (message) showToast(message);
+      },
+      onError: () =>
+        open(({ close }) => (
+          <Modal
+            title="알림 설정을 바꾸지 못했어요"
+            description="잠시 후 다시 시도해 주세요."
+            confirmText="확인"
+            onConfirm={close}
+            onClose={close}
+          />
+        )),
+    });
+  };
+
+  return {
+    consents,
+    isPending,
+    // 야간은 광고성 동의가 있을 때만 바꿀 수 있다
+    canChangeNight: consents?.marketingPush.agreed === true,
+    changeMarketing: (agreed: boolean) => change({ marketingPushAgreed: agreed }),
+    changeNight: (agreed: boolean) => change({ nightPushAgreed: agreed }),
+    devicePermission: device.permission,
+    turnOnDeviceNotifications: device.turnOn,
+  };
+}

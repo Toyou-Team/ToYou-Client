@@ -30,6 +30,33 @@ export const parsePushTokenResult = (data: unknown): PushTokenResult | null => {
   }
 };
 
+// 기기 알림 권한. NOT_DETERMINED 는 아직 iOS 권한 창에 답하지 않은 상태
+export type PushPermission = 'GRANTED' | 'DENIED' | 'NOT_DETERMINED';
+
+// 권한 창 없이 현재 상태만 묻는다. 앱은 백그라운드에서 돌아올 때도 결과를 보낸다
+export const requestPushPermission = () =>
+  window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'PUSH_PERMISSION_REQUEST' }));
+
+export const parsePushPermissionResult = (data: unknown): PushPermission | null => {
+  if (typeof data !== 'string') return null;
+
+  try {
+    const message = JSON.parse(data) as { type?: unknown; permission?: unknown };
+    if (message.type !== 'PUSH_PERMISSION_RESULT') return null;
+    return message.permission === 'GRANTED' ||
+      message.permission === 'DENIED' ||
+      message.permission === 'NOT_DETERMINED'
+      ? message.permission
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+// iOS 설정의 to you 화면을 연다. 사용자가 그 안에서 '알림'을 한 번 더 눌러 켠다
+export const openNotificationSettings = () =>
+  window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'OPEN_NOTIFICATION_SETTINGS' }));
+
 // Access Token 은 새로고침하면 사라지므로 Refresh Token 으로 로그인 여부를 본다
 export const isLoggedIn = () => refreshTokenStore.get() !== null;
 
