@@ -57,6 +57,7 @@ const SIGNUP_DRAFT_KEY = 'toyou_signup_draft';
 
 export interface SignupDraft {
   nickname?: string;
+  nicknameError?: string;
   receiveGender?: ReceiveGender;
   marketingPushAgreed?: boolean;
   nightPushAgreed?: boolean;

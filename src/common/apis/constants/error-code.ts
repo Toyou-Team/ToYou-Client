@@ -28,6 +28,12 @@ export const AUTH_ERROR_CODE = {
 // 제재 중 막힌 기능 호출 시 403. 로그인 만료 X
 export const ACCOUNT_SUSPENDED = 'ACCOUNT_SUSPENDED';
 
+// 편지/답장/닉네임에 금칙어나 외부 연락처가 있으면 message 를 그대로 안내
+export const CONTENT_ERROR_CODE = {
+  EXTERNAL_CONTACT: 'CONTENT_EXTERNAL_CONTACT',
+  FORBIDDEN_WORD: 'CONTENT_FORBIDDEN_WORD',
+} as const;
+
 export const PROFILE_ERROR_CODE = {
   /** 닉네임 입력란에 중복 오류 표시 */
   NICKNAME_TAKEN: 'PROFILE_NICKNAME_TAKEN',
