@@ -69,7 +69,7 @@ function ChocoSummary() {
 
   if (!summary) return null;
 
-  const { balance, todayDaily, permanentBalance, firstLetterWrittenAt, dailyGrantAmount, maximumBalance } = summary;
+  const { balance, todayDaily, permanentBalance, firstLetterWrittenAt, dailyGrantAmount } = summary;
 
   const hasTodayChoco = todayDaily.remainingAmount > 0;
   const isFirstLetterToday = summary.week.days.some((day) => day.isToday && day.firstLetterBonusGrantedAmount > 0);
@@ -123,7 +123,7 @@ function ChocoSummary() {
     ? ['첫 편지를 보냈어요!', `내일부터 매일 밤 12시에 ${dailyGrantAmount}초코가 채워져요.`]
     : isOutOfChoco
       ? ['오늘 초코를 모두 사용했어요.', '충전 기능이 열리면 가장 먼저 알려드릴게요.']
-      : [`매일 밤 12시에 ${dailyGrantAmount}초코가 새로 채워지고,`, `최대 ${maximumBalance}초코까지 가질 수 있어요.`];
+      : [`매일 밤 12시에 ${dailyGrantAmount}초코가 새로 채워져요.`];
 
   return (
     <div className={styles.scrollArea}>
@@ -182,8 +182,12 @@ function ChocoSummary() {
 
           <p className={styles.notice}>
             {noticeFirstLine}
-            <br />
-            {noticeSecondLine}
+            {noticeSecondLine && (
+              <>
+                <br />
+                {noticeSecondLine}
+              </>
+            )}
           </p>
 
           {isOutOfChoco && (
