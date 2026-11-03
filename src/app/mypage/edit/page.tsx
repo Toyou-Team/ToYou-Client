@@ -3,8 +3,12 @@
 import { useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { ApiError } from '@/common/apis/client';
+import { ACCOUNT_SUSPENDED } from '@/common/apis/constants/error-code';
+import { useModal } from '@/common/hooks/useModal';
 import { Header } from '@/components/common/Header/Header';
 import { BackButton } from '@/components/common/BackButton/BackButton';
+import { Modal } from '@/components/common/Modal/Modal';
 import { NavBar } from '@/components/common/NavBar/NavBar';
 import TextField from '@/components/signup/nickname/textField/TextField';
 import { ImageUpload } from '@/components/signup/profile-image/ImageUpload/ImageUpload';
@@ -19,8 +23,11 @@ import { getNicknameError, getNicknameServerError, NICKNAME_LENGTH_ERROR } from 
 
 import * as styles from './edit.css';
 
+const isSuspended = (error: Error) => error instanceof ApiError && error.code === ACCOUNT_SUSPENDED;
+
 export default function MyPageEditPage() {
   const router = useRouter();
+  const { open } = useModal();
 
   const { data: profile } = useProfileQuery();
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfileMutation();
@@ -59,20 +66,40 @@ export default function MyPageEditPage() {
       { nickname: trimmed },
       {
         onSuccess: () => router.back(),
-        onError: (error) => setServerError(getNicknameServerError(error)),
+        onError: (error) => {
+          if (!isSuspended(error)) setServerError(getNicknameServerError(error));
+        },
       },
     );
+  };
+
+  // 실패하면 기존 사진으로 되돌리고 안내한다. 제재는 공통 안내 시트가 띄워진다
+  const handleImageError = (error: Error) => {
+    setProfileImageUrl(undefined);
+    if (isSuspended(error)) return;
+
+    open(({ close }) => (
+      <Modal
+        title="사진을 변경하지 못했어요"
+        description={error.message}
+        confirmText="확인"
+        onConfirm={close}
+        onClose={close}
+      />
+    ));
   };
 
   const handleSelectFile = (file: File) => {
     uploadProfileImage(file, {
       onSuccess: (updated) => setProfileImageUrl(updated.profileImage?.url ?? null),
+      onError: handleImageError,
     });
   };
 
   const handleRemoveImage = () => {
     deleteProfileImage(undefined, {
       onSuccess: (updated) => setProfileImageUrl(updated.profileImage?.url ?? null),
+      onError: handleImageError,
     });
   };
 

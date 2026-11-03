@@ -18,6 +18,10 @@ export const formatDay = (isoString: string) => {
   return `${date.getFullYear()}년 ${pad(date.getMonth() + 1)}월 ${pad(date.getDate())}일`;
 };
 
+// 2026.11.10 (기기 시간대와 상관없이 한국 시간)
+export const formatKoreanDay = (isoString: string) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date(isoString)).replaceAll('-', '.');
+
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 // 10월 11일 (일) 오후 7:25

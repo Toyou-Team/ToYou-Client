@@ -17,9 +17,9 @@ export interface ProfileImage {
 export interface Profile {
   id: string;
   nickname: string;
-  gender: Gender;
+  gender: Gender | null;
   /** "2002-01-09" 형식의 생년월일 */
-  birthDate: string;
+  birthDate: string | null;
   receiveGender: ReceiveGender;
   chocolateBalance: number;
   profileImage: ProfileImage | null;

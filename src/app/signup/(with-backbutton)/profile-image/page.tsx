@@ -14,6 +14,7 @@ import {
   setTokens,
   signupDraftStore,
 } from '@/common/apis/token';
+import { useAccountUnavailable } from '@/common/hooks/useAccountUnavailable';
 import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
@@ -34,6 +35,7 @@ const RETRY_PATH: Record<string, string> = {
 export default function SignUpProfileImagePage() {
   const router = useRouter();
   const { open } = useModal();
+  const handleAccountUnavailable = useAccountUnavailable();
   const { mutate: signup, isPending: isSigningUp } = useSignupMutation();
   const { mutate: uploadProfileImage, isPending: isUploading } = useUploadProfileImageMutation();
 
@@ -102,7 +104,7 @@ export default function SignUpProfileImagePage() {
           const code = error instanceof ApiError ? error.code : undefined;
 
           if (code === AUTH_ERROR_CODE.ACCOUNT_UNAVAILABLE) {
-            router.replace('/?blocked=restricted');
+            handleAccountUnavailable(error);
             return;
           }
 

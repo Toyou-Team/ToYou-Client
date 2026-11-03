@@ -112,6 +112,11 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
             if (bonusChocolateAmount > 0) showToast(`${bonusChocolateAmount}초코가 지급됐어요.`);
             router.push('/home');
           },
+          onError: (error) => {
+            if (error instanceof ApiError && error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY) {
+              openAlertModal('편지를 보내지 못했어요', error.message);
+            }
+          },
         },
       );
       return;
