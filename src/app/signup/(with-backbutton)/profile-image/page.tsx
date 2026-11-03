@@ -38,10 +38,9 @@ export default function SignUpProfileImagePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const goHome = () => router.replace('/home');
+  const goOnboarding = () => router.replace('/onboarding');
 
-  // TODO: 업로드 실패 안내(토스트) 기획 확정 후 추가. 지금은 실패해도 사진 없이 홈으로 이동
-  const uploadImage = (file: File) => uploadProfileImage(file, { onSettled: goHome });
+  const uploadImage = (file: File) => uploadProfileImage(file, { onSettled: goOnboarding });
 
   const alertAndGo = (message: string, path?: string) =>
     open(({ close }) => {
@@ -95,7 +94,7 @@ export default function SignUpProfileImagePage() {
           clearSignupData();
 
           if (imageFile) uploadImage(imageFile);
-          else goHome();
+          else goOnboarding();
         },
         onError: (error) => {
           const code = error instanceof ApiError ? error.code : undefined;
