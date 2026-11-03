@@ -30,7 +30,12 @@ const withTopicParticle = (word: string) => {
 
 // 금칙어는 시안 문구로, 그 밖의 오류는 서버 문구로 안내
 export const getNicknameServerError = (error: Error) => {
-  if (!(error instanceof ApiError) || error.code !== CONTENT_ERROR_CODE.FORBIDDEN_WORD) return error.message;
+  if (!(error instanceof ApiError)) return error.message;
+
+  const fieldError = error.details?.fields?.find(({ field }) => field === 'nickname')?.messages[0];
+  if (fieldError) return fieldError;
+
+  if (error.code !== CONTENT_ERROR_CODE.FORBIDDEN_WORD) return error.message;
 
   const words = error.details?.forbiddenWords;
   return words?.length ? `${withTopicParticle(words.join(', '))} 설정할 수 없는 닉네임이에요.` : error.message;
