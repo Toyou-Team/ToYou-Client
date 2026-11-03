@@ -97,6 +97,12 @@ export const postSignup = (payload: SignupPayload) =>
 
 export const useSignupMutation = () => useMutation({ mutationFn: postSignup });
 
+// 가입 닉네임 미리 확인
+export const postNicknameCheck = (payload: { registrationToken: string; nickname: string }) =>
+  request<{ available: boolean }>('post', '/api/v1/auth/nickname-check', payload, { auth: false });
+
+export const useNicknameCheckMutation = () => useMutation({ mutationFn: postNicknameCheck });
+
 // 로그아웃
 export const postLogout = async () => {
   try {

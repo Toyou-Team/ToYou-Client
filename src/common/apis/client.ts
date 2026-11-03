@@ -11,8 +11,16 @@ interface ApiResponse<T> {
 }
 
 // 공통 오류 형식: { error: { code, message, requestId, details } }
+interface ErrorDetails {
+  // 탈퇴 후 재가입 제한 (AUTH_ACCOUNT_UNAVAILABLE)
+  rejoinAvailableAt?: string;
+  sanctionReasonTitle?: string | null;
+  // 금칙어 (CONTENT_FORBIDDEN_WORD)
+  forbiddenWords?: string[];
+}
+
 interface ErrorPayload {
-  error?: { code?: string; message?: string; requestId?: string };
+  error?: { code?: string; message?: string; requestId?: string; details?: ErrorDetails };
 }
 
 export class ApiError extends Error {
@@ -21,6 +29,7 @@ export class ApiError extends Error {
     message: string,
     readonly code?: string,
     readonly requestId?: string,
+    readonly details?: ErrorDetails,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -105,7 +114,7 @@ async function dispatch<T>(
       redirectToLogin();
     }
 
-    throw new ApiError(status, message, code, requestId);
+    throw new ApiError(status, message, code, requestId, payload?.error?.details);
   }
 }
 
