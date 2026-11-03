@@ -105,16 +105,17 @@ export const useNicknameCheckMutation = () => useMutation({ mutationFn: postNick
 
 // 로그아웃
 export const postLogout = async () => {
-  try {
-    await request<void>('post', '/api/v1/auth/logout');
-  } finally {
-    clearTokens();
-  }
+  const { loggedOut } = await request<{ loggedOut: boolean }>('post', '/api/v1/auth/logout');
+  if (!loggedOut) throw new Error('로그아웃 처리가 완료되지 않았어요.');
+
+  clearTokens();
 };
 
 export interface WithdrawalSummary {
   letterCount: number;
   chocolateBalance: number;
+  // days 가 0 이면 availableAt 은 null (바로 재가입 가능)
+  rejoinRestriction: { days: number; availableAt: string | null };
 }
 
 export interface AccountSanction {
@@ -149,9 +150,16 @@ export const useWithdrawalSummaryQuery = () =>
   useQuery({ queryKey: ['withdrawal-summary'], queryFn: getWithdrawalSummary });
 
 // 회원 탈퇴
-export const deleteAccount = async () => {
-  const { withdrawn } = await request<{ withdrawn: boolean }>('delete', '/api/v1/auth/account', undefined, {
+export interface AppleWithdrawalPayload {
+  appleAuthorizationCode: string;
+  // 웹만 보낸다
+  appleClientId?: string;
+}
+
+export const deleteAccount = async (payload?: AppleWithdrawalPayload) => {
+  const { withdrawn } = await request<{ withdrawn: boolean }>('delete', '/api/v1/auth/account', payload, {
     retry: 0,
+    retryAfterRefresh: !payload,
   });
   if (!withdrawn) throw new Error('탈퇴 처리가 완료되지 않았어요.');
 
@@ -161,7 +169,7 @@ export const deleteAccount = async () => {
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({ mutationFn: postLogout, onSettled: () => queryClient.clear() });
+  return useMutation({ mutationFn: postLogout, onSuccess: () => queryClient.clear() });
 };
 
 export const useDeleteAccountMutation = () => {

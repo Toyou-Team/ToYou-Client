@@ -32,6 +32,9 @@ const webStore = (getStorage: () => Storage, key: string) => ({
 
 export const refreshTokenStore = webStore(() => window.localStorage, 'toyou_refresh_token');
 
+// 애플 계정은 탈퇴할 때 재인증이 필요하다. 서버 응답에 로그인 수단이 없어 로그인할 때 기록한다
+export const loginProviderStore = webStore(() => window.localStorage, 'toyou_login_provider');
+
 // 카카오 인증은 됐지만 가입 미완료인 유저가 가입 플로우 동안 들고 다니는 임시 토큰
 export const registrationTokenStore = webStore(() => window.sessionStorage, 'toyou_registration_token');
 
@@ -100,6 +103,7 @@ export const setTokens = ({ accessToken, refreshToken }: { accessToken: string; 
 export const clearTokens = () => {
   accessTokenStore.clear();
   refreshTokenStore.clear();
+  loginProviderStore.clear();
   loggedInCookie.clear();
 };
 
