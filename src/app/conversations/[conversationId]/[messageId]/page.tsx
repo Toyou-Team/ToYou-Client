@@ -5,21 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
 import { IcMore } from '@/assets/icons';
-import {
-  useConversationQuery,
-  useConversationReactivationMutation,
-  useReadMessageMutation,
-} from '@/common/apis/conversation';
-import { useReplyReactivationMutation } from '@/common/apis/delivery';
-import { useProfileQuery } from '@/common/apis/profile';
+import { useConversationQuery, useReadMessageMutation } from '@/common/apis/conversation';
 import { useBlockConversation } from '@/common/hooks/useBlockConversation';
-import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
 import Button from '@/components/common/Button/Button';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
-import { Modal } from '@/components/common/Modal/Modal';
 import { LetterPaper } from '@/components/letter/LetterPaper/LetterPaper';
 import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 import { getPartnerNickname } from '@/utils/partner';
@@ -29,14 +21,9 @@ import * as styles from './conversationLetter.css';
 export default function ConversationLetterPage() {
   const { conversationId, messageId } = useParams<{ conversationId: string; messageId: string }>();
   const router = useRouter();
-  const { open } = useModal();
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useConversationQuery(conversationId);
-  const { data: profile } = useProfileQuery();
   const { mutate: readMessage } = useReadMessageMutation(conversationId);
-  const { mutate: reactivateConversation, isPending: isReactivatingConversation } =
-    useConversationReactivationMutation(conversationId);
-  const { mutate: reactivateFirstReply, isPending: isReactivatingFirstReply } = useReplyReactivationMutation();
 
   const [activeId, setActiveId] = useState(messageId);
   const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
@@ -99,83 +86,17 @@ export default function ConversationLetterPage() {
         : `/write-letter?conversationId=${conversationId}`,
     );
 
-  const handleReactivateClick = (cost: number) => {
-    const chocolateBalance = profile?.chocolateBalance ?? 0;
-
-    if (chocolateBalance < cost) {
-      open(({ close }) => (
-        <Modal
-          title="초코가 부족해요"
-          description={`답장 기한을 다시 열려면 초코 ${cost}개가 필요해요.`}
-          subDescription={
-            <>
-              지금은 <strong>초코 {chocolateBalance}개</strong>를 가지고 있어요.
-            </>
-          }
-          cancelText="다음에"
-          confirmText="열기"
-          confirmDisabled
-          onConfirm={() => {}}
-          onClose={close}
-        />
-      ));
-      return;
-    }
-
-    open(({ close }) => (
-      <Modal
-        title="답장 기한 다시 열기"
-        description="답장 기한이 지났어요. 다시 열고 답장할까요?"
-        subDescription={`초코 ${cost}개가 사용돼요.`}
-        cancelText="다음에"
-        confirmText="열기"
-        onConfirm={() => {
-          close();
-          const idempotencyKey = crypto.randomUUID();
-
-          if (isFirstReply) {
-            reactivateFirstReply({ deliveryId: conversation.deliveryId, idempotencyKey }, { onSuccess: goToWrite });
-          } else {
-            reactivateConversation(idempotencyKey, { onSuccess: goToWrite });
-          }
-        }}
-        onClose={close}
-      />
-    ));
-  };
-
   // 가장 최근에 받은 편지이고 내 답장 차례면, 그 편지에서는 점 대신 답장 버튼을 보여준다
-  const canReplyToLatest =
-    !items[0].isMine &&
-    !conversation.isReadOnly &&
-    (conversation.canSend || (conversation.canReactivateReply && conversation.replyCost !== null));
+  const canReplyToLatest = !items[0].isMine && !conversation.isReadOnly && conversation.canSend;
 
   const renderReplyButton = () => {
     if (activeIndex !== 0 || !canReplyToLatest) return null;
 
-    if (conversation.canSend) {
-      return (
-        <Button type="button" onClick={goToWrite}>
-          답장하기
-        </Button>
-      );
-    }
-
-    if (conversation.canReactivateReply && conversation.replyCost !== null) {
-      const cost = conversation.replyCost;
-
-      return (
-        <Button
-          type="button"
-          disabled={isReactivatingConversation || isReactivatingFirstReply}
-          onClick={() => handleReactivateClick(cost)}
-        >
-          답장하기 · 초코 {cost}개
-        </Button>
-      );
-    }
-
-    return null;
+    return (
+      <Button type="button" onClick={goToWrite}>
+        답장하기
+      </Button>
+    );
   };
 
   return (

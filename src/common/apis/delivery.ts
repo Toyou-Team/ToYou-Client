@@ -64,9 +64,8 @@ export interface OpenedDelivery {
   deliveryId: string;
   conversationId: string;
   selectedAt: string;
-  replyAvailableUntil: string;
-  replyStatus: 'AVAILABLE' | 'REACTIVATION_REQUIRED' | 'UNAVAILABLE';
-  replyCost: number | null;
+  // UNAVAILABLE: 이미 첫 답장을 보냈거나 작성자가 탈퇴/정지됨
+  replyStatus: 'AVAILABLE' | 'UNAVAILABLE';
   chocolateBalance: number;
   letter: LetterContent & { id: string };
 }
@@ -90,12 +89,6 @@ export interface CreatedReply {
     spotify: DeliverySpotify | null;
     createdAt: string;
   };
-}
-
-export interface ReplyReactivation {
-  replyAvailableUntil: string;
-  canReply: boolean;
-  chocolateBalance: number;
 }
 
 export const OPEN_DELIVERY_COST = 5;
@@ -191,22 +184,6 @@ export const useReplyMutation = () => {
       queryClient.invalidateQueries({ queryKey: CURRENT_DELIVERY_ROUND_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY });
     },
-  });
-};
-
-// 답장 기한 재활성화 (5초코)
-export const postReplyReactivation = ({ deliveryId, idempotencyKey }: { deliveryId: string; idempotencyKey: string }) =>
-  request<ReplyReactivation>('post', `/api/v1/deliveries/${deliveryId}/reply-reactivations`, undefined, {
-    headers: { 'Idempotency-Key': idempotencyKey },
-  });
-
-export const useReplyReactivationMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: postReplyReactivation,
-    retry: retryOnce,
-    onSuccess: ({ chocolateBalance }) => syncChocolateBalance(queryClient, chocolateBalance),
   });
 };
 
