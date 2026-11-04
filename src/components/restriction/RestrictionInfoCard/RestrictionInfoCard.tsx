@@ -36,13 +36,10 @@ export function RestrictionInfoCard({ restriction }: RestrictionInfoCardProps) {
           <dt className={styles.label}>제한 단계</dt>
           <dd className={styles.value}>{SANCTION_STAGE_LABEL[stage]}</dd>
         </div>
-        {/* 영구 정지는 해제 일시 없음 */}
-        {endsAt && (
-          <div className={styles.row}>
-            <dt className={styles.label}>해제 일시</dt>
-            <dd className={styles.value}>{formatDateTime(endsAt)}</dd>
-          </div>
-        )}
+        <div className={styles.row}>
+          <dt className={styles.label}>해제 일시</dt>
+          <dd className={styles.value}>{formatDateTime(endsAt)}</dd>
+        </div>
       </div>
     </dl>
   );
