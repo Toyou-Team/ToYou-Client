@@ -28,16 +28,16 @@ const consentChangeMessage = (before: PushConsents, after: UpdatedPushConsents) 
   const marketingChanged = before.marketingPush.agreed !== after.marketingPush.agreed;
   const nightChanged = before.nightPush.agreed !== after.nightPush.agreed;
 
-  if (marketingChanged && after.marketingPush.agreed) return `TO YOU 광고성 정보 수신에 동의했어요. (${date})`;
+  if (marketingChanged && after.marketingPush.agreed) return `to you 광고성 정보 수신에 동의했어요. (${date})`;
   // 광고성을 끄면 서버가 야간도 함께 끈다
   if (marketingChanged) {
-    const scope = nightChanged ? '광고성 정보(야간 포함)' : '광고성 정보';
-    return `TO YOU ${scope} 수신 동의를 철회했어요. (${date})`;
+    const scope = nightChanged ? '광고성·야간 광고성 정보' : '광고성 정보';
+    return `to you ${scope} 수신 동의를 철회했어요. (${date})`;
   }
   if (nightChanged) {
     return after.nightPush.agreed
-      ? `TO YOU 야간 광고성 정보 수신에 동의했어요. (${date})`
-      : `TO YOU 야간 광고성 정보 수신 동의를 철회했어요. (${date})`;
+      ? `to you 야간 광고성 정보 수신에 동의했어요. (${date})`
+      : `to you 야간 광고성 정보 수신 동의를 철회했어요. (${date})`;
   }
   return null;
 };
@@ -71,37 +71,34 @@ function useDevicePushPermission() {
   return { permission, turnOn };
 }
 
-// 마이페이지 알림 설정: 광고성·야간 수신 동의 토글 + 기기 알림 상태
+// 설정 화면 알림: 광고성·야간 수신 동의 토글 + 기기 알림 상태
 export function usePushSettings() {
   const { open } = useModal();
   const { data: consents } = usePushConsentsQuery();
-  const { mutate, isPending } = useUpdatePushConsentsMutation();
+  const { mutate } = useUpdatePushConsentsMutation({
+    onUpdated: (before, after) => {
+      const message = consentChangeMessage(before, after);
+      if (message) showToast(message);
+    },
+    onFailed: () =>
+      open(({ close }) => (
+        <Modal
+          title="알림 설정을 바꾸지 못했어요"
+          description="잠시 후 다시 시도해 주세요."
+          confirmText="확인"
+          onConfirm={close}
+          onClose={close}
+        />
+      )),
+  });
   const device = useDevicePushPermission();
 
   const change = (payload: { marketingPushAgreed?: boolean; nightPushAgreed?: boolean }) => {
-    if (!consents) return;
-
-    mutate(payload, {
-      onSuccess: (result) => {
-        const message = consentChangeMessage(consents, result);
-        if (message) showToast(message);
-      },
-      onError: () =>
-        open(({ close }) => (
-          <Modal
-            title="알림 설정을 바꾸지 못했어요"
-            description="잠시 후 다시 시도해 주세요."
-            confirmText="확인"
-            onConfirm={close}
-            onClose={close}
-          />
-        )),
-    });
+    if (consents) mutate(payload);
   };
 
   return {
     consents,
-    isPending,
     // 야간은 광고성 동의가 있을 때만 바꿀 수 있다
     canChangeNight: consents?.marketingPush.agreed === true,
     changeMarketing: (agreed: boolean) => change({ marketingPushAgreed: agreed }),
