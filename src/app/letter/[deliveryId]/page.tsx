@@ -7,12 +7,7 @@ import clsx from 'clsx';
 import { IcMore } from '@/assets/icons';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
-import {
-  OPEN_DELIVERY_COST,
-  useCurrentDeliveryRoundQuery,
-  useOpenDeliveryMutation,
-  useReplyReactivationMutation,
-} from '@/common/apis/delivery';
+import { OPEN_DELIVERY_COST, useCurrentDeliveryRoundQuery, useOpenDeliveryMutation } from '@/common/apis/delivery';
 import { useBlockDelivery } from '@/common/hooks/useBlockConversation';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
@@ -33,7 +28,6 @@ export default function LetterPage() {
 
   const { data: round } = useCurrentDeliveryRoundQuery();
   const { mutate: openDelivery, data: opened, isPending, isIdle, isError } = useOpenDeliveryMutation();
-  const { mutate: reactivateReply, isPending: isReactivating } = useReplyReactivationMutation();
   const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
   const closeReportBlockSheet = () => setIsReportBlockSheetOpen(false);
   const openBlockConfirm = useBlockDelivery(deliveryId);
@@ -131,29 +125,6 @@ export default function LetterPage() {
     ));
   };
 
-  // 답장 기한이 지난 편지는 초코를 써서 기한을 다시 연 뒤 답장한다
-  const handleReactivateClick = (cost: number) => {
-    if (round.chocolateBalance < cost) {
-      openShortageModal('답장 기한을 다시 열려면', cost, round.chocolateBalance);
-      return;
-    }
-
-    open(({ close }) => (
-      <Modal
-        title="답장 기한 다시 열기"
-        description="답장 기한이 지났어요. 다시 열고 답장할까요?"
-        subDescription={`초코 ${cost}개가 사용돼요.`}
-        cancelText="다음에"
-        confirmText="열기"
-        onConfirm={() => {
-          close();
-          reactivateReply({ deliveryId, idempotencyKey: crypto.randomUUID() }, { onSuccess: goToReply });
-        }}
-        onClose={close}
-      />
-    ));
-  };
-
   const renderBottomButton = () => {
     if (!opened) {
       return (
@@ -167,16 +138,6 @@ export default function LetterPage() {
       return (
         <Button type="button" onClick={goToReply}>
           답장하기
-        </Button>
-      );
-    }
-
-    if (opened.replyStatus === 'REACTIVATION_REQUIRED' && opened.replyCost !== null) {
-      const cost = opened.replyCost;
-
-      return (
-        <Button type="button" disabled={isReactivating} onClick={() => handleReactivateClick(cost)}>
-          답장하기 · 초코 {cost}개
         </Button>
       );
     }

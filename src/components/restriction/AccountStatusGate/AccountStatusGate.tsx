@@ -1,20 +1,17 @@
 'use client';
 
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { accountStatusQueryOptions } from '@/common/apis/auth';
 import { restoreSession } from '@/common/apis/refresh';
 import { useAccountStatusCheck } from '@/common/hooks/useAccountStatusCheck';
 import { RestrictionSheet } from '@/components/restriction/RestrictionSheet/RestrictionSheet';
-import { getRestrictionPath } from '@/constants/restriction';
 
 export const ACCOUNT_SUSPENDED_EVENT = 'toyou:account-suspended';
 
 // 앱 시작 시 제재 확인 + 403 제재 응답에 안내 시트
 export function AccountStatusGate() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const checkAccountStatus = useAccountStatusCheck();
   // 동시에 여러 번 막혀도 시트는 하나
@@ -35,13 +32,6 @@ export function AccountStatusGate() {
       .fetchQuery(accountStatusQueryOptions)
       .then((status) => status.sanction)
       .catch(() => null);
-
-    // 영구 정지는 시트 대신 안내 화면으로
-    if (sanction?.type === 'PERMANENT') {
-      isSheetOpen.current = false;
-      router.replace(getRestrictionPath(sanction));
-      return;
-    }
 
     setSheet({ releaseAt: sanction?.endsAt ?? null });
   });

@@ -8,7 +8,7 @@ import {
 
 import { request, retryOnce } from './client';
 import type { DeliverySpotify, LetterImage } from './delivery';
-import { syncChocolateBalance, type ProfileImage } from './profile';
+import type { ProfileImage } from './profile';
 
 const PAGE_SIZE = 8;
 
@@ -45,9 +45,6 @@ export interface ConversationSummary {
   partner: ConversationPartner;
   isReadOnly: boolean;
   canSend: boolean;
-  canReactivateReply: boolean;
-  replyAvailableUntil: string | null;
-  replyCost: number | null;
   hasUnread: boolean;
 }
 
@@ -149,28 +146,6 @@ export const useReadMessageMutation = (conversationId: string) => {
       );
 
       if (!hasUnread) queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY, exact: true });
-    },
-  });
-};
-
-// 후속 편지 답장 권한 재활성화 (5초코)
-export const postConversationReactivation = (conversationId: string, idempotencyKey: string) =>
-  request<{ conversationId: string; replyAvailableUntil: string; canReply: boolean; chocolateBalance: number }>(
-    'post',
-    `/api/v1/conversations/${conversationId}/reply-reactivations`,
-    undefined,
-    { headers: { 'Idempotency-Key': idempotencyKey } },
-  );
-
-export const useConversationReactivationMutation = (conversationId: string) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (idempotencyKey: string) => postConversationReactivation(conversationId, idempotencyKey),
-    retry: retryOnce,
-    onSuccess: ({ chocolateBalance }) => {
-      syncChocolateBalance(queryClient, chocolateBalance);
-      queryClient.invalidateQueries({ queryKey: conversationQueryKey(conversationId) });
     },
   });
 };

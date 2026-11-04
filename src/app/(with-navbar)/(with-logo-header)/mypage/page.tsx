@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-import { useLogoutMutation } from '@/common/apis/auth';
+import { useAccountStatusQuery, useLogoutMutation } from '@/common/apis/auth';
 import { GENDER_LABEL, useProfileQuery } from '@/common/apis/profile';
 import { useModal } from '@/common/hooks/useModal';
 import { usePushSettings } from '@/common/hooks/usePushSettings';
@@ -22,6 +22,9 @@ export default function MyPage() {
 
   const { data: profile } = useProfileQuery();
   const push = usePushSettings();
+  // 정지 중에는 조회만 되고 수정은 403 이라 수정 진입을 막는다
+  const { data: accountStatus } = useAccountStatusQuery();
+  const canEdit = !accountStatus?.restricted;
   const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
 
   const selectedPolicy = AGREE_DATA.find((data) => data.id === selectedPolicyId);
@@ -41,7 +44,19 @@ export default function MyPage() {
         cancelText="취소"
         onConfirm={() => {
           close();
-          logout(undefined, { onSuccess: () => router.replace('/') });
+          logout(undefined, {
+            onSuccess: () => router.replace('/'),
+            onError: (error) =>
+              open(({ close: closeError }) => (
+                <Modal
+                  title="로그아웃하지 못했어요"
+                  description={error.message}
+                  confirmText="확인"
+                  onConfirm={closeError}
+                  onClose={closeError}
+                />
+              )),
+          });
         }}
         onClose={close}
       />
@@ -50,35 +65,51 @@ export default function MyPage() {
 
   if (!profile) return null;
 
+  const profileSummary = (
+    <>
+      <div className={styles.profileImageWrapper}>
+        {profile.profileImage ? (
+          <img src={profile.profileImage.url} alt={`${profile.nickname}의 프로필`} className={styles.profileImage} />
+        ) : (
+          <IcProfileImage className={styles.profileImage} />
+        )}
+      </div>
+
+      <div className={styles.profileTextWrapper}>
+        <span className={styles.nickname}>{profile.nickname}</span>
+        {canEdit && <span className={styles.profileEditText}>프로필 수정</span>}
+      </div>
+    </>
+  );
+
   return (
     <div className={styles.mypageWrapper}>
-      <Link href="/mypage/edit" className={styles.profileCard}>
-        <div className={styles.profileImageWrapper}>
-          {profile.profileImage ? (
-            <img src={profile.profileImage.url} alt={`${profile.nickname}의 프로필`} className={styles.profileImage} />
-          ) : (
-            <IcProfileImage className={styles.profileImage} />
-          )}
-        </div>
-
-        <div className={styles.profileTextWrapper}>
-          <span className={styles.nickname}>{profile.nickname}</span>
-          <span className={styles.profileEditText}>프로필 수정</span>
-        </div>
-
-        <IcChevronRight />
-      </Link>
+      {canEdit ? (
+        <Link href="/mypage/edit" className={styles.profileCard}>
+          {profileSummary}
+          <IcChevronRight />
+        </Link>
+      ) : (
+        <div className={styles.profileCard}>{profileSummary}</div>
+      )}
 
       <div className={styles.settingSection}>
         <div className={styles.settingGroup}>
           <h2 className={styles.sectionTitle}>편지 설정</h2>
-          <Link href="/mypage/gender" className={styles.row}>
-            <span className={styles.settingItem}>받는 사람 성별</span>
-            <span className={styles.rowRight}>
+          {canEdit ? (
+            <Link href="/mypage/gender" className={styles.row}>
+              <span className={styles.settingItem}>받는 사람 성별</span>
+              <span className={styles.rowRight}>
+                <span className={styles.rowValue}>{GENDER_LABEL[profile.receiveGender]}</span>
+                <IcChevronRight />
+              </span>
+            </Link>
+          ) : (
+            <div className={styles.row}>
+              <span className={styles.settingItem}>받는 사람 성별</span>
               <span className={styles.rowValue}>{GENDER_LABEL[profile.receiveGender]}</span>
-              <IcChevronRight />
-            </span>
-          </Link>
+            </div>
+          )}
         </div>
 
         {/* TODO: 디자인 적용. 시안은 별도 '설정' 화면의 '이벤트 및 혜택 알림' 묶음 */}

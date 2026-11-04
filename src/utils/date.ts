@@ -21,14 +21,18 @@ export const formatDay = (isoString: string) => {
   return `${date.getFullYear()}년 ${pad(date.getMonth() + 1)}월 ${pad(date.getDate())}일`;
 };
 
+// 2026.11.10 (기기 시간대와 상관없이 한국 시간)
+export const formatKoreanDay = (isoString: string) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date(isoString)).replaceAll('-', '.');
+
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
-// 10월 11일 (일) 오후 7:25
+// 2026년 10월 11일 (일) 오후 7:25
 export const formatDateTime = (isoString: string) => {
   const date = new Date(isoString);
   const hours = date.getHours();
 
-  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]}) ${hours < 12 ? '오전' : '오후'} ${hours % 12 || 12}:${pad(date.getMinutes())}`;
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]}) ${hours < 12 ? '오전' : '오후'} ${hours % 12 || 12}:${pad(date.getMinutes())}`;
 };
 
 // 오늘이면 시각, 어제면 '어제', 그 이전이면 9월 4일

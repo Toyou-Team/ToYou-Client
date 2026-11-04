@@ -4,13 +4,10 @@ import { request } from './client';
 import { syncChocolateBalance } from './profile';
 
 export interface ChocolateDaily {
-  requestedAmount: number;
   grantedAmount: number;
   usedAmount: number;
   expiredAmount: number;
   remainingAmount: number;
-  // 잔액 상한으로 지급하지 못한 수량
-  discardedAmount: number;
 }
 
 export interface ChocolateCalendarDay {
@@ -30,7 +27,6 @@ export interface ChocolateSummary {
   serverTime: string;
   timeZone: string;
   balance: number;
-  maximumBalance: number;
   // 기한 없는 초코 잔액 (첫 편지 선물 등)
   permanentBalance: number;
   expiringBalance: number;

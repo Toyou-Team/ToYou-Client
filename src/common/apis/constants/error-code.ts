@@ -11,6 +11,10 @@ export const AUTH_ERROR_CODE = {
   KAKAO_TOKEN_EXCHANGE_FAILED: 'AUTH_KAKAO_TOKEN_EXCHANGE_FAILED',
   // Apple 로그인 서비스 일시 장애. 자동 재시도 X
   APPLE_UNAVAILABLE: 'AUTH_APPLE_UNAVAILABLE',
+  // 탈퇴 재인증 code 만료·재사용. 애플 재인증부터 다시
+  APPLE_AUTHORIZATION_INVALID: 'AUTH_APPLE_AUTHORIZATION_INVALID',
+  // 로그인한 계정과 다른 애플 계정으로 재인증
+  APPLE_ACCOUNT_MISMATCH: 'AUTH_APPLE_ACCOUNT_MISMATCH',
   // 가입 화면을 중단하고 카카오 로그인부터 다시 시작
   REGISTRATION_TOKEN_INVALID: 'AUTH_REGISTRATION_TOKEN_INVALID',
   // 만 14세 미만 가입 불가 안내
@@ -27,6 +31,12 @@ export const AUTH_ERROR_CODE = {
 
 // 제재 중 막힌 기능 호출 시 403. 로그인 만료 X
 export const ACCOUNT_SUSPENDED = 'ACCOUNT_SUSPENDED';
+
+// 편지/답장/닉네임에 금칙어나 외부 연락처가 있으면 message 를 그대로 안내
+export const CONTENT_ERROR_CODE = {
+  EXTERNAL_CONTACT: 'CONTENT_EXTERNAL_CONTACT',
+  FORBIDDEN_WORD: 'CONTENT_FORBIDDEN_WORD',
+} as const;
 
 export const PROFILE_ERROR_CODE = {
   /** 닉네임 입력란에 중복 오류 표시 */
