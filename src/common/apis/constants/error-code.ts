@@ -9,6 +9,10 @@ export const AUTH_ERROR_CODE = {
   INVALID_AUTHORIZATION_CODE: 'AUTH_INVALID_AUTHORIZATION_CODE',
   // 카카오 로그인을 처음부터 다시 시도
   KAKAO_TOKEN_EXCHANGE_FAILED: 'AUTH_KAKAO_TOKEN_EXCHANGE_FAILED',
+  // 카카오 서비스 일시 장애. 자동 재시도 X
+  KAKAO_UNAVAILABLE: 'AUTH_KAKAO_UNAVAILABLE',
+  // 서버가 앱(카카오 SDK) 로그인을 끈 환경. 웹 카카오 로그인으로 전환
+  KAKAO_NATIVE_LOGIN_DISABLED: 'AUTH_KAKAO_NATIVE_LOGIN_DISABLED',
   // Apple 로그인 서비스 일시 장애. 자동 재시도 X
   APPLE_UNAVAILABLE: 'AUTH_APPLE_UNAVAILABLE',
   // 탈퇴 재인증 code 만료·재사용. 애플 재인증부터 다시
