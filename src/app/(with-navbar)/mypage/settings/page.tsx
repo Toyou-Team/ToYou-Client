@@ -80,14 +80,14 @@ export default function SettingsPage() {
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>이용 약관 및 정책</h2>
+          <h2 className={styles.sectionTitle}>이용약관 및 정책</h2>
           <div className={styles.rowList}>
             <button type="button" className={styles.row} onClick={() => setSelectedPolicyId(1)}>
-              이용 약관 및 정책
+              이용약관 및 정책
               <IcChevronRight />
             </button>
             <button type="button" className={styles.row} onClick={() => setSelectedPolicyId(2)}>
-              개인정보 처리 방침
+              개인정보 처리방침
               <IcChevronRight />
             </button>
           </div>
