@@ -8,6 +8,7 @@ import { ApiError } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED } from '@/common/apis/constants/error-code';
 import { ModalProvider } from '@/common/providers/ModalProvider';
 import { AppToaster } from '@/components/common/Toast/Toast';
+import { PushTokenSync } from '@/components/push/PushTokenSync/PushTokenSync';
 import {
   AccountStatusGate,
   ACCOUNT_SUSPENDED_EVENT,
@@ -41,6 +42,7 @@ export default function Providers({ children }: { children: ReactNode }) {
         {children}
         <AccountStatusGate />
       </ModalProvider>
+      <PushTokenSync />
       <AppToaster />
     </QueryClientProvider>
   );
