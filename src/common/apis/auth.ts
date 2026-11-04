@@ -121,12 +121,12 @@ export interface WithdrawalSummary {
 export interface AccountSanction {
   // 제한번호 (예: R-K7M4-P9X2)
   referenceNumber: string;
-  // 1차 3일 · 2차 7일 · 3차 영구
+  // 1차 3일 · 2차 7일 · 3차 1년
   stage: 1 | 2 | 3;
   reason: string;
-  type: 'TEMPORARY' | 'PERMANENT';
+  type: 'TEMPORARY';
   startedAt: string;
-  endsAt: string | null;
+  endsAt: string;
 }
 
 export interface AccountStatus {
