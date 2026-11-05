@@ -69,6 +69,12 @@ export const postKakaoLogin = (authorizationCode: string) =>
 
 export const useKakaoLoginMutation = () => useMutation({ mutationFn: postKakaoLogin });
 
+// iOS 앱 카카오 SDK 토큰 로그인 (서버가 한 번 쓰고 만료시키므로 재시도하지 않는다)
+export const postKakaoTokenLogin = (accessToken: string) =>
+  request<KakaoAuthResult>('post', '/api/v1/auth/kakao/token', { accessToken }, { auth: false, retry: 0 });
+
+export const useKakaoTokenLoginMutation = () => useMutation({ mutationFn: postKakaoTokenLogin });
+
 // 애플은 kakaoProfile 이 빈 객체로 온다
 export type AppleAuthResult =
   | SignedInResult
