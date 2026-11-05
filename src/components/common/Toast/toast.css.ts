@@ -1,4 +1,4 @@
-import { keyframes, style } from '@vanilla-extract/css';
+import { keyframes, style, styleVariants } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
 
@@ -6,6 +6,9 @@ const HEIGHT = '3.8rem';
 const RADIUS = '1.2rem';
 const CIRCLE = `inset(0 calc(50% - ${HEIGHT} / 2) round calc(${HEIGHT} / 2))`;
 const FULL = `inset(0 round ${RADIUS})`;
+
+// 6.4rem: 좌우 padding + 아이콘 + 간격 + 화면 여백. 문구가 화면 폭을 넘으면 그만큼 글자를 줄인다
+const fitFontSize = (widthInEm: number) => `min(1.3rem, calc((100vw - 6.4rem) / ${widthInEm}))`;
 
 const appear = keyframes({
   '0%': { opacity: 0, clipPath: CIRCLE },
@@ -48,7 +51,7 @@ export const toast = style({
   borderRadius: RADIUS,
   backgroundColor: `color-mix(in srgb, ${vars.color.neutral_950} 90%, transparent)`,
 
-  ...vars.fontStyles.body,
+  ...vars.fontStyles.caption,
   color: vars.color.neutral_50,
   whiteSpace: 'nowrap',
 
@@ -61,10 +64,17 @@ export const toast = style({
   },
 });
 
+// 값은 해당 길이 문구의 실측 폭(em)
+export const textSize = styleVariants({
+  default: { fontSize: fitFontSize(24) },
+  long: { fontSize: fitFontSize(26) },
+  longest: { fontSize: fitFontSize(29.5) },
+});
+
 export const content = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '0.6rem',
+  gap: '0.8rem',
 
   animation: `${contentFadeIn} 3s ease-out forwards`,
 

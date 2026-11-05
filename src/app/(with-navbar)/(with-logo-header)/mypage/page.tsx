@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -8,8 +7,6 @@ import { useAccountStatusQuery, useLogoutMutation } from '@/common/apis/auth';
 import { GENDER_LABEL, useProfileQuery } from '@/common/apis/profile';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
-import { PolicySheet } from '@/components/signup/terms/PolicySheet/PolicySheet';
-import { AGREE_DATA } from '@/constants';
 import { IcChevronRight, IcProfileImage } from '@/assets/icons';
 
 import * as styles from './mypage.css';
@@ -23,9 +20,6 @@ export default function MyPage() {
   // 정지 중에는 조회만 되고 수정은 403 이라 수정 진입을 막는다
   const { data: accountStatus } = useAccountStatusQuery();
   const canEdit = !accountStatus?.restricted;
-  const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
-
-  const selectedPolicy = AGREE_DATA.find((data) => data.id === selectedPolicyId);
 
   const handleLogout = () => {
     open(({ close }) => (
@@ -111,34 +105,30 @@ export default function MyPage() {
         </div>
 
         <div className={styles.settingGroup}>
+          <h2 className={styles.sectionTitle}>설정</h2>
+          <Link href="/mypage/settings" className={styles.row}>
+            <span className={styles.settingItem}>설정</span>
+            <IcChevronRight />
+          </Link>
+        </div>
+
+        {accountStatus?.supportUrl && (
+          <div className={styles.settingGroup}>
+            <h2 className={styles.sectionTitle}>문의하기</h2>
+            <a className={styles.row} href={accountStatus.supportUrl} target="_blank" rel="noopener noreferrer">
+              <span className={styles.settingItem}>카카오톡 채널로 문의하기</span>
+              <IcChevronRight />
+            </a>
+          </div>
+        )}
+
+        <div className={styles.accountGroup}>
           <h2 className={styles.sectionTitle}>계정</h2>
           <span className={styles.settingItem} onClick={handleLogout}>
             로그아웃
           </span>
         </div>
       </div>
-      <div className={styles.policyWrapper}>
-        <div className={styles.policyRow}>
-          <button type="button" className={styles.policyLink} onClick={() => setSelectedPolicyId(1)}>
-            이용약관
-          </button>
-
-          <button type="button" className={styles.policyLink} onClick={() => setSelectedPolicyId(2)}>
-            개인정보처리방침
-          </button>
-        </div>
-
-        <button type="button" className={styles.withdrawButton} onClick={() => router.push('/mypage/withdraw')}>
-          탈퇴하기
-        </button>
-      </div>
-
-      <PolicySheet
-        isOpen={selectedPolicy !== undefined}
-        onClose={() => setSelectedPolicyId(null)}
-        title={selectedPolicy?.text ?? ''}
-        content={selectedPolicy?.content ?? ''}
-      />
     </div>
   );
 }

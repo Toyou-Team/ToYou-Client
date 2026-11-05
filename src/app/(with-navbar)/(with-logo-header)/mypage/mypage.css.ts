@@ -58,7 +58,7 @@ export const profileEditText = style({
 export const settingSection = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '4.4rem',
+  gap: '1.6rem',
 
   marginTop: '4.4rem',
 });
@@ -68,6 +68,8 @@ export const settingGroup = style({
   flexDirection: 'column',
   gap: '0.8rem',
 });
+
+export const accountGroup = style([settingGroup, { marginTop: '3rem' }]);
 
 export const sectionTitle = style({
   ...vars.fontStyles.label,
@@ -85,16 +87,7 @@ export const row = style({
   justifyContent: 'space-between',
 
   width: '100%',
-  height: '5.4rem',
-  padding: 0,
-  border: 0,
-
-  background: 'transparent',
-  textAlign: 'left',
-  cursor: 'pointer',
-
-  ...vars.fontStyles.body,
-  color: vars.color.neutral_950,
+  height: '2.4rem',
 });
 
 export const rowRight = style({
@@ -106,31 +99,4 @@ export const rowRight = style({
 export const rowValue = style({
   ...vars.fontStyles.subtitle,
   color: vars.color.neutral_600,
-});
-
-export const policyWrapper = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: '1.6rem',
-
-  marginTop: '4.4rem',
-});
-
-export const policyRow = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '1.6rem',
-});
-
-export const policyLink = style({
-  ...vars.fontStyles.body,
-  color: vars.color.neutral_600,
-  cursor: 'pointer',
-});
-
-export const withdrawButton = style({
-  ...vars.fontStyles.body,
-  color: vars.color.neutral_600,
-  cursor: 'pointer',
 });

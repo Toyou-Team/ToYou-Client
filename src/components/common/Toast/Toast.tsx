@@ -1,5 +1,6 @@
 'use client';
 
+import clsx from 'clsx';
 import { toast, Toaster } from 'sonner';
 
 import * as styles from './toast.css';
@@ -19,9 +20,15 @@ export function AppToaster() {
   );
 }
 
-export const showToast = (message: string) =>
-  toast.custom(() => (
-    <div className={styles.toast}>
+// 알림 동의·철회 토스트 글자가 화면을 넘지 않도록
+const getTextSize = ({ length }: string) => (length >= 45 ? 'longest' : length >= 41 ? 'long' : 'default');
+
+export const showToast = (message: string) => {
+  // 연달아 띄워도 겹치지 않게 마지막 것만 보여준다
+  toast.dismiss();
+
+  return toast.custom(() => (
+    <div className={clsx(styles.toast, styles.textSize[getTextSize(message)])}>
       <span className={styles.content}>
         <svg width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">
           <path
@@ -36,3 +43,4 @@ export const showToast = (message: string) =>
       </span>
     </div>
   ));
+};

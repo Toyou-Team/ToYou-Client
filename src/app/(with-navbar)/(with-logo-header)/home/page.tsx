@@ -1,4 +1,5 @@
 import { DeliverySection } from '@/components/home/DeliverySection/DeliverySection';
+import { PushPermissionRequest } from '@/components/push/PushPermissionRequest/PushPermissionRequest';
 
 import * as styles from './home.css';
 
@@ -12,6 +13,7 @@ export default function HomePage() {
     <div className={styles.homeWrapper}>
       <h1 className={styles.titleText}>{question}</h1>
       <DeliverySection />
+      <PushPermissionRequest />
     </div>
   );
 }
