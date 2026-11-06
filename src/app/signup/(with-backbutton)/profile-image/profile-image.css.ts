@@ -1,5 +1,6 @@
 import { vars } from '@/styles/theme.css';
 import { style } from '@vanilla-extract/css';
+import { withSafeBottom } from '@/styles/safeArea';
 
 export const profileImagePageWrapper = style({
   display: 'flex',
@@ -26,7 +27,7 @@ export const guideText = style({
 
 export const bottomButtonWrapper = style({
   position: 'absolute',
-  bottom: '3.4rem',
+  bottom: withSafeBottom('3.4rem'),
   left: '0',
   right: '0',
   padding: '0 2.4rem',

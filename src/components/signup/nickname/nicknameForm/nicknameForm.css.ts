@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { withSafeBottom } from '@/styles/safeArea';
 
 export const nicknameFormWrapper = style({
   width: '100%',
@@ -17,7 +18,7 @@ export const nicknameFieldWrapper = style({
 
 export const bottomButtonWrapper = style({
   position: 'absolute',
-  bottom: '3.4rem',
+  bottom: withSafeBottom('3.4rem'),
   left: '0',
   right: '0',
 

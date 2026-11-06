@@ -1,6 +1,7 @@
 import { vars } from '@/styles/theme.css';
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
+import { withSafeBottom } from '@/styles/safeArea';
 
 export const buttonWrapper = style({
   width: '100%',
@@ -41,7 +42,7 @@ export const choiceButton = recipe({
 
 export const bottomButtonWrapper = style({
   position: 'absolute',
-  bottom: '3.4rem',
+  bottom: withSafeBottom('3.4rem'),
   left: '0',
   right: '0',
 

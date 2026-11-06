@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { withSafeBottom } from '@/styles/safeArea';
 
 export const termsFormWrapper = style({
   flex: 1,
@@ -19,7 +20,7 @@ export const termCheckboxListContainer = style({
 
 export const bottomButtonWrapper = style({
   position: 'absolute',
-  bottom: '3.4rem',
+  bottom: withSafeBottom('3.4rem'),
   left: '0',
   right: '0',
 

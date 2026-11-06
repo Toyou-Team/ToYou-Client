@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
 import { vars } from '@/styles/theme.css';
+import { withSafeTop, withSafeBottom } from '@/styles/safeArea';
 
 export const page = style({
   position: 'relative',
@@ -10,7 +11,7 @@ export const page = style({
 
   width: '100%',
   height: '100dvh',
-  padding: '11.6rem 4.5rem 4rem',
+  padding: `${withSafeTop('11.6rem')} 4.5rem ${withSafeBottom('4rem')}`,
   backgroundColor: vars.color.neutral_100,
 
   backgroundSize: 'cover',
@@ -20,7 +21,7 @@ export const page = style({
 
 export const closeButton = style({
   position: 'absolute',
-  top: '4.9rem',
+  top: withSafeTop('4.9rem'),
   right: '2.8rem',
 
   padding: 0,
@@ -204,7 +205,7 @@ export const attachmentButton = recipe({
 export const submitButtonWrapper = style({
   position: 'absolute',
   right: '2.4rem',
-  bottom: '4rem',
+  bottom: withSafeBottom('4rem'),
   left: '2.4rem',
 });
 

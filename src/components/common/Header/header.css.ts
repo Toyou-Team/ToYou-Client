@@ -2,6 +2,7 @@ import { vars } from '@/styles/theme.css';
 import { Z_INDEX } from '@/constants/zIndex';
 import { globalStyle, style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
+import { SAFE_AREA, withSafeTop } from '@/styles/safeArea';
 
 export const headerWrapper = recipe({
   base: {
@@ -9,7 +10,8 @@ export const headerWrapper = recipe({
     top: 0,
     display: 'flex',
     width: '100%',
-    height: '6.8rem',
+    height: withSafeTop('6.8rem'),
+    paddingTop: SAFE_AREA.top,
     color: vars.color.neutral_950,
     backgroundColor: 'white',
   },
@@ -24,7 +26,7 @@ export const headerWrapper = recipe({
     },
     bordered: {
       true: {
-        height: '8rem',
+        height: withSafeTop('8rem'),
         borderBottom: `1px solid ${vars.color.neutral_300}`,
       },
     },
@@ -41,7 +43,8 @@ globalStyle(`${onDark} svg [stroke]`, {
 });
 
 export const leftElement = style({
-  height: '100%',
+  top: SAFE_AREA.top,
+  bottom: 0,
   display: 'flex',
   alignItems: 'center',
 
@@ -57,7 +60,8 @@ export const centerElement = style({
 });
 
 export const rightElement = style({
-  height: '100%',
+  top: SAFE_AREA.top,
+  bottom: 0,
 
   display: 'flex',
   alignItems: 'center',
