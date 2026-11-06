@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
+import { SAFE_AREA, withSafeBottom } from '@/styles/safeArea';
 
 export const pageWrapper = style({
   display: 'flex',
@@ -8,6 +9,7 @@ export const pageWrapper = style({
 
   width: '100%',
   height: '100dvh',
+  paddingTop: SAFE_AREA.top,
 
   backgroundColor: vars.color.neutral_50,
 });
@@ -104,5 +106,5 @@ export const bottomArea = style({
   gap: '3.2rem',
 
   marginTop: 'auto',
-  padding: '1.6rem 2.4rem 4rem',
+  padding: `1.6rem 2.4rem ${withSafeBottom('4rem')}`,
 });

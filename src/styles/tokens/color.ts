@@ -6,7 +6,7 @@ export const color = {
   neutral_900: '#3A3A3A',
   neutral_600: '#797979',
   neutral_300: '#D9D9D9',
-  neutral_100: '#EEEEEE',
+  neutral_100: '#F2F2F2',
 
   // white
   neutral_50: '#FEFEFE',

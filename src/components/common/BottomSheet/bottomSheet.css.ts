@@ -2,6 +2,7 @@ import { vars } from '@/styles/theme.css';
 import { keyframes, style } from '@vanilla-extract/css';
 
 import { Z_INDEX } from '@/constants/zIndex';
+import { SAFE_AREA } from '@/styles/safeArea';
 
 const fadeIn = keyframes({
   from: { opacity: 0 },
@@ -40,7 +41,8 @@ export const sheet = style({
   flexDirection: 'column',
 
   width: '100%',
-  maxHeight: 'calc(100dvh - 6.8rem)',
+  maxHeight: `calc(100dvh - 6.8rem - ${SAFE_AREA.top})`,
+  paddingBottom: SAFE_AREA.bottom,
 
   borderRadius: '2.4rem 2.4rem 0 0',
   backgroundColor: vars.color.neutral_50,

@@ -1,6 +1,7 @@
 import { globalStyle, style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
+import { withSafeTop, withSafeBottom } from '@/styles/safeArea';
 
 export const page = style({
   display: 'flex',
@@ -16,7 +17,7 @@ export const page = style({
 
 // 공통 Header 를 이 화면에서만 낮고 투명하게 쓴다
 globalStyle(`${page} > header`, {
-  height: '8rem',
+  height: withSafeTop('8rem'),
   backgroundColor: 'transparent',
 });
 
@@ -48,5 +49,5 @@ export const bottomButtonWrapper = style({
   bottom: 0,
 
   marginInline: '-2.1rem',
-  padding: '3.2rem 0 4rem',
+  padding: `3.2rem 0 ${withSafeBottom('4rem')}`,
 });

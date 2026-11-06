@@ -86,6 +86,13 @@ globalStyle('*', {
   boxSizing: 'border-box',
 });
 
+globalStyle(':root', {
+  vars: {
+    '--safe-area-top': 'env(safe-area-inset-top, 0px)',
+    '--safe-area-bottom': 'env(safe-area-inset-bottom, 0px)',
+  },
+});
+
 globalStyle('html', {
   WebkitTouchCallout: 'none',
   WebkitTapHighlightColor: 'rgb(0 0 0 / 0%)',

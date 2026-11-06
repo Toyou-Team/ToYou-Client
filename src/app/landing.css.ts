@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
+import { withSafeTop, withSafeBottom } from '@/styles/safeArea';
 
 export const landingPageWrapper = style({
   display: 'flex',
@@ -9,7 +10,7 @@ export const landingPageWrapper = style({
   width: '100%',
   minHeight: '100dvh',
 
-  padding: '3rem 0',
+  padding: `${withSafeTop('3rem')} 0 ${withSafeBottom('3rem')}`,
 });
 
 export const landingPageTitle = style({

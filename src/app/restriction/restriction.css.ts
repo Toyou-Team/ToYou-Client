@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
+import { withSafeBottom } from '@/styles/safeArea';
 
 export const pageWrapper = style({
   display: 'flex',
@@ -83,7 +84,7 @@ export const bottomWrapper = style({
   alignItems: 'center',
 
   marginTop: 'auto',
-  padding: '3rem 2.4rem 4rem',
+  padding: `3rem 2.4rem ${withSafeBottom('4rem')}`,
 });
 
 export const contactLink = style({
