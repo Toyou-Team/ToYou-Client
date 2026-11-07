@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { GoogleTagManager } from '@next/third-parties/google';
 
 import '@/styles/global.css';
 import { themeClass } from '@/styles/theme.css';
@@ -57,6 +58,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      {process.env.NEXT_PUBLIC_GTM_ID && <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />}
       <body className={`${pretendard.variable} ${montserrat.variable} ${montserratWithNumber.variable} ${themeClass}`}>
         <Providers>{children}</Providers>
       </body>
