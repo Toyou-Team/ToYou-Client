@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-import { IcChevronRight } from '@/assets/icons';
+import { IcAlarmOff, IcChevronRight } from '@/assets/icons';
 import { usePushSettings } from '@/common/hooks/usePushSettings';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { Header } from '@/components/common/Header/Header';
@@ -31,24 +31,34 @@ export default function SettingsPage() {
           <h2 className={styles.sectionTitle}>알림 설정</h2>
 
           <div className={styles.rowList}>
+            {push.devicePermission !== null && push.devicePermission !== 'GRANTED' && (
+              <button type="button" className={styles.deviceBanner} onClick={push.openDeviceNotificationModal}>
+                <span className={styles.deviceBannerContent}>
+                  <IcAlarmOff aria-hidden className={styles.deviceBannerIcon} />
+                  <span className={styles.deviceBannerText}>
+                    <strong className={styles.deviceBannerTitle}>기기 알림이 꺼져 있어요</strong>
+                    현재 알림을 받을 수 없어요
+                  </span>
+                </span>
+                <span className={styles.deviceBannerButton}>설정으로 이동</span>
+              </button>
+            )}
+
             <label className={styles.row}>
               <span>서비스 알림</span>
-              {/* 기기 알림 권한은 iOS 설정에서만 끌 수 있어 값을 직접 바꾸지 않고 앱에 요청 */}
-              <Toggle
-                checked={push.devicePermission === 'GRANTED'}
-                disabled={push.devicePermission === null}
-                onChange={push.turnOnDeviceNotifications}
-              />
+              {/* 서비스 알림은 항상 ON. 실제 수신은 기기 알림 권한에 따른다 */}
+              <Toggle checked onChange={push.openDeviceNotificationModal} />
             </label>
 
             <div className={styles.toggleGroup}>
               <label className={styles.row}>
                 <span>광고 · 이벤트 알림</span>
-                <Toggle
-                  checked={push.consents?.marketingPush.agreed ?? false}
-                  disabled={!push.consents}
-                  onChange={(event) => push.changeMarketing(event.target.checked)}
-                />
+                {push.consents && (
+                  <Toggle
+                    checked={push.consents.marketingPush.agreed}
+                    onChange={(event) => push.changeMarketing(event.target.checked)}
+                  />
+                )}
               </label>
               <p className={styles.description}>
                 새소식, 이벤트 및 혜택에 대한 알림이나 메시지를 받을 수 있어요.
@@ -60,11 +70,12 @@ export default function SettingsPage() {
             <div className={styles.toggleGroup}>
               <label className={styles.row}>
                 <span>야간 수신 동의</span>
-                <Toggle
-                  checked={push.consents?.nightPush.agreed ?? false}
-                  disabled={!push.consents}
-                  onChange={(event) => push.changeNight(event.target.checked)}
-                />
+                {push.consents && (
+                  <Toggle
+                    checked={push.consents.nightPush.agreed}
+                    onChange={(event) => push.changeNight(event.target.checked)}
+                  />
+                )}
               </label>
               <p className={styles.description}>오후 9시부터 오전 8시 사이에 알림을 받을 수 있어요.</p>
             </div>

@@ -54,6 +54,58 @@ export const row = style({
   cursor: 'pointer',
 });
 
+export const deviceBanner = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '2.1rem',
+
+  width: '100%',
+  padding: '1.5rem 1.7rem',
+  borderRadius: '1.8rem',
+
+  backgroundColor: vars.color.neutral_100,
+  textAlign: 'left',
+  cursor: 'pointer',
+});
+
+export const deviceBannerContent = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '1.6rem',
+});
+
+export const deviceBannerIcon = style({
+  flexShrink: 0,
+
+  width: '2.4rem',
+  height: '2.4rem',
+});
+
+export const deviceBannerText = style({
+  display: 'flex',
+  flexDirection: 'column',
+
+  ...vars.fontStyles.caption,
+  color: vars.color.neutral_600,
+});
+
+export const deviceBannerTitle = style({
+  ...vars.fontStyles.subtitle,
+  color: vars.color.neutral_950,
+});
+
+export const deviceBannerButton = style({
+  flexShrink: 0,
+
+  padding: '0.8rem 1.6rem',
+  borderRadius: '10rem',
+
+  ...vars.fontStyles.body,
+  color: vars.color.neutral_50,
+  backgroundColor: vars.color.neutral_900,
+});
+
 export const toggleGroup = style({
   display: 'flex',
   flexDirection: 'column',
