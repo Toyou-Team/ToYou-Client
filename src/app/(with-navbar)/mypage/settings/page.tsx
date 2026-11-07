@@ -62,7 +62,7 @@ export default function SettingsPage() {
                 <span>야간 수신 동의</span>
                 <Toggle
                   checked={push.consents?.nightPush.agreed ?? false}
-                  disabled={!push.canChangeNight}
+                  disabled={!push.consents}
                   onChange={(event) => push.changeNight(event.target.checked)}
                 />
               </label>

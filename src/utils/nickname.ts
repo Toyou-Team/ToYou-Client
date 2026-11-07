@@ -2,7 +2,7 @@ import { ApiError } from '@/common/apis/client';
 import { CONTENT_ERROR_CODE } from '@/common/apis/constants/error-code';
 
 const NICKNAME_MIN_LENGTH = 2;
-const NICKNAME_MAX_LENGTH = 12;
+export const NICKNAME_MAX_LENGTH = 12;
 const NICKNAME_PATTERN = /^[가-힣a-zA-Z0-9 ]+$/;
 
 export const NICKNAME_LENGTH_ERROR = '닉네임은 최소 2자에서 12자까지 작성 가능합니다.';

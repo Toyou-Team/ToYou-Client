@@ -17,11 +17,11 @@ const REASONS = [
   {
     id: 'UNPLEASANT',
     label: '불쾌하거나 불편한 경험이 있어요.',
-    placeholder: '어떤 일이 있었는지 알려주시면 조치할게요.',
+    placeholder: '어떤 일이 있었는지 알려주시면 조치할게요. (선택)',
   },
   { id: 'LOST_INTEREST', label: '흥미가 떨어졌어요.' },
   { id: 'BREAK', label: '잠깐 쉬어갈래요.' },
-  { id: 'OTHER', label: '기타', placeholder: '자유롭게 적어주세요.' },
+  { id: 'OTHER', label: '기타', placeholder: '자유롭게 적어주세요. (선택)' },
 ];
 
 const DETAIL_MAX_LENGTH = 500;
@@ -31,9 +31,7 @@ export default function WithdrawReasonPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [details, setDetails] = useState<Record<string, string>>({});
 
-  const canNext =
-    selectedIds.length > 0 &&
-    REASONS.every(({ id, placeholder }) => !placeholder || !selectedIds.includes(id) || details[id]?.trim());
+  const canNext = selectedIds.length > 0;
 
   const toggleReason = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]));

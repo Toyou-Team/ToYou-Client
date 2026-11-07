@@ -28,7 +28,10 @@ const consentChangeMessage = (before: PushConsents, after: UpdatedPushConsents) 
   const marketingChanged = before.marketingPush.agreed !== after.marketingPush.agreed;
   const nightChanged = before.nightPush.agreed !== after.nightPush.agreed;
 
-  if (marketingChanged && after.marketingPush.agreed) return `to you 광고성 정보 수신에 동의했어요. (${date})`;
+  if (marketingChanged && after.marketingPush.agreed) {
+    const scope = nightChanged ? '광고성·야간 광고성 정보' : '광고성 정보';
+    return `to you ${scope} 수신에 동의했어요. (${date})`;
+  }
   // 광고성을 끄면 서버가 야간도 함께 끈다
   if (marketingChanged) {
     const scope = nightChanged ? '광고성·야간 광고성 정보' : '광고성 정보';
@@ -99,10 +102,13 @@ export function usePushSettings() {
 
   return {
     consents,
-    // 야간은 광고성 동의가 있을 때만 바꿀 수 있다
-    canChangeNight: consents?.marketingPush.agreed === true,
     changeMarketing: (agreed: boolean) => change({ marketingPushAgreed: agreed }),
-    changeNight: (agreed: boolean) => change({ nightPushAgreed: agreed }),
+    changeNight: (agreed: boolean) =>
+      change(
+        agreed && !consents?.marketingPush.agreed
+          ? { marketingPushAgreed: true, nightPushAgreed: true }
+          : { nightPushAgreed: agreed },
+      ),
     devicePermission: device.permission,
     turnOnDeviceNotifications: device.turnOn,
   };

@@ -40,7 +40,7 @@ export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }
   const [detail, setDetail] = useState('');
 
   const isOther = reason === 'OTHER';
-  const canSubmit = reason !== null && (!isOther || detail.trim().length > 0);
+  const canSubmit = reason !== null;
 
   const openAlertModal = (title: string, description?: string, onConfirm?: () => void) => {
     open(({ close }) => (
@@ -79,7 +79,7 @@ export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }
     if (!reason) return;
 
     try {
-      const { alreadyReportedUser } = await report({ reason, detail: isOther ? detail.trim() : undefined });
+      const { alreadyReportedUser } = await report({ reason, detail: (isOther && detail.trim()) || undefined });
       router.back();
 
       if (alreadyReportedUser) {

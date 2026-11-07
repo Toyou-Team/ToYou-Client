@@ -23,7 +23,7 @@ export function AppToaster() {
 }
 
 // 알림 동의·철회 토스트 글자가 화면을 넘지 않도록
-const getTextSize = ({ length }: string) => (length >= 45 ? 'longest' : length >= 41 ? 'long' : 'default');
+const getTextSize = ({ length }: string) => (length >= 42 ? 'longest' : length >= 41 ? 'long' : 'default');
 
 export const showToast = (message: string) => {
   // 연달아 띄워도 겹치지 않게 마지막 것만 보여준다
