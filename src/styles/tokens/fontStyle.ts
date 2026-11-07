@@ -19,7 +19,7 @@ export const fontStyle = {
 
   // subtitle
   subtitle: {
-    fontSize: typography.fontSize.scale[500],
+    fontSize: typography.fontSize.subtitle,
     fontWeight: typography.fontWeight.medium,
     lineHeight: typography.lineHeight.default,
     letterSpacing: typography.letterSpacing.default,
@@ -27,7 +27,7 @@ export const fontStyle = {
 
   // body
   body: {
-    fontSize: typography.fontSize.scale[300],
+    fontSize: typography.fontSize.body,
     fontWeight: typography.fontWeight.regular,
     lineHeight: typography.lineHeight.default,
     letterSpacing: typography.letterSpacing.default,
@@ -35,7 +35,7 @@ export const fontStyle = {
 
   // caption
   caption: {
-    fontSize: typography.fontSize.scale[200],
+    fontSize: typography.fontSize.caption,
     fontWeight: typography.fontWeight.regular,
     lineHeight: typography.lineHeight.default,
     letterSpacing: typography.letterSpacing.default,
@@ -43,7 +43,7 @@ export const fontStyle = {
 
   // label
   label: {
-    fontSize: typography.fontSize.scale[100],
+    fontSize: typography.fontSize.label,
     fontWeight: typography.fontWeight.medium,
     lineHeight: typography.lineHeight.default,
     letterSpacing: typography.letterSpacing.default,
