@@ -68,10 +68,7 @@ function useDevicePushPermission() {
     return () => window.removeEventListener('message', listener);
   }, []);
 
-  // 한 번도 묻지 않았으면 권한 창, 이미 거절했으면 iOS 설정으로 보낸다 (권한 창은 다시 띄울 수 없다)
-  const turnOn = () => (permission === 'NOT_DETERMINED' ? requestPushToken() : openNotificationSettings());
-
-  return { permission, turnOn };
+  return { permission };
 }
 
 // 설정 화면 알림: 광고성·야간 수신 동의 토글 + 기기 알림 상태
@@ -100,16 +97,53 @@ export function usePushSettings() {
     if (consents) mutate(payload);
   };
 
+  // 야간 동의 클릭 시 광고성 동의 함께 동의할지 확인 모달창
+  const changeNight = (agreed: boolean) => {
+    if (!agreed || consents?.marketingPush.agreed) {
+      change({ nightPushAgreed: agreed });
+      return;
+    }
+
+    open(({ close }) => (
+      <Modal
+        title="광고·이벤트 알림도 함께 받을까요?"
+        description={'야간 알림을 받으려면\n광고·이벤트 알림 수신에도 동의해야 해요.'}
+        cancelText="취소"
+        confirmText="함께 동의하기"
+        onConfirm={() => {
+          close();
+          change({ marketingPushAgreed: true, nightPushAgreed: true });
+        }}
+        onClose={close}
+      />
+    ));
+  };
+
+  // 기기 알림이 꺼져 있을 때만 안내
+  const openDeviceNotificationModal = () => {
+    if (device.permission === null || device.permission === 'GRANTED') return;
+
+    open(({ close }) => (
+      <Modal
+        title="기기 알림이 꺼져 있어요"
+        description={'편지가 도착했을 때 알림을 받으려면\n아이폰 설정에서 to you 알림을 켜주세요.'}
+        cancelText="취소"
+        confirmText="설정으로 이동"
+        onConfirm={() => {
+          close();
+          if (device.permission === 'NOT_DETERMINED') requestPushToken();
+          else openNotificationSettings();
+        }}
+        onClose={close}
+      />
+    ));
+  };
+
   return {
     consents,
     changeMarketing: (agreed: boolean) => change({ marketingPushAgreed: agreed }),
-    changeNight: (agreed: boolean) =>
-      change(
-        agreed && !consents?.marketingPush.agreed
-          ? { marketingPushAgreed: true, nightPushAgreed: true }
-          : { nightPushAgreed: agreed },
-      ),
+    changeNight,
     devicePermission: device.permission,
-    turnOnDeviceNotifications: device.turnOn,
+    openDeviceNotificationModal,
   };
 }
