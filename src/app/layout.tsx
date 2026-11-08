@@ -1,5 +1,6 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { GoogleTagManager } from '@next/third-parties/google';
 
 import '@/styles/global.css';
 import { themeClass } from '@/styles/theme.css';
@@ -36,6 +37,18 @@ const montserratWithNumber = localFont({
 export const metadata: Metadata = {
   title: 'To You',
   description: 'To You',
+  // 홈 화면에 추가한 웹앱에서만 적용
+  other: { 'apple-mobile-web-app-status-bar-style': 'black-translucent' },
+};
+
+// iOS/Safari 클릭 시 확대 방지
+// viewportFit: 상태 바/홈 바 영역까지 그린다. 여백은 styles/safeArea 로 처리
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+  themeColor: 'transparent',
 };
 
 export default function RootLayout({
@@ -45,6 +58,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      {process.env.NEXT_PUBLIC_GTM_ID && <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />}
       <body className={`${pretendard.variable} ${montserrat.variable} ${montserratWithNumber.variable} ${themeClass}`}>
         <Providers>{children}</Providers>
       </body>

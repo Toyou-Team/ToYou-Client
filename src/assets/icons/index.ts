@@ -31,6 +31,8 @@ import IcSpotify from '@/assets/icons/ic_spotify.svg';
 import IcXNeutral600 from '@/assets/icons/ic_x_neutral600.svg';
 import IcMore from '@/assets/icons/ic_more.svg';
 import IcExit from '@/assets/icons/ic_exit.svg';
+import IcClock from '@/assets/icons/ic_clock.svg';
+import IcAlarmOff from '@/assets/icons/ic_alarm_off.svg';
 
 export {
   IcLogoKakao,
@@ -66,4 +68,6 @@ export {
   IcXNeutral600,
   IcMore,
   IcExit,
+  IcClock,
+  IcAlarmOff,
 };

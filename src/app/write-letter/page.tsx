@@ -15,6 +15,7 @@ import {
   useWritingPromptQuery,
 } from '@/common/apis/letter';
 import { ApiError } from '@/common/apis/client';
+import { CONTENT_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useSendMessageMutation } from '@/common/apis/conversation';
 import { useReplyMutation } from '@/common/apis/delivery';
@@ -95,6 +96,19 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     ));
   };
 
+  const openForbiddenWordModal = (error: Error) => {
+    if (!(error instanceof ApiError) || error.code !== CONTENT_ERROR_CODE.FORBIDDEN_WORD) return false;
+
+    const words = error.details?.forbiddenWords;
+    openAlertModal(
+      '전송 불가',
+      words?.length
+        ? `${words.join(', ')}은(는) 보낼 수 없는 표현이에요.\n다른 표현으로 작성해 주세요.`
+        : error.message,
+    );
+    return true;
+  };
+
   const submit = () => {
     const body = message.trim();
     const spotifyTrackId = selectedTrack?.id;
@@ -112,6 +126,12 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
             if (bonusChocolateAmount > 0) showToast(`${bonusChocolateAmount}초코가 지급됐어요.`);
             router.push('/home');
           },
+          onError: (error) => {
+            if (openForbiddenWordModal(error)) return;
+            if (error instanceof ApiError && error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY) {
+              openAlertModal('편지를 보내지 못했어요', error.message);
+            }
+          },
         },
       );
       return;
@@ -124,7 +144,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     const replyOptions = {
       onSuccess: () => router.back(),
       onError: (error: Error) => {
-        if (!(error instanceof ApiError)) return;
+        if (!(error instanceof ApiError) || openForbiddenWordModal(error)) return;
 
         if (error.status === HTTP_STATUS_CODE.CONFLICT) {
           openAlertModal('답장을 보낼 수 없어요', error.message, () => router.back());

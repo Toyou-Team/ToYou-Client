@@ -1,4 +1,4 @@
-import type { KakaoProfileSuggestion, ReceiveGender } from './auth';
+import type { KakaoProfileSuggestion, ReceiveGender, WithdrawalReasonPayload } from './auth';
 
 /**
  * 토큰 저장 정책
@@ -9,14 +9,23 @@ import type { KakaoProfileSuggestion, ReceiveGender } from './auth';
 const isBrowser = () => typeof window !== 'undefined';
 
 let accessToken: string | null = null;
+const accessTokenListeners = new Set<() => void>();
+
+const changeAccessToken = (token: string | null) => {
+  accessToken = token;
+  accessTokenListeners.forEach((listener) => listener());
+};
 
 export const accessTokenStore = {
   get: () => accessToken,
-  set: (token: string) => {
-    accessToken = token;
-  },
-  clear: () => {
-    accessToken = null;
+  set: (token: string) => changeAccessToken(token),
+  clear: () => changeAccessToken(null),
+  // 로그인/재발급/로그아웃 때마다 호출
+  subscribe: (listener: () => void) => {
+    accessTokenListeners.add(listener);
+    return () => {
+      accessTokenListeners.delete(listener);
+    };
   },
 };
 
@@ -31,6 +40,9 @@ const webStore = (getStorage: () => Storage, key: string) => ({
 });
 
 export const refreshTokenStore = webStore(() => window.localStorage, 'toyou_refresh_token');
+
+// 애플 계정은 탈퇴할 때 재인증이 필요하다. 서버 응답에 로그인 수단이 없어 로그인할 때 기록한다
+export const loginProviderStore = webStore(() => window.localStorage, 'toyou_login_provider');
 
 // 카카오 인증은 됐지만 가입 미완료인 유저가 가입 플로우 동안 들고 다니는 임시 토큰
 export const registrationTokenStore = webStore(() => window.sessionStorage, 'toyou_registration_token');
@@ -57,11 +69,28 @@ const SIGNUP_DRAFT_KEY = 'toyou_signup_draft';
 
 export interface SignupDraft {
   nickname?: string;
+  nicknameError?: string;
   receiveGender?: ReceiveGender;
-  // 약관 화면의 선택 동의
   marketingPushAgreed?: boolean;
   nightPushAgreed?: boolean;
 }
+
+// 탈퇴 사유 화면에서 고른 값을 확인 화면의 탈퇴 요청까지 들고 감
+const WITHDRAWAL_REASON_KEY = 'toyou_withdrawal_reason';
+
+export const withdrawalReasonStore = {
+  get: (): WithdrawalReasonPayload => {
+    if (!isBrowser()) return {};
+    const raw = window.sessionStorage.getItem(WITHDRAWAL_REASON_KEY);
+    return raw ? (JSON.parse(raw) as WithdrawalReasonPayload) : {};
+  },
+  set: (payload: WithdrawalReasonPayload) => {
+    if (isBrowser()) window.sessionStorage.setItem(WITHDRAWAL_REASON_KEY, JSON.stringify(payload));
+  },
+  clear: () => {
+    if (isBrowser()) window.sessionStorage.removeItem(WITHDRAWAL_REASON_KEY);
+  },
+};
 
 export const signupDraftStore = {
   get: (): SignupDraft => {
@@ -100,6 +129,7 @@ export const setTokens = ({ accessToken, refreshToken }: { accessToken: string; 
 export const clearTokens = () => {
   accessTokenStore.clear();
   refreshTokenStore.clear();
+  loginProviderStore.clear();
   loggedInCookie.clear();
 };
 

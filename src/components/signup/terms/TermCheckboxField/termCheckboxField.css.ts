@@ -73,6 +73,31 @@ export const termText = style({
   color: vars.color.neutral_950,
 });
 
+export const detail = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.8rem',
+
+  padding: '0 2.7rem 0 7.2rem',
+});
+
+export const detailLabel = style({
+  display: 'flex',
+  alignItems: 'center',
+});
+
+export const detailTitle = style({
+  ...vars.fontStyles.caption,
+  fontWeight: 600,
+  color: vars.color.neutral_600,
+});
+
+export const detailDescription = style({
+  ...vars.fontStyles.caption,
+  color: vars.color.neutral_600,
+  wordBreak: 'keep-all',
+});
+
 export const descriptionText = style({
   ...vars.fontStyles.body,
   color: vars.color.neutral_600,

@@ -2,7 +2,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/r
 
 import { request } from './client';
 import { KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY } from './oAuth';
-import { clearTokens } from './token';
+import { clearTokens, withdrawalReasonStore } from './token';
 
 export type Gender = 'MALE' | 'FEMALE';
 export type ReceiveGender = 'MALE' | 'FEMALE' | 'ALL';
@@ -69,6 +69,12 @@ export const postKakaoLogin = (authorizationCode: string) =>
 
 export const useKakaoLoginMutation = () => useMutation({ mutationFn: postKakaoLogin });
 
+// iOS 앱 카카오 SDK 토큰 로그인 (서버가 한 번 쓰고 만료시키므로 재시도하지 않는다)
+export const postKakaoTokenLogin = (accessToken: string) =>
+  request<KakaoAuthResult>('post', '/api/v1/auth/kakao/token', { accessToken }, { auth: false, retry: 0 });
+
+export const useKakaoTokenLoginMutation = () => useMutation({ mutationFn: postKakaoTokenLogin });
+
 // 애플은 kakaoProfile 이 빈 객체로 온다
 export type AppleAuthResult =
   | SignedInResult
@@ -87,7 +93,6 @@ export interface SignupPayload {
   receiveGender: ReceiveGender;
   useKakaoProfileImage: boolean;
   gender?: Gender;
-  // 선택 동의. 보내지 않으면 미동의
   marketingPushAgreed?: boolean;
   nightPushAgreed?: boolean;
 }
@@ -98,29 +103,36 @@ export const postSignup = (payload: SignupPayload) =>
 
 export const useSignupMutation = () => useMutation({ mutationFn: postSignup });
 
+// 가입 닉네임 미리 확인
+export const postNicknameCheck = (payload: { registrationToken: string; nickname: string }) =>
+  request<{ available: boolean }>('post', '/api/v1/auth/nickname-check', payload, { auth: false });
+
+export const useNicknameCheckMutation = () => useMutation({ mutationFn: postNicknameCheck });
+
 // 로그아웃
 export const postLogout = async () => {
-  try {
-    await request<void>('post', '/api/v1/auth/logout');
-  } finally {
-    clearTokens();
-  }
+  const { loggedOut } = await request<{ loggedOut: boolean }>('post', '/api/v1/auth/logout');
+  if (!loggedOut) throw new Error('로그아웃 처리가 완료되지 않았어요.');
+
+  clearTokens();
 };
 
 export interface WithdrawalSummary {
   letterCount: number;
   chocolateBalance: number;
+  // days 가 0 이면 availableAt 은 null (바로 재가입 가능)
+  rejoinRestriction: { days: number; availableAt: string | null };
 }
 
 export interface AccountSanction {
   // 제한번호 (예: R-K7M4-P9X2)
   referenceNumber: string;
-  // 1차 3일 · 2차 7일 · 3차 영구
+  // 1차 3일 · 2차 7일 · 3차 1년
   stage: 1 | 2 | 3;
   reason: string;
-  type: 'TEMPORARY' | 'PERMANENT';
+  type: 'TEMPORARY';
   startedAt: string;
-  endsAt: string | null;
+  endsAt: string;
 }
 
 export interface AccountStatus {
@@ -144,19 +156,49 @@ export const useWithdrawalSummaryQuery = () =>
   useQuery({ queryKey: ['withdrawal-summary'], queryFn: getWithdrawalSummary });
 
 // 회원 탈퇴
-export const deleteAccount = async () => {
-  const { withdrawn } = await request<{ withdrawn: boolean }>('delete', '/api/v1/auth/account', undefined, {
-    retry: 0,
-  });
+export interface AppleWithdrawalPayload {
+  appleAuthorizationCode: string;
+  // 웹만 보낸다
+  appleClientId?: string;
+}
+
+export type WithdrawalReason =
+  | 'NO_DESIRED_LETTERS'
+  | 'CONVERSATION_NOT_CONTINUING'
+  | 'WRITING_BURDEN'
+  | 'UNPLEASANT_EXPERIENCE'
+  | 'LOST_INTEREST'
+  | 'TAKING_BREAK'
+  | 'OTHER';
+
+// 사유를 고르지 않았으면 reasons 를 빼고, 상세는 그 사유를 골랐고 내용이 있을 때만 보낸다
+export interface WithdrawalReasonPayload {
+  reasons?: WithdrawalReason[];
+  unpleasantExperienceDetail?: string;
+  otherDetail?: string;
+}
+
+export type WithdrawalPayload = WithdrawalReasonPayload & Partial<AppleWithdrawalPayload>;
+
+export const deleteAccount = async (payload: WithdrawalPayload) => {
+  const hasBody = Object.values(payload).some((value) => value !== undefined);
+  const { withdrawn } = await request<{ withdrawn: boolean }>(
+    'delete',
+    '/api/v1/auth/account',
+    hasBody ? payload : undefined,
+    // 애플 code 는 한 번만 쓸 수 있어 재발급 후 같은 요청을 다시 보내지 않는다
+    { retry: 0, retryAfterRefresh: !payload.appleAuthorizationCode },
+  );
   if (!withdrawn) throw new Error('탈퇴 처리가 완료되지 않았어요.');
 
   clearTokens();
+  withdrawalReasonStore.clear();
 };
 
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({ mutationFn: postLogout, onSettled: () => queryClient.clear() });
+  return useMutation({ mutationFn: postLogout, onSuccess: () => queryClient.clear() });
 };
 
 export const useDeleteAccountMutation = () => {

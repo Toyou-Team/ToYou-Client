@@ -74,9 +74,8 @@ export function TermsForm() {
 
   const isAllChecked = useMemo(() => [agree1, agree2, agree3, agree4].every(Boolean), [agree1, agree2, agree3, agree4]);
 
-  // 선택 동의는 가입 요청 때 함께 보낸다
   const onSubmit = () => {
-    signupDraftStore.patch({ marketingPushAgreed: agree3, nightPushAgreed: agree3 && agree4 });
+    signupDraftStore.patch({ marketingPushAgreed: agree3, nightPushAgreed: agree4 });
     router.push('/signup/nickname');
   };
 
@@ -88,23 +87,16 @@ export function TermsForm() {
 
           <div className={styles.termCheckboxListContainer}>
             {AGREE_DATA.map((data) => (
-              <Fragment key={data.id}>
-                <TermCheckboxField
-                  id={data.id}
-                  text={data.text}
-                  isChecked={watch(`agree${data.id}` as keyof TermsFormData)}
-                  isRequired={data.type === 'required'}
-                  isDisabled={data.id === NIGHT_ID && !agree3}
-                  onChangeChecked={handleSingleChecked}
-                  onClickView={() => setSelectedPolicyId(data.id)}
-                />
-                {/* TODO: 디자인 적용. 시안은 광고성 정보 수신 동의 아래 '앱 푸시' 하위 항목 */}
-                {data.id === MARKETING_ID && (
-                  <p className={styles.marketingNote}>
-                    앱 푸시로 기능 업데이트 및 이벤트, 할인 혜택까지 빠르게 받아보실 수 있어요.
-                  </p>
-                )}
-              </Fragment>
+              <TermCheckboxField
+                key={data.id}
+                id={data.id}
+                text={data.text}
+                isChecked={watch(`agree${data.id}` as keyof TermsFormData)}
+                isRequired={data.type === 'required'}
+                detail={data.detail}
+                onChangeChecked={handleSingleChecked}
+                onClickView={() => setSelectedPolicyId(data.policyId ?? data.id)}
+              />
             ))}
           </div>
         </div>

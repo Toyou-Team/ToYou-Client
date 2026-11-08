@@ -20,7 +20,7 @@ export const termCheckboxListContainer = style({
 
 export const bottomButtonWrapper = style({
   position: 'absolute',
-  bottom: '3.4rem',
+  bottom: withSafeBottom('3.4rem'),
   left: '0',
   right: '0',
 

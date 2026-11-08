@@ -12,10 +12,10 @@ export const typography = {
 
     display: '3.6rem',
     title: '2rem',
-    subtitle: '1.8rem',
-    body: '1.4rem',
-    caption: '1.3rem',
-    label: '1.1rem',
+    subtitle: '1.6rem',
+    body: '1.3rem',
+    caption: '1.2rem',
+    label: '1rem',
   },
 
   fontWeight: {

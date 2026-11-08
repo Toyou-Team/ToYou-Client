@@ -18,7 +18,7 @@ declare global {
         signIn: () => Promise<AppleSignInResponse>;
       };
     };
-    TOYOU_APP?: { appleSignIn?: boolean };
+    TOYOU_APP?: { appleSignIn?: boolean; kakaoSignIn?: boolean; push?: boolean };
     ReactNativeWebView?: { postMessage: (message: string) => void };
   }
 }
@@ -34,7 +34,13 @@ export const getAppleLoginMode = (): AppleLoginMode => {
 // iOS 앱
 
 export type AppleAppResult =
-  | { type: 'APPLE_SIGN_IN_RESULT'; status: 'SUCCESS'; identityToken?: string; nonce?: string }
+  | {
+      type: 'APPLE_SIGN_IN_RESULT';
+      status: 'SUCCESS';
+      identityToken?: string;
+      nonce?: string;
+      authorizationCode?: string;
+    }
   | { type: 'APPLE_SIGN_IN_RESULT'; status: 'CANCELED' | 'FAILED' };
 
 export const requestAppleAppSignIn = () =>

@@ -4,46 +4,86 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
-import { useDeleteAccountMutation, useWithdrawalSummaryQuery } from '@/common/apis/auth';
+import { type AppleWithdrawalPayload, useDeleteAccountMutation, useWithdrawalSummaryQuery } from '@/common/apis/auth';
+import { ApiError } from '@/common/apis/client';
+import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
+import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
+import { APPLE_WEB_CLIENT_ID } from '@/common/apis/oAuth';
+import { loginProviderStore, withdrawalReasonStore } from '@/common/apis/token';
+import { type AppleAuthorization, useAppleAuthorization } from '@/common/hooks/useAppleAuthorization';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import Button from '@/components/common/Button/Button';
 import { CheckBox } from '@/components/common/CheckBox/CheckBox';
 import { Header } from '@/components/common/Header/Header';
 import { Modal } from '@/components/common/Modal/Modal';
+import { formatKoreanDay } from '@/utils/date';
 
 import * as styles from '../withdraw.css';
 
-const REJOIN_WAITING_DAYS = 7;
+const getWithdrawErrorMessage = (error: Error) => {
+  if (!(error instanceof ApiError)) return error.message;
 
-const getRejoinDateText = () => {
-  const date = new Date();
-  date.setDate(date.getDate() + REJOIN_WAITING_DAYS);
+  // 재발급 후 재시도할 때도 애플 계정은 새 code 가 필요하다
+  if (error.status === HTTP_STATUS_CODE.UNAUTHORIZED) return '탈퇴하기를 다시 눌러 애플 인증을 진행해 주세요.';
+  if (error.code === AUTH_ERROR_CODE.APPLE_AUTHORIZATION_INVALID) return '애플 인증을 다시 진행해 주세요.';
+  if (error.code === AUTH_ERROR_CODE.APPLE_ACCOUNT_MISMATCH) return '가입한 애플 계정으로 다시 인증해 주세요.';
+  if (error.code === AUTH_ERROR_CODE.APPLE_UNAVAILABLE)
+    return '애플 서버가 원활하지 않아요. 잠시 후 다시 시도해 주세요.';
 
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  return error.message;
 };
 
 export default function WithdrawConfirmPage() {
   const router = useRouter();
   const { open } = useModal();
   const { data: summary, isError: isSummaryError, refetch: refetchSummary } = useWithdrawalSummaryQuery();
-  const { mutate: deleteAccount, isPending } = useDeleteAccountMutation();
+  const { mutateAsync: deleteAccount, isPending } = useDeleteAccountMutation();
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isAppleAccount] = useState(() => loginProviderStore.get() === 'APPLE');
+  // 재시도할 때도 같은 사유를 다시 보낸다
+  const [reasonPayload] = useState(() => withdrawalReasonStore.get());
+
+  const openErrorModal = (description: string) =>
+    open(({ close }) => (
+      <Modal
+        title="탈퇴를 완료하지 못했어요"
+        description={description}
+        confirmText="확인"
+        onConfirm={close}
+        onClose={close}
+      />
+    ));
+
+  const withdraw = async (applePayload?: AppleWithdrawalPayload) => {
+    try {
+      await deleteAccount({ ...reasonPayload, ...applePayload });
+      router.replace('/');
+    } catch (error) {
+      openErrorModal(getWithdrawErrorMessage(error as Error));
+    }
+  };
+
+  const handleAppleResult = async (result: AppleAuthorization) => {
+    // 재인증을 취소하면 탈퇴 화면에 그대로 머문다
+    if (result.status === 'CANCELED') return;
+
+    if (result.status === 'SUCCESS' && result.authorizationCode) {
+      await withdraw({
+        appleAuthorizationCode: result.authorizationCode,
+        appleClientId: appleAuth.mode === 'web' ? APPLE_WEB_CLIENT_ID : undefined,
+      });
+      return;
+    }
+
+    openErrorModal('애플 인증을 완료하지 못했어요. 다시 시도해 주세요.');
+  };
+
+  const appleAuth = useAppleAuthorization({ enabled: isAppleAccount, onResult: handleAppleResult });
 
   const handleWithdraw = () => {
-    deleteAccount(undefined, {
-      onSuccess: () => router.replace('/'),
-      onError: (error) =>
-        open(({ close }) => (
-          <Modal
-            title="탈퇴를 완료하지 못했어요"
-            description={error.message}
-            confirmText="확인"
-            onConfirm={close}
-            onClose={close}
-          />
-        )),
-    });
+    if (isAppleAccount) appleAuth.authorize();
+    else withdraw();
   };
 
   return (
@@ -90,13 +130,22 @@ export default function WithdrawConfirmPage() {
           </p>
         </section>
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionLabel}>다시 가입하려면</h2>
-          <p className={styles.bodyText}>
-            <strong className={styles.infoValue}>{getRejoinDateText()}</strong>부터 다시 가입할 수 있어요.
-          </p>
-          <p className={styles.subText}>탈퇴 후 {REJOIN_WAITING_DAYS}일이 지나야 해요.</p>
-        </section>
+        {summary && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionLabel}>다시 가입하려면</h2>
+            {summary.rejoinRestriction.availableAt ? (
+              <>
+                <p className={styles.bodyText}>
+                  <strong className={styles.infoValue}>{formatKoreanDay(summary.rejoinRestriction.availableAt)}</strong>
+                  부터 다시 가입할 수 있어요.
+                </p>
+                <p className={styles.subText}>탈퇴 후 {summary.rejoinRestriction.days}일이 지나야 해요.</p>
+              </>
+            ) : (
+              <p className={styles.bodyText}>바로 다시 가입할 수 있어요.</p>
+            )}
+          </section>
+        )}
 
         <button
           type="button"
@@ -110,7 +159,11 @@ export default function WithdrawConfirmPage() {
       </main>
 
       <div className={styles.bottomButtonWrapper}>
-        <Button type="button" disabled={!isConfirmed || isPending} onClick={handleWithdraw}>
+        <Button
+          type="button"
+          disabled={!isConfirmed || isPending || (isAppleAccount && appleAuth.isDisabled)}
+          onClick={handleWithdraw}
+        >
           탈퇴하기
         </Button>
       </div>

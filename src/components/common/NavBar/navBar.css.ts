@@ -1,6 +1,7 @@
 import { vars } from '@/styles/theme.css';
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
+import { SAFE_AREA, withSafeBottom } from '@/styles/safeArea';
 
 export const navBarWrapper = style({
   position: 'sticky',
@@ -10,7 +11,8 @@ export const navBarWrapper = style({
   justifyContent: 'space-between',
 
   width: '100%',
-  height: '8.8rem',
+  height: withSafeBottom('8.8rem'),
+  paddingBottom: SAFE_AREA.bottom,
 
   backgroundColor: vars.color.neutral_50,
 });

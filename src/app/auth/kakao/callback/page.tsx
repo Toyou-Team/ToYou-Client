@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import { consumeKakaoState, useKakaoLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
-import { kakaoProfileStore, registrationTokenStore, setTokens } from '@/common/apis/token';
+import { kakaoProfileStore, loginProviderStore, registrationTokenStore, setTokens } from '@/common/apis/token';
 import { useAccountStatusCheck } from '@/common/hooks/useAccountStatusCheck';
+import { useAccountUnavailable } from '@/common/hooks/useAccountUnavailable';
 
 import * as styles from './callback.css';
 
@@ -22,6 +23,7 @@ export default function KakaoCallbackPage() {
   const started = useRef(false);
   const { mutate } = useKakaoLoginMutation();
   const checkAccountStatus = useAccountStatusCheck();
+  const handleAccountUnavailable = useAccountUnavailable();
   const [blockedMessage, setBlockedMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,6 +43,8 @@ export default function KakaoCallbackPage() {
 
     mutate(code, {
       onSuccess: (result) => {
+        loginProviderStore.clear();
+
         switch (result.status) {
           case 'SIGNED_IN':
             setTokens(result);
@@ -64,9 +68,8 @@ export default function KakaoCallbackPage() {
           return;
         }
 
-        // TODO: 영구 정지와 재가입 제한 기간을 서버가 구분해 주면 영구 정지일 때만 이 안내를 띄운다
         if (code === AUTH_ERROR_CODE.ACCOUNT_UNAVAILABLE) {
-          router.replace('/?blocked=restricted');
+          handleAccountUnavailable(error);
           return;
         }
 
@@ -74,7 +77,7 @@ export default function KakaoCallbackPage() {
         router.replace('/');
       },
     });
-  }, [router, mutate, checkAccountStatus]);
+  }, [router, mutate, checkAccountStatus, handleAccountUnavailable]);
 
   if (blockedMessage) {
     return (

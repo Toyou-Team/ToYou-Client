@@ -1,4 +1,4 @@
-import { keyframes, style } from '@vanilla-extract/css';
+import { keyframes, style, styleVariants } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
 
@@ -6,6 +6,9 @@ const HEIGHT = '3.8rem';
 const RADIUS = '1.2rem';
 const CIRCLE = `inset(0 calc(50% - ${HEIGHT} / 2) round calc(${HEIGHT} / 2))`;
 const FULL = `inset(0 round ${RADIUS})`;
+
+// 6.4rem: 좌우 padding + 아이콘 + 간격 + 화면 여백. 그래도 화면 폭을 넘으면 그만큼 글자를 줄인다
+const fitFontSize = (fontSize: string, widthInEm: number) => `min(${fontSize}, calc((100vw - 6.4rem) / ${widthInEm}))`;
 
 const appear = keyframes({
   '0%': { opacity: 0, clipPath: CIRCLE },
@@ -61,10 +64,17 @@ export const toast = style({
   },
 });
 
+// 기본은 body, 긴 문구는 caption
+export const textSize = styleVariants({
+  default: { fontSize: fitFontSize(vars.fontStyles.body.fontSize, 24) },
+  long: { fontSize: fitFontSize(vars.fontStyles.caption.fontSize, 26) },
+  longest: { fontSize: fitFontSize(vars.fontStyles.caption.fontSize, 29.5) },
+});
+
 export const content = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '0.6rem',
+  gap: '0.8rem',
 
   animation: `${contentFadeIn} 3s ease-out forwards`,
 

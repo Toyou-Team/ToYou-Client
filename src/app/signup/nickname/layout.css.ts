@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { withSafeTop } from '@/styles/safeArea';
 
 export const layoutWrapper = style({
   display: 'flex',
@@ -6,7 +7,7 @@ export const layoutWrapper = style({
 
   width: '100%',
   minHeight: '100dvh',
-  paddingTop: '6.8rem',
+  paddingTop: withSafeTop('6.8rem'),
 });
 
 export const mainContent = style({

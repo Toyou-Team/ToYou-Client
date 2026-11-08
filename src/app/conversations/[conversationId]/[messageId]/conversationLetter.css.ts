@@ -1,6 +1,7 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
+import { withSafeTop, withSafeBottom } from '@/styles/safeArea';
 
 export const page = style({
   position: 'relative',
@@ -15,7 +16,7 @@ export const page = style({
 // 공통 Header 를 배경 이미지 위에 투명하게 띄우기
 globalStyle(`${page} > header`, {
   position: 'absolute',
-  height: '8rem',
+  height: withSafeTop('8rem'),
   backgroundColor: 'transparent',
 });
 
@@ -58,7 +59,7 @@ export const slide = style({
   flexDirection: 'column',
   justifyContent: 'center',
 
-  padding: '11.6rem 2.4rem 16rem',
+  padding: `${withSafeTop('11.6rem')} 2.4rem ${withSafeBottom('16rem')}`,
 
   backgroundSize: 'cover',
   backgroundPosition: 'center',
@@ -68,7 +69,7 @@ export const slide = style({
 
 // 하단에 답장 버튼이 뜨는 편지는 버튼에 가리지 않도록 아래 여백 추가
 export const slideWithButton = style({
-  paddingBottom: '12.2rem',
+  paddingBottom: withSafeBottom('12.2rem'),
 });
 
 export const letterWrapper = style({
@@ -88,7 +89,7 @@ export const bottom = style({
   display: 'flex',
   justifyContent: 'center',
 
-  padding: '0 2.4rem 4rem',
+  padding: `0 2.4rem ${withSafeBottom('4rem')}`,
   pointerEvents: 'none',
 });
 

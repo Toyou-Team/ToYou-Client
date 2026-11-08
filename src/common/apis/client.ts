@@ -2,17 +2,28 @@ import ky, { HTTPError } from 'ky';
 
 import { API_BASE_URL } from './oAuth';
 
+import { AUTH_ERROR_CODE } from './constants/error-code';
 import { HTTP_ERROR_MESSAGE, HTTP_STATUS_CODE } from './constants/http';
 import { reissueToken } from './refresh';
-import { accessTokenStore, clearTokens } from './token';
+import { accessTokenStore, clearTokens, refreshTokenStore } from './token';
 
 interface ApiResponse<T> {
   data: T;
 }
 
 // 공통 오류 형식: { error: { code, message, requestId, details } }
+interface ErrorDetails {
+  // 탈퇴 후 재가입 제한 (AUTH_ACCOUNT_UNAVAILABLE)
+  rejoinAvailableAt?: string;
+  sanctionReasonTitle?: string | null;
+  // 금칙어 (CONTENT_FORBIDDEN_WORD)
+  forbiddenWords?: string[];
+  // 입력값 오류 (VALIDATION_ERROR)
+  fields?: { field: string; messages: string[] }[];
+}
+
 interface ErrorPayload {
-  error?: { code?: string; message?: string; requestId?: string };
+  error?: { code?: string; message?: string; requestId?: string; details?: ErrorDetails };
 }
 
 export class ApiError extends Error {
@@ -21,6 +32,7 @@ export class ApiError extends Error {
     message: string,
     readonly code?: string,
     readonly requestId?: string,
+    readonly details?: ErrorDetails,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -33,6 +45,8 @@ interface RequestOptions {
   headers?: Record<string, string>;
   // ky 기본값은 GET 이 429·5xx 로 실패하면 2번 자동 재시도
   retry?: number;
+  // 한 번만 쓸 수 있는 값을 보내는 요청은 재발급 후 같은 요청을 다시 보내지 않는다 (기본 true)
+  retryAfterRefresh?: boolean;
 }
 
 const client = ky.create({
@@ -71,6 +85,9 @@ async function dispatch<T>(
 ): Promise<T> {
   const auth = options.auth ?? true;
 
+  // 새로고침 직후 Access Token 이 없으면 로그인 복원이 끝난 뒤 요청한다
+  if (auth && !accessTokenStore.get() && refreshTokenStore.get()) await tryReissueToken();
+
   try {
     const response = await client(`${API_BASE_URL}${path}`, {
       method,
@@ -96,16 +113,22 @@ async function dispatch<T>(
     const message = payload?.error?.message || HTTP_ERROR_MESSAGE[status] || `요청에 실패했습니다. (${status})`;
     const requestId = payload?.error?.requestId;
 
-    // 401 이면 에러 코드와 상관없이 재발급 후 원 요청을 한 번만 다시 보낸다
     if (status === HTTP_STATUS_CODE.UNAUTHORIZED && auth) {
-      if (!retried && (await tryReissueToken())) return dispatch<T>(method, path, body, options, true);
+      // Access Token 만료·무효일 때만 재발급 후 원 요청을 한 번만 다시 보낸다
+      const isReissued = code === AUTH_ERROR_CODE.TOKEN_INVALID && !retried && (await tryReissueToken());
 
-      // 재발급에 실패했거나 새 토큰으로도 401 이면 다시 로그인
-      clearTokens();
-      redirectToLogin();
+      if (isReissued && options.retryAfterRefresh !== false) {
+        return dispatch<T>(method, path, body, options, true);
+      }
+
+      // 재발급이 서버/네트워크 문제로 실패했으면 토큰이 남아 있어 로그인을 유지한다
+      if (!isReissued && (retried || !refreshTokenStore.get())) {
+        clearTokens();
+        redirectToLogin();
+      }
     }
 
-    throw new ApiError(status, message, code, requestId);
+    throw new ApiError(status, message, code, requestId, payload?.error?.details);
   }
 }
 

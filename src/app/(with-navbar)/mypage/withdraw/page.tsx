@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import type { WithdrawalReason } from '@/common/apis/auth';
+import { withdrawalReasonStore } from '@/common/apis/token';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import Button from '@/components/common/Button/Button';
 import { CheckBox } from '@/components/common/CheckBox/CheckBox';
@@ -10,37 +12,43 @@ import { Header } from '@/components/common/Header/Header';
 
 import * as styles from './withdraw.css';
 
-const REASONS = [
-  { id: 'NO_LETTER', label: '받고 싶은 편지가 오지 않았어요.' },
-  { id: 'NO_CONVERSATION', label: '답장이나 대화가 잘 이어지지 않았어요.' },
-  { id: 'BURDEN', label: '편지를 쓰는 게 부담스러워요.' },
+const REASONS: { id: WithdrawalReason; label: string; placeholder?: string }[] = [
+  { id: 'NO_DESIRED_LETTERS', label: '받고 싶은 편지가 오지 않았어요.' },
+  { id: 'CONVERSATION_NOT_CONTINUING', label: '답장이나 대화가 잘 이어지지 않았어요.' },
+  { id: 'WRITING_BURDEN', label: '편지를 쓰는 게 부담스러워요.' },
   {
-    id: 'UNPLEASANT',
+    id: 'UNPLEASANT_EXPERIENCE',
     label: '불쾌하거나 불편한 경험이 있어요.',
-    placeholder: '어떤 일이 있었는지 알려주시면 조치할게요.',
+    placeholder: '어떤 일이 있었는지 알려주시면 조치할게요. (선택)',
   },
   { id: 'LOST_INTEREST', label: '흥미가 떨어졌어요.' },
-  { id: 'BREAK', label: '잠깐 쉬어갈래요.' },
-  { id: 'OTHER', label: '기타', placeholder: '자유롭게 적어주세요.' },
+  { id: 'TAKING_BREAK', label: '잠깐 쉬어갈래요.' },
+  { id: 'OTHER', label: '기타', placeholder: '자유롭게 적어주세요. (선택)' },
 ];
 
 const DETAIL_MAX_LENGTH = 500;
 
 export default function WithdrawReasonPage() {
   const router = useRouter();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [details, setDetails] = useState<Record<string, string>>({});
+  const [selectedIds, setSelectedIds] = useState<WithdrawalReason[]>([]);
+  const [details, setDetails] = useState<Partial<Record<WithdrawalReason, string>>>({});
 
-  const canNext =
-    selectedIds.length > 0 &&
-    REASONS.every(({ id, placeholder }) => !placeholder || !selectedIds.includes(id) || details[id]?.trim());
+  const canNext = selectedIds.length > 0;
 
-  const toggleReason = (id: string) => {
+  const toggleReason = (id: WithdrawalReason) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]));
   };
 
-  // TODO: 탈퇴 API 가 사유를 받게 되면 selectedIds 와 공백을 제외한 details 를 함께 보낸다
-  const handleNext = () => router.push('/mypage/withdraw/confirm');
+  const getDetail = (id: WithdrawalReason) => (selectedIds.includes(id) && details[id]?.trim()) || undefined;
+
+  const handleNext = () => {
+    withdrawalReasonStore.set({
+      reasons: REASONS.filter(({ id }) => selectedIds.includes(id)).map(({ id }) => id),
+      unpleasantExperienceDetail: getDetail('UNPLEASANT_EXPERIENCE'),
+      otherDetail: getDetail('OTHER'),
+    });
+    router.push('/mypage/withdraw/confirm');
+  };
 
   return (
     <div className={styles.pageWrapper}>
