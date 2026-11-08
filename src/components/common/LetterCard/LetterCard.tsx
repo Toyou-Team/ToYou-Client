@@ -15,6 +15,8 @@ interface LetterCardProps {
   width?: number;
   height?: number;
   song?: LetterSong;
+  // 열었지만 답장하지 않은 편지는 흑백으로 표시
+  isMuted?: boolean;
 }
 
 export function LetterCard({
@@ -28,10 +30,11 @@ export function LetterCard({
   width,
   height = 40,
   song,
+  isMuted = false,
 }: LetterCardProps) {
   return (
     <div
-      className={styles.letterCardWrapper}
+      className={clsx(styles.letterCardWrapper, isMuted && styles.letterCardMuted)}
       style={{
         width: width ? `${width}rem` : '100%',
         height: `${height}rem`,

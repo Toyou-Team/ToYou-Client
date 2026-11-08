@@ -98,7 +98,8 @@ export function LetterCarousel({ deliveries, onSelect }: LetterCarouselProps) {
                 profileImage={delivery.content.author.profileImage?.url}
                 backgroundImage={delivery.content.image?.url}
                 isDarkBackground={!!delivery.content.image?.isDark}
-                expiresText={formatExpiresIn(delivery.expiresAt)}
+                expiresText={delivery.selectedAt ? '답장을 기다리는 중...' : formatExpiresIn(delivery.expiresAt)}
+                isMuted={delivery.selectedAt !== null}
                 song={
                   delivery.content.spotify
                     ? {

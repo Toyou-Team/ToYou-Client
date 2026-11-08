@@ -11,6 +11,10 @@ export const letterCardWrapper = style({
   backgroundColor: vars.color.neutral_100,
 });
 
+export const letterCardMuted = style({
+  filter: 'grayscale(1)',
+});
+
 export const letterCardBackground = style({
   zIndex: 0,
   objectFit: 'cover',
