@@ -1,4 +1,4 @@
-import type { KakaoProfileSuggestion, ReceiveGender } from './auth';
+import type { KakaoProfileSuggestion, ReceiveGender, WithdrawalReasonPayload } from './auth';
 
 /**
  * 토큰 저장 정책
@@ -9,14 +9,23 @@ import type { KakaoProfileSuggestion, ReceiveGender } from './auth';
 const isBrowser = () => typeof window !== 'undefined';
 
 let accessToken: string | null = null;
+const accessTokenListeners = new Set<() => void>();
+
+const changeAccessToken = (token: string | null) => {
+  accessToken = token;
+  accessTokenListeners.forEach((listener) => listener());
+};
 
 export const accessTokenStore = {
   get: () => accessToken,
-  set: (token: string) => {
-    accessToken = token;
-  },
-  clear: () => {
-    accessToken = null;
+  set: (token: string) => changeAccessToken(token),
+  clear: () => changeAccessToken(null),
+  // 로그인/재발급/로그아웃 때마다 호출
+  subscribe: (listener: () => void) => {
+    accessTokenListeners.add(listener);
+    return () => {
+      accessTokenListeners.delete(listener);
+    };
   },
 };
 
@@ -65,6 +74,23 @@ export interface SignupDraft {
   marketingPushAgreed?: boolean;
   nightPushAgreed?: boolean;
 }
+
+// 탈퇴 사유 화면에서 고른 값을 확인 화면의 탈퇴 요청까지 들고 감
+const WITHDRAWAL_REASON_KEY = 'toyou_withdrawal_reason';
+
+export const withdrawalReasonStore = {
+  get: (): WithdrawalReasonPayload => {
+    if (!isBrowser()) return {};
+    const raw = window.sessionStorage.getItem(WITHDRAWAL_REASON_KEY);
+    return raw ? (JSON.parse(raw) as WithdrawalReasonPayload) : {};
+  },
+  set: (payload: WithdrawalReasonPayload) => {
+    if (isBrowser()) window.sessionStorage.setItem(WITHDRAWAL_REASON_KEY, JSON.stringify(payload));
+  },
+  clear: () => {
+    if (isBrowser()) window.sessionStorage.removeItem(WITHDRAWAL_REASON_KEY);
+  },
+};
 
 export const signupDraftStore = {
   get: (): SignupDraft => {

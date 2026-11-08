@@ -9,7 +9,7 @@ import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { APPLE_WEB_CLIENT_ID } from '@/common/apis/oAuth';
-import { loginProviderStore } from '@/common/apis/token';
+import { loginProviderStore, withdrawalReasonStore } from '@/common/apis/token';
 import { type AppleAuthorization, useAppleAuthorization } from '@/common/hooks/useAppleAuthorization';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
@@ -41,6 +41,8 @@ export default function WithdrawConfirmPage() {
   const { mutateAsync: deleteAccount, isPending } = useDeleteAccountMutation();
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isAppleAccount] = useState(() => loginProviderStore.get() === 'APPLE');
+  // 재시도할 때도 같은 사유를 다시 보낸다
+  const [reasonPayload] = useState(() => withdrawalReasonStore.get());
 
   const openErrorModal = (description: string) =>
     open(({ close }) => (
@@ -53,9 +55,9 @@ export default function WithdrawConfirmPage() {
       />
     ));
 
-  const withdraw = async (payload?: AppleWithdrawalPayload) => {
+  const withdraw = async (applePayload?: AppleWithdrawalPayload) => {
     try {
-      await deleteAccount(payload);
+      await deleteAccount({ ...reasonPayload, ...applePayload });
       router.replace('/');
     } catch (error) {
       openErrorModal(getWithdrawErrorMessage(error as Error));
