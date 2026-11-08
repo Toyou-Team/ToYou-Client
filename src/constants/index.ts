@@ -9,6 +9,7 @@ interface AgreeData {
   // 보기를 누르면 이 항목의 약관을 보여준다
   policyId?: number;
   detail?: { title: string; description: string };
+  description?: string;
 }
 
 export const AGREE_DATA: AgreeData[] = [
@@ -39,5 +40,7 @@ export const AGREE_DATA: AgreeData[] = [
     type: 'optional',
     text: '야간 수신 동의',
     policyId: 1,
+    description:
+      '오후 9시부터 오전 8시 사이에도 광고·이벤트 알림을 받아요. 선택하면 광고성 정보 수신에도 함께 동의돼요.',
   },
 ];

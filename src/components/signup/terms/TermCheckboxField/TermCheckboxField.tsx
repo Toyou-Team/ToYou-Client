@@ -9,6 +9,7 @@ interface TermCheckboxProps {
   isChecked: boolean;
   isRequired: boolean;
   detail?: { title: string; description: string };
+  description?: string;
   onChangeChecked: (id: number, checked: boolean) => void;
   onClickView?: () => void;
 }
@@ -19,6 +20,7 @@ export const TermCheckboxField = memo(function TermCheckbox({
   isChecked,
   isRequired,
   detail,
+  description,
   onChangeChecked,
   onClickView,
 }: TermCheckboxProps) {
@@ -67,6 +69,8 @@ export const TermCheckboxField = memo(function TermCheckbox({
           <p className={styles.detailDescription}>{detail.description}</p>
         </div>
       )}
+
+      {description && <p className={styles.description}>{description}</p>}
     </>
   );
 });
