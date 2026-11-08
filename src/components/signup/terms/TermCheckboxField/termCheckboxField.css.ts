@@ -89,6 +89,14 @@ export const detailDescription = style({
   wordBreak: 'keep-all',
 });
 
+export const description = style({
+  ...vars.fontStyles.caption,
+  color: vars.color.neutral_600,
+  wordBreak: 'keep-all',
+
+  padding: '0 2.7rem 0 5.4rem',
+});
+
 export const descriptionText = style({
   ...vars.fontStyles.body,
   color: vars.color.neutral_600,

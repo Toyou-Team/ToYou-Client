@@ -18,8 +18,10 @@ import { useAccountUnavailable } from '@/common/hooks/useAccountUnavailable';
 import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
+import { showToast } from '@/components/common/Toast/Toast';
 import { MemoizedStepIcon } from '@/components/signup/stepIcon/StepIcon';
 import { ImageUpload } from '@/components/signup/profile-image/ImageUpload/ImageUpload';
+import { formatDotDate } from '@/utils/date';
 
 import { getNicknameServerError } from '@/utils/nickname';
 
@@ -96,6 +98,11 @@ export default function SignUpProfileImagePage() {
         onSuccess: (result) => {
           setTokens(result);
           clearSignupData();
+          // 광고성 정보 수신 동의 처리 결과 안내 (정보통신망법)
+          if (draft.marketingPushAgreed) {
+            const scope = draft.nightPushAgreed ? '광고성·야간 광고성 정보' : '광고성 정보';
+            showToast(`to you ${scope} 수신에 동의했어요. (${formatDotDate(new Date())})`);
+          }
 
           if (imageFile) uploadImage(imageFile);
           else goOnboarding();

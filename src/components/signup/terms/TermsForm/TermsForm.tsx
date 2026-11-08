@@ -21,6 +21,9 @@ interface TermsFormData {
   agree4: boolean;
 }
 
+const MARKETING_ID = 3;
+const NIGHT_ID = 4;
+
 export function TermsForm() {
   const router = useRouter();
 
@@ -51,13 +54,14 @@ export function TermsForm() {
     });
   }, [setValue, watch]);
 
+  // 야간은 광고성 동의가 있어야 해서, 야간을 켜면 광고성도 켜고 광고성을 끄면 야간도 끈다
   const handleSingleChecked = useCallback(
     (id: number, checked: boolean) => {
-      const fieldName = `agree${id}` as keyof TermsFormData;
+      const next = !checked;
+      setValue(`agree${id}` as keyof TermsFormData, next, { shouldValidate: true });
 
-      setValue(fieldName, !checked, {
-        shouldValidate: true,
-      });
+      if (id === NIGHT_ID && next) setValue('agree3', true, { shouldValidate: true });
+      if (id === MARKETING_ID && !next) setValue('agree4', false, { shouldValidate: true });
     },
     [setValue],
   );
@@ -86,6 +90,7 @@ export function TermsForm() {
                 isChecked={watch(`agree${data.id}` as keyof TermsFormData)}
                 isRequired={data.type === 'required'}
                 detail={data.detail}
+                description={data.description}
                 onChangeChecked={handleSingleChecked}
                 onClickView={() => setSelectedPolicyId(data.policyId ?? data.id)}
               />
@@ -95,7 +100,7 @@ export function TermsForm() {
 
         <div className={styles.bottomButtonWrapper}>
           <Button type="submit" disabled={!isAllRequired}>
-            다음
+            완료
           </Button>
         </div>
       </form>
