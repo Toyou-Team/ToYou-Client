@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
@@ -14,16 +14,12 @@ import { PolicySheet } from '../PolicySheet/PolicySheet';
 
 import * as styles from './termsForm.css';
 
-// agree3: 광고성 정보 수신 동의(앱 푸시), agree4: 야간 수신 동의
 interface TermsFormData {
   agree1: boolean;
   agree2: boolean;
   agree3: boolean;
   agree4: boolean;
 }
-
-const MARKETING_ID = 3;
-const NIGHT_ID = 4;
 
 export function TermsForm() {
   const router = useRouter();
@@ -55,19 +51,15 @@ export function TermsForm() {
     });
   }, [setValue, watch]);
 
-  // 야간 수신은 광고성 동의가 있어야 선택할 수 있고, 광고성을 해제하면 함께 해제된다
   const handleSingleChecked = useCallback(
     (id: number, checked: boolean) => {
-      if (id === NIGHT_ID && !watch('agree3')) return;
-
       const fieldName = `agree${id}` as keyof TermsFormData;
 
       setValue(fieldName, !checked, {
         shouldValidate: true,
       });
-      if (id === MARKETING_ID && checked) setValue('agree4', false, { shouldValidate: true });
     },
-    [setValue, watch],
+    [setValue],
   );
 
   const isAllRequired = useMemo(() => agree1 && agree2, [agree1, agree2]);

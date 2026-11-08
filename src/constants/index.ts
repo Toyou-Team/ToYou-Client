@@ -1,5 +1,4 @@
 import { PRIVACY_POLICY } from './privacy';
-import { MARKETING_PUSH_CONSENT, NIGHT_PUSH_CONSENT } from './pushConsent';
 import { TERMS_OF_SERVICE } from './terms';
 
 interface AgreeData {

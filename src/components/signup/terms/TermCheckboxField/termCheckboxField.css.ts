@@ -15,20 +15,11 @@ export const hiddenInput = style({
   display: 'none',
 });
 
-export const termCheckboxLabel = recipe({
-  base: {
-    display: 'flex',
-    alignItems: 'center',
+export const termCheckboxLabel = style({
+  display: 'flex',
+  alignItems: 'center',
 
-    gap: '0.8rem',
-  },
-
-  variants: {
-    isDisabled: {
-      true: { opacity: 0.4, cursor: 'not-allowed' },
-      false: {},
-    },
-  },
+  gap: '0.8rem',
 });
 
 export const checkIcon = style({
