@@ -93,8 +93,6 @@ export default function SignUpProfileImagePage() {
         nightPushAgreed: draft.nightPushAgreed,
         // 직접 고른 사진은 가입 후 사진 업로드 API로 따로 저장
         useKakaoProfileImage: false,
-        marketingPushAgreed: draft.marketingPushAgreed === true,
-        nightPushAgreed: draft.nightPushAgreed === true,
       },
       {
         onSuccess: (result) => {
@@ -102,8 +100,8 @@ export default function SignUpProfileImagePage() {
           clearSignupData();
           // 광고성 정보 수신 동의 처리 결과 안내 (정보통신망법)
           if (draft.marketingPushAgreed) {
-            const scope = draft.nightPushAgreed ? '광고성 정보(야간 포함)' : '광고성 정보';
-            showToast(`TO YOU ${scope} 수신에 동의했어요. (${formatDotDate(new Date())})`);
+            const scope = draft.nightPushAgreed ? '광고성·야간 광고성 정보' : '광고성 정보';
+            showToast(`to you ${scope} 수신에 동의했어요. (${formatDotDate(new Date())})`);
           }
 
           if (imageFile) uploadImage(imageFile);
