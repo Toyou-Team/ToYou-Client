@@ -2,7 +2,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/r
 
 import { request } from './client';
 import { KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY } from './oAuth';
-import { clearTokens } from './token';
+import { clearTokens, withdrawalReasonStore } from './token';
 
 export type Gender = 'MALE' | 'FEMALE';
 export type ReceiveGender = 'MALE' | 'FEMALE' | 'ALL';
@@ -162,14 +162,37 @@ export interface AppleWithdrawalPayload {
   appleClientId?: string;
 }
 
-export const deleteAccount = async (payload?: AppleWithdrawalPayload) => {
-  const { withdrawn } = await request<{ withdrawn: boolean }>('delete', '/api/v1/auth/account', payload, {
-    retry: 0,
-    retryAfterRefresh: !payload,
-  });
+export type WithdrawalReason =
+  | 'NO_DESIRED_LETTERS'
+  | 'CONVERSATION_NOT_CONTINUING'
+  | 'WRITING_BURDEN'
+  | 'UNPLEASANT_EXPERIENCE'
+  | 'LOST_INTEREST'
+  | 'TAKING_BREAK'
+  | 'OTHER';
+
+// 사유를 고르지 않았으면 reasons 를 빼고, 상세는 그 사유를 골랐고 내용이 있을 때만 보낸다
+export interface WithdrawalReasonPayload {
+  reasons?: WithdrawalReason[];
+  unpleasantExperienceDetail?: string;
+  otherDetail?: string;
+}
+
+export type WithdrawalPayload = WithdrawalReasonPayload & Partial<AppleWithdrawalPayload>;
+
+export const deleteAccount = async (payload: WithdrawalPayload) => {
+  const hasBody = Object.values(payload).some((value) => value !== undefined);
+  const { withdrawn } = await request<{ withdrawn: boolean }>(
+    'delete',
+    '/api/v1/auth/account',
+    hasBody ? payload : undefined,
+    // 애플 code 는 한 번만 쓸 수 있어 재발급 후 같은 요청을 다시 보내지 않는다
+    { retry: 0, retryAfterRefresh: !payload.appleAuthorizationCode },
+  );
   if (!withdrawn) throw new Error('탈퇴 처리가 완료되지 않았어요.');
 
   clearTokens();
+  withdrawalReasonStore.clear();
 };
 
 export const useLogoutMutation = () => {
