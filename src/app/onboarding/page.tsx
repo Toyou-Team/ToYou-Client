@@ -30,8 +30,8 @@ const STEPS = [
   {
     image: ImgOnboarding04,
     title: '매일 자정,\n20초코가 충전돼요.',
-    description: '초코는 최대 60개까지 모을 수 있어요.',
-    notice: '초코 충전 기능은 곧 업데이트 될 예정이에요.',
+    description: '매일 받은 20초코는 다음 날 자정에 사라져요.',
+    notice: '초코 구매 기능은 준비중이에요.',
   },
 ];
 
