@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { trackEvent } from '@/common/analytics/gtm';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import type { ReportReason, ReportResult } from '@/common/apis/conversation';
@@ -80,6 +81,7 @@ export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }
 
     try {
       const { alreadyReportedUser } = await report({ reason, detail: (isOther && detail.trim()) || undefined });
+      trackEvent({ event: 'report_submit', reason: reason.toLowerCase() });
       router.back();
 
       if (alreadyReportedUser) {

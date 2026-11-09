@@ -1,5 +1,7 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { trackEvent } from '@/common/analytics/gtm';
+
 import { request } from './client';
 import { KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY } from './oAuth';
 import { clearTokens, withdrawalReasonStore } from './token';
@@ -191,6 +193,11 @@ export const deleteAccount = async (payload: WithdrawalPayload) => {
   );
   if (!withdrawn) throw new Error('탈퇴 처리가 완료되지 않았어요.');
 
+  // user_id 가 지워지기 전에 보낸다. 사유가 여러 개면 쉼표로 잇는다
+  trackEvent({
+    event: 'account_delete',
+    reason: payload.reasons?.length ? payload.reasons.map((reason) => reason.toLowerCase()).join(',') : 'none',
+  });
   clearTokens();
   withdrawalReasonStore.clear();
 };
