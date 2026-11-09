@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
+import { trackEvent } from '@/common/analytics/gtm';
 import { useCurrentDeliveryRoundQuery, useExtraDeliveryRoundMutation } from '@/common/apis/delivery';
 import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
@@ -54,6 +55,8 @@ export function DeliverySection() {
     }
 
     if (!available) {
+      trackEvent({ event: 'choco_insufficient', screen_name: 'home' });
+
       open(({ close }) => (
         <Modal
           title="초코가 부족해요"
@@ -82,7 +85,9 @@ export function DeliverySection() {
         confirmText="받기"
         onConfirm={() => {
           close();
-          receiveExtra(crypto.randomUUID());
+          receiveExtra(crypto.randomUUID(), {
+            onSuccess: () => trackEvent({ event: 'letter_more_request', choco_spent: cost }),
+          });
         }}
         onClose={close}
       />
