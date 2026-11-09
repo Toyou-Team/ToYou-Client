@@ -7,6 +7,7 @@ import { isServer, MutationCache, QueryCache, QueryClient, QueryClientProvider }
 import { ApiError } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED } from '@/common/apis/constants/error-code';
 import { ModalProvider } from '@/common/providers/ModalProvider';
+import { AnalyticsSync } from '@/components/analytics/AnalyticsSync/AnalyticsSync';
 import { AppToaster } from '@/components/common/Toast/Toast';
 import { PushTokenSync } from '@/components/push/PushTokenSync/PushTokenSync';
 import { RealtimeSync } from '@/components/realtime/RealtimeSync/RealtimeSync';
@@ -39,6 +40,7 @@ export default function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AnalyticsSync />
       <ModalProvider>
         {children}
         <AccountStatusGate />

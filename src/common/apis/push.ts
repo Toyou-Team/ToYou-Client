@@ -57,6 +57,23 @@ export const parsePushPermissionResult = (data: unknown): PushPermission | null 
 export const openNotificationSettings = () =>
   window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'OPEN_NOTIFICATION_SETTINGS' }));
 
+export type DeliverySlot = '12' | '18' | '21';
+
+// 정기 알림을 눌러 앱을 열면 앱이 보내는 회차
+export const parsePushOpened = (data: unknown): DeliverySlot | null => {
+  if (typeof data !== 'string') return null;
+
+  try {
+    const message = JSON.parse(data) as { type?: unknown; deliverySlot?: unknown };
+    if (message.type !== 'PUSH_OPENED') return null;
+    return message.deliverySlot === '12' || message.deliverySlot === '18' || message.deliverySlot === '21'
+      ? message.deliverySlot
+      : null;
+  } catch {
+    return null;
+  }
+};
+
 // Access Token 은 새로고침하면 사라지므로 Refresh Token 으로 로그인 여부를 본다
 export const isLoggedIn = () => refreshTokenStore.get() !== null;
 
