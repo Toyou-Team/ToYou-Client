@@ -6,7 +6,7 @@ import { type InfiniteData, type QueryClient, type QueryFilters, useQueryClient 
 import { io } from 'socket.io-client';
 
 import { ApiError } from '@/common/apis/client';
-import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
+import { AUTH_ERROR_CODE, CONVERSATION_NOT_FOUND } from '@/common/apis/constants/error-code';
 import { CONVERSATIONS_QUERY_KEY, removeConversationFromCache } from '@/common/apis/conversation';
 import { CURRENT_DELIVERY_ROUND_QUERY_KEY } from '@/common/apis/delivery';
 import { API_BASE_URL } from '@/common/apis/oAuth';
@@ -14,7 +14,6 @@ import { reissueToken } from '@/common/apis/refresh';
 import { accessTokenStore } from '@/common/apis/token';
 
 const CONNECTION_LIMIT = 'REALTIME_CONNECTION_LIMIT';
-const CONVERSATION_NOT_FOUND = 'CONVERSATION_NOT_FOUND';
 const LIMIT_RETRY_DELAY = 30_000;
 
 // 이벤트 내용은 쓰지 않고, 보고 있는 화면만 첫 페이지로 다시 조회

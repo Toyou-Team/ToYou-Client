@@ -1,18 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 
 import { IcMore } from '@/assets/icons';
-import { useConversationQuery, type ConversationMessage } from '@/common/apis/conversation';
+import { ApiError } from '@/common/apis/client';
+import { CONVERSATION_NOT_FOUND } from '@/common/apis/constants/error-code';
+import { CONVERSATIONS_QUERY_KEY, useConversationQuery, type ConversationMessage } from '@/common/apis/conversation';
 import { useBlockConversation } from '@/common/hooks/useBlockConversation';
 import { useLeaveConversation } from '@/common/hooks/useLeaveConversation';
 import { useInfiniteScroll } from '@/common/hooks/useInfiniteScroll';
+import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
+import { Modal } from '@/components/common/Modal/Modal';
 import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 import { formatDay, formatTime } from '@/utils/date';
 import { getPartnerNickname } from '@/utils/partner';
@@ -35,12 +40,43 @@ export default function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const router = useRouter();
   const { openLeaveConfirm, hasLeft } = useLeaveConversation();
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useConversationQuery(conversationId, !hasLeft);
+  const { data, error, hasNextPage, isFetchingNextPage, fetchNextPage } = useConversationQuery(
+    conversationId,
+    !hasLeft,
+  );
   const openBlockConfirm = useBlockConversation(conversationId);
   const [isMenuSheetOpen, setIsMenuSheetOpen] = useState(false);
+  const { open } = useModal();
+  const queryClient = useQueryClient();
 
   // 불러오는 동안 잠시 멈췄다가, 끝나면 끝 요소가 아직 보이는지 다시 확인
   const loadMoreRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage);
+
+  // 차단/나가기 등으로 볼 수 없는 대화 (답장 알림으로 들어온 경우 등)
+  const notFoundMessage =
+    error instanceof ApiError && error.code === CONVERSATION_NOT_FOUND && !data ? error.message : null;
+  useEffect(() => {
+    if (!notFoundMessage) return;
+
+    open(({ close }) => {
+      // 상세를 닫고 편지함 목록 재조회 (편지함·대화 API 가이드)
+      const handleClose = () => {
+        close();
+        queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY, exact: true });
+        router.replace('/letter-box');
+      };
+
+      return (
+        <Modal
+          title="대화를 열 수 없어요"
+          description={notFoundMessage}
+          confirmText="확인"
+          onConfirm={handleClose}
+          onClose={handleClose}
+        />
+      );
+    });
+  }, [notFoundMessage, open, queryClient, router]);
 
   if (!data) return null;
 
