@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { trackEvent } from '@/common/analytics/gtm';
 import { consumeKakaoState, useKakaoLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
@@ -44,6 +45,7 @@ export default function KakaoCallbackPage() {
     mutate(code, {
       onSuccess: (result) => {
         loginProviderStore.clear();
+        if (result.status !== 'SIGNUP_UNAVAILABLE') trackEvent({ event: 'login', method: 'kakao' });
 
         switch (result.status) {
           case 'SIGNED_IN':

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { TrackEvent } from '@/components/analytics/TrackEvent/TrackEvent';
+import { trackEvent } from '@/common/analytics/gtm';
 import { useSignupMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE, CONTENT_ERROR_CODE, PROFILE_ERROR_CODE } from '@/common/apis/constants/error-code';
@@ -10,6 +12,7 @@ import { useUploadProfileImageMutation } from '@/common/apis/profile';
 import {
   clearSignupData,
   kakaoProfileStore,
+  loginProviderStore,
   registrationTokenStore,
   setTokens,
   signupDraftStore,
@@ -97,6 +100,7 @@ export default function SignUpProfileImagePage() {
       {
         onSuccess: (result) => {
           setTokens(result);
+          trackEvent({ event: 'sign_up', method: loginProviderStore.get() === 'APPLE' ? 'apple' : 'kakao' });
           clearSignupData();
           // 광고성 정보 수신 동의 처리 결과 안내 (정보통신망법)
           if (draft.marketingPushAgreed) {
@@ -131,6 +135,7 @@ export default function SignUpProfileImagePage() {
   return (
     <>
       <div className={styles.profileImagePageWrapper}>
+        <TrackEvent event="onboarding_step_view" step_name="profile_image" step_index={3} />
         <MemoizedStepIcon step={3} />
         <h1 className={styles.titleWrapper}>프로필 사진을 설정해주세요.</h1>
       </div>

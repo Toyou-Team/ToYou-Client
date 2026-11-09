@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
+import { trackEvent } from '@/common/analytics/gtm';
 import { signupDraftStore } from '@/common/apis/token';
 import Button from '@/components/common/Button/Button';
 import { AGREE_DATA } from '@/constants';
@@ -72,6 +73,7 @@ export function TermsForm() {
 
   const onSubmit = () => {
     signupDraftStore.patch({ marketingPushAgreed: agree3, nightPushAgreed: agree4 });
+    trackEvent({ event: 'terms_agree', marketing_opt_in: agree3 });
     router.push('/signup/nickname');
   };
 
