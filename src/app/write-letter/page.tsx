@@ -1,7 +1,8 @@
 'use client';
 
-import { ChangeEvent, use, useRef, useState } from 'react';
+import { ChangeEvent, use, useEffect, useRef, useState } from 'react';
 
+import { getScreenName, trackEvent } from '@/common/analytics/gtm';
 import Button from '@/components/common/Button/Button';
 import * as styles from './write-letter.css';
 import { IcClose, IcImage, IcMusic, IcXNeutral600 } from '@/assets/icons';
@@ -58,6 +59,11 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const clientMessageIdRef = useRef<string | null>(null);
 
   const isValidBody = message.trim().length >= MIN_LENGTH;
+
+  // 새 편지만 보낸다. 답장은 제외
+  useEffect(() => {
+    if (!replyTo && !conversationId) trackEvent({ event: 'letter_write_start', screen_name: getScreenName() });
+  }, [replyTo, conversationId]);
 
   // 사진을 지우거나 바꾸거나 작성을 취소하면, 편지에 연결되지 않은 업로드 사진을 지운다
   const discardUploadedImage = () => {
@@ -123,6 +129,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
         { body, ...attachment },
         {
           onSuccess: ({ bonusChocolateAmount }) => {
+            trackEvent({ event: 'letter_send', char_count: body.length });
             if (bonusChocolateAmount > 0) showToast(`${bonusChocolateAmount}초코가 지급됐어요.`);
             router.push('/home');
           },
@@ -142,7 +149,12 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
 
     // 답장은 성공·실패 모두 답장 화면을 열기 직전 페이지로 돌아간다
     const replyOptions = {
-      onSuccess: () => router.back(),
+      onSuccess: () => {
+        trackEvent({ event: 'reply_send', char_count: body.length });
+        // 첫 답장이면 대화방이 생긴다
+        if (replyTo) trackEvent({ event: 'chat_room_open' });
+        router.back();
+      },
       onError: (error: Error) => {
         if (!(error instanceof ApiError) || openForbiddenWordModal(error)) return;
 

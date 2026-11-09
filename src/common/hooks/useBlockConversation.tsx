@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { trackEvent } from '@/common/analytics/gtm';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useBlockMutation } from '@/common/apis/conversation';
@@ -19,6 +20,7 @@ function useBlockConfirm(block: () => Promise<unknown>, redirectPath: string) {
   const blockAndLeave = async () => {
     try {
       await block();
+      trackEvent({ event: 'block_user' });
     } catch (error) {
       if (!(error instanceof ApiError) || error.status !== HTTP_STATUS_CODE.NOT_FOUND) {
         open(({ close }) => (

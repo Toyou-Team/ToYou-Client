@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
+import { trackEvent } from '@/common/analytics/gtm';
 import { useAppleLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
@@ -37,6 +38,7 @@ export function useAppleLogin() {
   const loginToServer = async (payload: { identityToken: string; nonce: string }) => {
     try {
       const result = await login(payload);
+      if (result.status !== 'SIGNUP_UNAVAILABLE') trackEvent({ event: 'login', method: 'apple' });
 
       switch (result.status) {
         case 'SIGNED_IN':

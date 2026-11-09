@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { trackEvent } from '@/common/analytics/gtm';
 import { startKakaoLogin, useKakaoTokenLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
@@ -50,6 +51,7 @@ export function useKakaoLogin() {
     try {
       const result = await login(accessToken);
       loginProviderStore.clear();
+      if (result.status !== 'SIGNUP_UNAVAILABLE') trackEvent({ event: 'login', method: 'kakao' });
 
       switch (result.status) {
         case 'SIGNED_IN':

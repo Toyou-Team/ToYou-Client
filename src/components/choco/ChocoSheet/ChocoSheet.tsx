@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+import { getScreenName, trackEvent } from '@/common/analytics/gtm';
 import { useChocolateSummaryQuery } from '@/common/apis/chocolate';
 import { useModal } from '@/common/hooks/useModal';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
@@ -97,6 +98,8 @@ function ChocoSummary() {
     ));
 
   const handleNotifyClick = () => {
+    trackEvent({ event: 'choco_notify_click', screen_name: getScreenName() });
+
     if (isNotificationGranted()) {
       openNotifyDoneModal();
       return;
@@ -112,9 +115,15 @@ function ChocoSummary() {
         onConfirm={async () => {
           close();
           if (typeof Notification === 'undefined') return;
-          if ((await Notification.requestPermission()) === 'granted') openNotifyDoneModal();
+
+          const permission = await Notification.requestPermission();
+          if (permission !== 'default') trackEvent({ event: 'notification_permission_result', result: permission });
+          if (permission === 'granted') openNotifyDoneModal();
         }}
-        onClose={close}
+        onClose={() => {
+          close();
+          trackEvent({ event: 'notification_permission_result', result: 'later' });
+        }}
       />
     ));
   };

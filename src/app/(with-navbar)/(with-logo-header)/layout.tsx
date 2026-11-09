@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '@/components/common/Header/Header';
 import Link from 'next/link';
+import { getScreenName, trackEvent } from '@/common/analytics/gtm';
 
 import * as styles from './layout.css';
 import Badge from '@/components/common/Badge/Badge';
@@ -23,7 +24,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         }
         right={
           profile && (
-            <button type="button" aria-label="내 초코 보기" onClick={() => setIsChocoSheetOpen(true)}>
+            <button
+              type="button"
+              aria-label="내 초코 보기"
+              onClick={() => {
+                trackEvent({ event: 'choco_badge_click', screen_name: getScreenName() });
+                setIsChocoSheetOpen(true);
+              }}
+            >
               <Badge count={profile.chocolateBalance} />
             </button>
           )
