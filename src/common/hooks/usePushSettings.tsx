@@ -14,6 +14,7 @@ import {
 import {
   type PushConsents,
   type UpdatedPushConsents,
+  type UpdatePushConsentsPayload,
   usePushConsentsQuery,
   useUpdatePushConsentsMutation,
 } from '@/common/apis/pushConsent';
@@ -71,12 +72,15 @@ function useDevicePushPermission() {
   return { permission };
 }
 
-// 설정 화면 알림: 광고성·야간 수신 동의 토글 + 기기 알림 상태
+// 설정 화면 알림: 서비스·광고성·야간 토글 + 기기 알림 상태
 export function usePushSettings() {
   const { open } = useModal();
   const { data: consents } = usePushConsentsQuery();
   const { mutate } = useUpdatePushConsentsMutation({
     onUpdated: (before, after) => {
+      if (before.servicePush.enabled && !after.servicePush.enabled) {
+        showToast('편지 도착 소식을 제때 확인하지 못할 수 있어요');
+      }
       const message = consentChangeMessage(before, after);
       if (message) showToast(message);
     },
@@ -93,7 +97,7 @@ export function usePushSettings() {
   });
   const device = useDevicePushPermission();
 
-  const change = (payload: { marketingPushAgreed?: boolean; nightPushAgreed?: boolean }) => {
+  const change = (payload: UpdatePushConsentsPayload) => {
     if (consents) mutate(payload);
   };
 
@@ -141,6 +145,7 @@ export function usePushSettings() {
 
   return {
     consents,
+    changeService: (enabled: boolean) => change({ servicePushEnabled: enabled }),
     changeMarketing: (agreed: boolean) => change({ marketingPushAgreed: agreed }),
     changeNight,
     devicePermission: device.permission,

@@ -8,13 +8,15 @@ export interface PushConsentState {
   agreedAt: string | null;
 }
 
-// 광고성 정보(앱 푸시)·야간 수신 동의. 기기 알림 권한(iOS 설정)과는 별개
+// 서비스(정보성)·광고성·야간 알림 설정. 기기 알림 권한(iOS 설정)과는 별개
 export interface PushConsents {
+  servicePush: { enabled: boolean };
   marketingPush: PushConsentState;
   nightPush: PushConsentState;
 }
 
 export interface UpdatePushConsentsPayload {
+  servicePushEnabled?: boolean;
   marketingPushAgreed?: boolean;
   nightPushAgreed?: boolean;
 }
@@ -40,9 +42,10 @@ export const patchPushConsents = (payload: UpdatePushConsentsPayload) =>
   request<UpdatedPushConsents>('patch', '/api/v1/push-consents', payload);
 
 const applyConsentChange = (
-  { marketingPush, nightPush }: PushConsents,
-  { marketingPushAgreed, nightPushAgreed }: UpdatePushConsentsPayload,
+  { servicePush, marketingPush, nightPush }: PushConsents,
+  { servicePushEnabled, marketingPushAgreed, nightPushAgreed }: UpdatePushConsentsPayload,
 ): PushConsents => ({
+  servicePush: { enabled: servicePushEnabled ?? servicePush.enabled },
   marketingPush: { ...marketingPush, agreed: marketingPushAgreed ?? marketingPush.agreed },
   nightPush: { ...nightPush, agreed: marketingPushAgreed === false ? false : (nightPushAgreed ?? nightPush.agreed) },
 });
@@ -71,11 +74,11 @@ export const useUpdatePushConsentsMutation = ({ onUpdated, onFailed }: UpdatePus
       return { before };
     },
     onSuccess: (result, _payload, { before }) => {
-      const { marketingPush, nightPush } = result;
+      const { servicePush, marketingPush, nightPush } = result;
 
       // 뒤에 남은 요청이 있으면 화면이 되돌아가지 않게 마지막 응답만 반영
       if (queryClient.isMutating({ mutationKey: UPDATE_PUSH_CONSENTS_KEY }) === 1) {
-        queryClient.setQueryData<PushConsents>(PUSH_CONSENTS_QUERY_KEY, { marketingPush, nightPush });
+        queryClient.setQueryData<PushConsents>(PUSH_CONSENTS_QUERY_KEY, { servicePush, marketingPush, nightPush });
       }
       if (before) onUpdated(before, result);
     },

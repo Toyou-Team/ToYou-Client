@@ -46,8 +46,12 @@ export default function SettingsPage() {
 
             <label className={styles.row}>
               <span>서비스 알림</span>
-              {/* 서비스 알림은 항상 ON. 실제 수신은 기기 알림 권한에 따른다 */}
-              <Toggle checked onChange={push.openDeviceNotificationModal} />
+              {push.consents && (
+                <Toggle
+                  checked={push.consents.servicePush.enabled}
+                  onChange={(event) => push.changeService(event.target.checked)}
+                />
+              )}
             </label>
 
             <div className={styles.toggleGroup}>
