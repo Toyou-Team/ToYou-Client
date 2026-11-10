@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, type ChangeEvent } from 'react';
+import { useEffect, useEffectEvent, useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { ApiError } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED } from '@/common/apis/constants/error-code';
+import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useModal } from '@/common/hooks/useModal';
 import { Header } from '@/components/common/Header/Header';
 import { BackButton } from '@/components/common/BackButton/BackButton';
@@ -15,6 +16,7 @@ import { ImageUpload } from '@/components/signup/profile-image/ImageUpload/Image
 import {
   GENDER_LABEL,
   useDeleteProfileImageMutation,
+  useProfileNicknameCheckMutation,
   useProfileQuery,
   useUpdateProfileMutation,
   useUploadProfileImageMutation,
@@ -22,6 +24,8 @@ import {
 import { getNicknameError, getNicknameServerError, NICKNAME_LENGTH_ERROR, NICKNAME_MAX_LENGTH } from '@/utils/nickname';
 
 import * as styles from './edit.css';
+
+const CHECK_DELAY = 400;
 
 const isSuspended = (error: Error) => error instanceof ApiError && error.code === ACCOUNT_SUSPENDED;
 
@@ -33,10 +37,13 @@ export default function MyPageEditPage() {
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfileMutation();
   const { mutate: uploadProfileImage } = useUploadProfileImageMutation();
   const { mutate: deleteProfileImage } = useDeleteProfileImageMutation();
+  const { mutate: checkNickname } = useProfileNicknameCheckMutation();
 
   // 사용자가 바꾸기 전까지는 프로필 값을 그대로 보여준다
   const [nicknameInput, setNickname] = useState<string | null>(null);
   const [imageInput, setProfileImageUrl] = useState<string | null | undefined>(undefined);
+  // 닉네임별 서버 확인 결과. 응답이 늦게 와도 자기 닉네임에만 기록된다 (null 이면 통과)
+  const [checkResults, setCheckResults] = useState(new Map<string, string | null>());
   const [serverError, setServerError] = useState<string | null>(null);
 
   const nickname = nicknameInput ?? profile?.nickname ?? '';
@@ -44,10 +51,42 @@ export default function MyPageEditPage() {
 
   const trimmed = nickname.trim();
   // 기존 닉네임은 그대로 유지할 수 있어서 바꿀 때만 검사한다
-  const nicknameError = serverError ?? (trimmed === profile?.nickname ? null : getNicknameError(nickname));
+  const isChanged = trimmed !== profile?.nickname;
+  const localError = isChanged ? getNicknameError(nickname) : null;
+  const nicknameError = serverError ?? localError ?? checkResults.get(trimmed) ?? null;
   const isValidNickname = !nicknameError;
   const isFull = nicknameInput !== null && nickname.length >= NICKNAME_MAX_LENGTH;
   const isError = (nickname !== '' && !isValidNickname) || isFull;
+
+  const saveCheckResult = (target: string, error: string | null) =>
+    setCheckResults((results) => new Map(results).set(target, error));
+
+  // 형식 오류·금칙어만 표시하고, 그 밖의 실패는 저장할 때 다시 검사
+  const checkAfterPause = useEffectEvent((target: string) =>
+    checkNickname(
+      { nickname: target },
+      {
+        onSuccess: () => saveCheckResult(target, null),
+        onError: (error) => {
+          if (
+            error instanceof ApiError &&
+            (error.status === HTTP_STATUS_CODE.BAD_REQUEST || error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY)
+          ) {
+            saveCheckResult(target, getNicknameServerError(error));
+          }
+        },
+      },
+    ),
+  );
+
+  const isChecked = checkResults.has(trimmed);
+
+  useEffect(() => {
+    if (!isChanged || localError || isChecked) return;
+
+    const timer = setTimeout(() => checkAfterPause(trimmed), CHECK_DELAY);
+    return () => clearTimeout(timer);
+  }, [trimmed, isChanged, localError, isChecked]);
 
   const handleNicknameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNickname(e.target.value.slice(0, NICKNAME_MAX_LENGTH));
@@ -57,7 +96,7 @@ export default function MyPageEditPage() {
   const handleSave = () => {
     if (!isValidNickname) return;
 
-    if (trimmed === profile?.nickname) {
+    if (!isChanged) {
       router.back();
       return;
     }

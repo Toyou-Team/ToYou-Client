@@ -59,6 +59,12 @@ export const useUpdateProfileMutation = () => {
   });
 };
 
+// 바꿀 닉네임 미리 확인 (저장은 하지 않음)
+export const postProfileNicknameCheck = (payload: { nickname: string }) =>
+  request<{ available: boolean }>('post', '/api/v1/profile/nickname-check', payload);
+
+export const useProfileNicknameCheckMutation = () => useMutation({ mutationFn: postProfileNicknameCheck });
+
 // 프로필 사진 등록, 교체
 export const postProfileImage = (file: File) => {
   const formData = new FormData();
