@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { getScreenName, trackEvent } from '@/common/analytics/gtm';
-import { useChocolateSummaryQuery } from '@/common/apis/chocolate';
+import { useChargeAlertMutation, useChocolateSummaryQuery } from '@/common/apis/chocolate';
+import { ApiError } from '@/common/apis/client';
+import { ACCOUNT_SUSPENDED, CHARGE_ALERT_CONDITIONS_NOT_MET } from '@/common/apis/constants/error-code';
 import { useModal } from '@/common/hooks/useModal';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
 import Button from '@/components/common/Button/Button';
@@ -44,8 +47,6 @@ function Countdown({ to, onEnd }: { to: string; onEnd: () => void }) {
   );
 }
 
-const isNotificationGranted = () => typeof Notification !== 'undefined' && Notification.permission === 'granted';
-
 export function ChocoSheet({ isOpen, onClose }: ChocoSheetProps) {
   return (
     <BottomSheet
@@ -65,21 +66,26 @@ export function ChocoSheet({ isOpen, onClose }: ChocoSheetProps) {
 
 // 시트가 열릴 때만 마운트되어 열 때마다 새로 조회한다
 function ChocoSummary() {
+  const router = useRouter();
   const { open } = useModal();
   const { data: summary, refetch } = useChocolateSummaryQuery();
+  const { mutate: requestChargeAlert, isPending: isRequesting } = useChargeAlertMutation();
 
   if (!summary) return null;
 
-  const { balance, todayDaily, permanentBalance, firstLetterWrittenAt, dailyGrantAmount } = summary;
+  const { balance, todayDaily, firstLetterBonusRemainingAmount, firstLetterWrittenAt, dailyGrantAmount, chargeAlert } =
+    summary;
 
   const hasTodayChoco = todayDaily.remainingAmount > 0;
   const isFirstLetterToday = summary.week.days.some((day) => day.isToday && day.firstLetterBonusGrantedAmount > 0);
-  const isOutOfChoco = balance === 0 && todayDaily.grantedAmount > 0 && !hasTodayChoco;
+  const isTodayUsedUp = todayDaily.grantedAmount > 0 && !hasTodayChoco;
+  const isOutOfChoco = isTodayUsedUp && balance === 0;
+  // 신청 선물로 잔액이 생겨도 오늘은 신청 상태를 보여준다
+  const showChargeAlert = isOutOfChoco || (isTodayUsedUp && chargeAlert.requested);
   // 남아 있으면 소멸 시각, 다 썼으면 다음 지급 시각(자정)까지
   const countdownTo = hasTodayChoco ? summary.nextExpirationAt : summary.nextDailyGrantAt;
 
-  // TODO: 충전 알림 신청 API 연결 (신청하면 초코 10개 지급)
-  const openNotifyDoneModal = () =>
+  const openNotifyDoneModal = (grantedAmount: number) =>
     open(({ close }) => (
       <Modal
         title="알림 신청 완료"
@@ -90,8 +96,39 @@ function ChocoSummary() {
             충전 기능이 열리면 푸시 알림으로 알려드릴게요.
           </>
         }
-        subDescription="초코 10개를 선물로 드렸어요."
+        subDescription={grantedAmount > 0 ? `초코 ${grantedAmount}개를 선물로 드렸어요.` : undefined}
         confirmText="완료"
+        onConfirm={close}
+        onClose={close}
+      />
+    ));
+
+  // 기기 알림/광고성 수신 동의는 설정 화면에서 켠다
+  const openTurnOnModal = () =>
+    open(({ close }) => (
+      <Modal
+        title="알림을 켜주세요"
+        description="충전 기능이 열리면 가장 먼저 알려드릴게요."
+        subDescription="지금 켜면 초코 10개를 선물로 드려요."
+        cancelText="다음에"
+        confirmText="알림 켜기"
+        onConfirm={() => {
+          close();
+          router.push('/mypage/settings');
+        }}
+        onClose={() => {
+          close();
+          trackEvent({ event: 'notification_permission_result', result: 'later' });
+        }}
+      />
+    ));
+
+  const openFailModal = (message: string) =>
+    open(({ close }) => (
+      <Modal
+        title="알림을 신청하지 못했어요"
+        description={message}
+        confirmText="확인"
         onConfirm={close}
         onClose={close}
       />
@@ -100,32 +137,15 @@ function ChocoSummary() {
   const handleNotifyClick = () => {
     trackEvent({ event: 'choco_notify_click', screen_name: getScreenName() });
 
-    if (isNotificationGranted()) {
-      openNotifyDoneModal();
-      return;
-    }
-
-    open(({ close }) => (
-      <Modal
-        title="알림을 켜주세요"
-        description="충전 기능이 열리면 가장 먼저 알려드릴게요."
-        subDescription="지금 켜면 초코 10개를 선물로 드려요."
-        cancelText="다음에"
-        confirmText="설정에서 켜기"
-        onConfirm={async () => {
-          close();
-          if (typeof Notification === 'undefined') return;
-
-          const permission = await Notification.requestPermission();
-          if (permission !== 'default') trackEvent({ event: 'notification_permission_result', result: permission });
-          if (permission === 'granted') openNotifyDoneModal();
-        }}
-        onClose={() => {
-          close();
-          trackEvent({ event: 'notification_permission_result', result: 'later' });
-        }}
-      />
-    ));
+    requestChargeAlert(undefined, {
+      onSuccess: ({ grantedAmount }) => openNotifyDoneModal(grantedAmount),
+      onError: (error) => {
+        // 제재는 공통 안내 시트가 띄워진다
+        if (error instanceof ApiError && error.code === ACCOUNT_SUSPENDED) return;
+        if (error instanceof ApiError && error.code === CHARGE_ALERT_CONDITIONS_NOT_MET) openTurnOnModal();
+        else openFailModal(error.message);
+      },
+    });
   };
 
   const [noticeFirstLine, noticeSecondLine] = isFirstLetterToday
@@ -161,7 +181,7 @@ function ChocoSummary() {
         </>
       ) : (
         <>
-          <ul>
+          <ul className={styles.rowList}>
             {todayDaily.grantedAmount > 0 && countdownTo && (
               <li className={styles.row}>
                 <div className={styles.rowText}>
@@ -177,32 +197,45 @@ function ChocoSummary() {
               </li>
             )}
 
-            {/* 첫 편지 초코를 다 쓰면 숨긴다 */}
-            {permanentBalance > 0 && (
+            {/* 선물 초코는 다 쓰면 숨긴다 */}
+            {firstLetterBonusRemainingAmount > 0 && (
               <li className={styles.row}>
                 <div className={styles.rowText}>
                   <p className={styles.rowTitle}>첫 편지 선물</p>
                   <p className={styles.rowDescription}>기한 없이 쓸 수 있어요</p>
                 </div>
-                <span className={styles.rowValue}>{permanentBalance}</span>
+                <span className={styles.rowValue}>{firstLetterBonusRemainingAmount}</span>
+              </li>
+            )}
+
+            {chargeAlert.giftRemainingAmount > 0 && (
+              <li className={styles.row}>
+                <div className={styles.rowText}>
+                  <p className={styles.rowTitle}>알림 신청 선물</p>
+                  <p className={styles.rowDescription}>기한 없이 쓸 수 있어요</p>
+                </div>
+                <span className={styles.rowValue}>{chargeAlert.giftRemainingAmount}</span>
               </li>
             )}
           </ul>
 
-          <p className={styles.notice}>
-            {noticeFirstLine}
-            {noticeSecondLine && (
-              <>
-                <br />
-                {noticeSecondLine}
-              </>
-            )}
-          </p>
+          {/* 신청을 마치면 안내 없이 버튼만 남는다 */}
+          {!(showChargeAlert && chargeAlert.requested) && (
+            <p className={styles.notice}>
+              {noticeFirstLine}
+              {noticeSecondLine && (
+                <>
+                  <br />
+                  {noticeSecondLine}
+                </>
+              )}
+            </p>
+          )}
 
-          {isOutOfChoco && (
+          {showChargeAlert && (
             <div className={styles.action}>
-              <Button type="button" onClick={handleNotifyClick}>
-                충전 열리면 알림 받기
+              <Button type="button" disabled={chargeAlert.requested || isRequesting} onClick={handleNotifyClick}>
+                {chargeAlert.requested ? '충전 가능할 때 알려드릴게요' : '충전 열리면 알림 받기'}
               </Button>
             </div>
           )}

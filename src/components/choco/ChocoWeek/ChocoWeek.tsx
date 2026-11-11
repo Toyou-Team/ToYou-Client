@@ -38,6 +38,8 @@ const getDayBox = (
     return { box: 'dashed', value: `+${day.scheduledDailyAmount}`, label: FUTURE_LABELS[daysFromToday - 1] };
 
   const { grantedAmount, remainingAmount, expiredAmount } = day.daily;
+
+  if (grantedAmount === 0) return { box: 'empty' };
   if (expiredAmount > 0) return { box: 'struck', value: `${grantedAmount}`, label: '소멸' };
   if (remainingAmount > 0) return { box: 'filled', value: `+${grantedAmount}`, label: '오늘' };
 

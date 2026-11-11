@@ -12,7 +12,7 @@ export const closeText = style({
 
 export const scrollArea = style({
   overflowY: 'auto',
-  paddingBottom: '3rem',
+  paddingBottom: '11.2rem',
 });
 
 export const balance = style({
@@ -42,6 +42,12 @@ export const balanceAmount = style({
 
 export const balanceUnit = style({
   ...vars.fontStyles.body,
+});
+
+// 두 줄까지 보이고 그 이상은 목록 안에서 스크롤
+export const rowList = style({
+  maxHeight: '15rem',
+  overflowY: 'auto',
 });
 
 export const row = style({
