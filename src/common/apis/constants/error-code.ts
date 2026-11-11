@@ -45,6 +45,9 @@ export const CONTENT_ERROR_CODE = {
   FORBIDDEN_WORD: 'CONTENT_FORBIDDEN_WORD',
 } as const;
 
+// 충전 알림 신청 조건(푸시 토큰, 광고성 수신 동의) 미충족. 설정을 켜도록 안내
+export const CHARGE_ALERT_CONDITIONS_NOT_MET = 'CHARGE_ALERT_CONDITIONS_NOT_MET';
+
 export const PROFILE_ERROR_CODE = {
   /** 닉네임 입력란에 중복 오류 표시 */
   NICKNAME_TAKEN: 'PROFILE_NICKNAME_TAKEN',
