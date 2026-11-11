@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { request } from './client';
 import { syncChocolateBalance } from './profile';
@@ -27,8 +27,10 @@ export interface ChocolateSummary {
   serverTime: string;
   timeZone: string;
   balance: number;
-  // 기한 없는 초코 잔액 (첫 편지 선물 등)
+  // 기한 없는 초코 전체 (첫 편지/알림 신청 선물 등 합산)
   permanentBalance: number;
+  // 첫 편지 선물의 남은 양
+  firstLetterBonusRemainingAmount: number;
   expiringBalance: number;
   expiringAmount: number;
   nextExpirationAt: string | null;
@@ -38,6 +40,13 @@ export interface ChocolateSummary {
   firstLetterBonusAmount: number;
   dailyGrantAmount: number;
   todayDaily: ChocolateDaily;
+  chargeAlert: {
+    // 광고성 수신 동의를 철회하면 false 로 돌아간다. 지급 이력과는 별개
+    requested: boolean;
+    requestedAt: string | null;
+    giftAmount: number;
+    giftRemainingAmount: number;
+  };
   week: {
     startDate: string;
     endDate: string;
@@ -60,6 +69,28 @@ export const useChocolateSummaryQuery = () => {
       const summary = await getChocolateSummary();
       syncChocolateBalance(queryClient, summary.balance);
       return summary;
+    },
+  });
+};
+
+export interface ChargeAlertResult {
+  requestedAt: string;
+  // 이번 요청으로 실제 지급한 양. 이미 보상받은 계정은 0
+  grantedAmount: number;
+  balance: number;
+}
+
+// 충전 알림 신청
+export const postChargeAlert = () => request<ChargeAlertResult>('post', '/api/v1/chocolates/charge-alert');
+
+export const useChargeAlertMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: postChargeAlert,
+    onSuccess: ({ balance }) => {
+      syncChocolateBalance(queryClient, balance);
+      queryClient.invalidateQueries({ queryKey: CHOCOLATE_SUMMARY_QUERY_KEY });
     },
   });
 };
