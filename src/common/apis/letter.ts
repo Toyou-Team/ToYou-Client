@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { request } from './client';
 import { CURRENT_DELIVERY_ROUND_QUERY_KEY, type CurrentDeliveryRound } from './delivery';
@@ -52,15 +53,36 @@ export const useCreateLetterMutation = () => {
 // 편지쓰기 랜덤 문구
 export const getWritingPrompt = () => request<{ phrase: string | null }>('get', '/api/v1/letters/writing-prompt');
 
-export const useWritingPromptQuery = () =>
-  useQuery({
-    queryKey: ['writing-prompt'],
-    queryFn: getWritingPrompt,
-    select: (data) => data.phrase,
-    gcTime: 0,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
+const writingPromptQueryOptions = queryOptions({
+  queryKey: ['writing-prompt'],
+  queryFn: getWritingPrompt,
+  staleTime: Infinity,
+  gcTime: Infinity,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+});
+
+// 편지 쓰기를 열기 전에 받아, 들어가자마자 문구가 보이도록
+export const usePrefetchWritingPrompt = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.prefetchQuery(writingPromptQueryOptions);
+  }, [queryClient]);
+};
+
+export const useWritingPromptQuery = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(
+    () => () => {
+      queryClient.invalidateQueries({ queryKey: writingPromptQueryOptions.queryKey, refetchType: 'none' });
+    },
+    [queryClient],
+  );
+
+  return useQuery({ ...writingPromptQueryOptions, select: (data) => data.phrase, refetchOnMount: false });
+};
 
 // 편지 작성 시 백그라운드 이미지 업로드
 export const uploadLetterImage = (file: File) => {
