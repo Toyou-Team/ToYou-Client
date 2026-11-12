@@ -16,6 +16,7 @@ import {
 } from '@/assets/icons';
 import { useConversationsQuery } from '@/common/apis/conversation';
 import { useCurrentDeliveryRoundQuery } from '@/common/apis/delivery';
+import { usePrefetchWritingPrompt } from '@/common/apis/letter';
 
 const navItems = [
   { href: '/home', label: '홈', icon: <IcHomeNeutral300 />, activeIcon: <IcHomeNeutral900 /> },
@@ -32,6 +33,7 @@ const navItems = [
 export function NavBar() {
   const pathname = usePathname();
   const tooltipId = useId();
+  usePrefetchWritingPrompt();
   const { data: conversations } = useConversationsQuery();
   const hasUnreadLetter = conversations?.some(({ hasUnread }) => hasUnread) ?? false;
 

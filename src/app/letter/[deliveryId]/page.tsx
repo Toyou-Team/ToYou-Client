@@ -9,6 +9,7 @@ import { IcMore } from '@/assets/icons';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { OPEN_DELIVERY_COST, useCurrentDeliveryRoundQuery, useOpenDeliveryMutation } from '@/common/apis/delivery';
+import { usePrefetchWritingPrompt } from '@/common/apis/letter';
 import { useBlockDelivery } from '@/common/hooks/useBlockConversation';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
@@ -32,6 +33,7 @@ export default function LetterPage() {
   const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
   const closeReportBlockSheet = () => setIsReportBlockSheetOpen(false);
   const openBlockConfirm = useBlockDelivery(deliveryId);
+  usePrefetchWritingPrompt();
 
   const delivery = round?.deliveries.find(({ id }) => id === deliveryId);
   const letter = opened?.letter ?? delivery?.content;

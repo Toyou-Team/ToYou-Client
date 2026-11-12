@@ -6,6 +6,7 @@ import clsx from 'clsx';
 
 import { IcMore } from '@/assets/icons';
 import { useConversationQuery, useReadMessageMutation } from '@/common/apis/conversation';
+import { usePrefetchWritingPrompt } from '@/common/apis/letter';
 import { useBlockConversation } from '@/common/hooks/useBlockConversation';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
@@ -24,6 +25,7 @@ export default function ConversationLetterPage() {
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useConversationQuery(conversationId);
   const { mutate: readMessage } = useReadMessageMutation(conversationId);
+  usePrefetchWritingPrompt();
 
   const [activeId, setActiveId] = useState(messageId);
   const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
