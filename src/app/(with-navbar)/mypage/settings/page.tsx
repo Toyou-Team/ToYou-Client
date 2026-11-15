@@ -24,7 +24,7 @@ export default function SettingsPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <Header isSticky bordered left={<BackButton />} center={<span className={styles.headerTitle}>설정</span>} />
+      <Header bordered left={<BackButton />} center={<span className={styles.headerTitle}>설정</span>} />
 
       <main className={styles.content}>
         <section className={styles.section}>

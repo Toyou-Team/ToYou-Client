@@ -17,7 +17,7 @@ export default function RestrictionPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <Header isSticky bordered center={<span className={styles.headerTitle}>이용 제한 안내</span>} />
+      <Header bordered center={<span className={styles.headerTitle}>이용 제한 안내</span>} />
 
       <main className={styles.content}>
         <h1 className={styles.title}>

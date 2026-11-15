@@ -12,7 +12,7 @@ import { useModal } from '@/common/hooks/useModal';
 import { useSignupDraft } from '@/common/hooks/useSignupDraft';
 import Button from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
-import { getNicknameError, getNicknameServerError, NICKNAME_LENGTH_ERROR } from '@/utils/nickname';
+import { getNicknameError, getNicknameServerError, NICKNAME_LENGTH_ERROR, NICKNAME_MAX_LENGTH } from '@/utils/nickname';
 import TextField from '../textField/TextField';
 import * as styles from './nicknameForm.css';
 
@@ -102,10 +102,7 @@ function NicknameForm() {
   }, [trimmed, nicknameError, isChecked]);
 
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-
-    if (inputValue.length > 12) return;
-    setNickname(inputValue);
+    setNickname(e.target.value.slice(0, NICKNAME_MAX_LENGTH));
   };
 
   const handleNext = async () => {
@@ -130,8 +127,9 @@ function NicknameForm() {
       <div className={styles.nicknameFieldWrapper}>
         <TextField
           isError={isError}
-          onChange={handleNicknameChange}
           value={nickname}
+          maxLength={NICKNAME_MAX_LENGTH}
+          onChange={handleNicknameChange}
           helperText={helperText}
           helperTextType={helperTextType}
         />

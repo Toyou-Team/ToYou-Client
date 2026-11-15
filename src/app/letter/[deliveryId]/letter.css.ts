@@ -15,8 +15,9 @@ export const page = style({
   backgroundPosition: 'center',
 });
 
-// 공통 Header 를 이 화면에서만 낮고 투명하게 쓴다
+// 공통 Header 를 이 화면에서만 낮고 투명하게 쓰고, 투명해서 편지가 아래로 비치지 않게 고정하지 않는다
 globalStyle(`${page} > header`, {
+  position: 'relative',
   height: withSafeTop('8rem'),
   backgroundColor: 'transparent',
 });
@@ -36,12 +37,8 @@ export const content = style({
 export const letterWrapper = style({
   display: 'flex',
   flexDirection: 'column',
-  flex: 1,
-});
-
-// 긴 편지는 위에 붙이고, 짧은 편지만 세로 중앙 정렬
-export const centered = style({
   justifyContent: 'center',
+  flex: 1,
 });
 
 export const bottomButtonWrapper = style({

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import { isServer, MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { isServer, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ApiError } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED } from '@/common/apis/constants/error-code';
@@ -18,7 +18,6 @@ import {
 
 function makeQueryClient() {
   return new QueryClient({
-    queryCache: new QueryCache({ onError: notifyIfSuspended }),
     mutationCache: new MutationCache({ onError: notifyIfSuspended }),
     defaultOptions: { queries: { retry: false } },
   });

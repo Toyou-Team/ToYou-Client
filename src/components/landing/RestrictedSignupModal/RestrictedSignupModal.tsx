@@ -29,7 +29,7 @@ export function RestrictedSignupModal() {
       return (
         <Modal
           title="가입이 제한됐어요"
-          description={'이전에 운영정책 위반으로\n영구 이용 제한된 이력이 있어요.'}
+          description="이전에 운영정책 위반으로 이용 제한된 이력이 있어요."
           subDescription="자세한 내용은 카카오톡 채널로 문의해주세요."
           confirmText="닫기"
           onConfirm={handleClose}
