@@ -16,6 +16,7 @@ export const badge = style({
 
 export const count = style({
   ...vars.fontStyles.subtitle,
+  lineHeight: '100%',
 });
 
 export const label = style({

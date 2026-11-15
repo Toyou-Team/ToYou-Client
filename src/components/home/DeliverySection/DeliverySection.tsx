@@ -60,7 +60,7 @@ export function DeliverySection() {
       open(({ close }) => (
         <Modal
           title="초코가 부족해요"
-          description={`편지를 새로 받으면 초코 ${cost}개가 필요해요.`}
+          description={`편지를 새로 받으려면 초코 ${cost}개가 필요해요.`}
           subDescription={
             <>
               지금은 <strong>초코 {chocolateBalance}개</strong>를 가지고 있어요.
