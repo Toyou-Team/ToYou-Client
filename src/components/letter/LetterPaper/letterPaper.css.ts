@@ -16,7 +16,6 @@ export const letter = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '1.6rem',
-  minHeight: '14.7rem',
 
   padding: '2rem 2.5rem',
 });

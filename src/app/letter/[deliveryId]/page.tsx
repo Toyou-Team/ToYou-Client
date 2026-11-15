@@ -140,15 +140,12 @@ export default function LetterPage() {
       );
     }
 
-    if (opened.replyStatus === 'AVAILABLE') {
-      return (
-        <Button type="button" onClick={goToReply}>
-          답장하기
-        </Button>
-      );
-    }
-
-    return null;
+    // 작성자가 탈퇴/정지했거나 이미 답장한 편지
+    return (
+      <Button type="button" disabled={opened.replyStatus !== 'AVAILABLE'} onClick={goToReply}>
+        답장하기
+      </Button>
+    );
   };
 
   return (
@@ -161,7 +158,7 @@ export default function LetterPage() {
       />
 
       <div className={styles.content}>
-        <div className={clsx(styles.letterWrapper, !isPreview && styles.centered)}>
+        <div className={styles.letterWrapper}>
           <LetterPaper letter={letter} isPreview={isPreview} />
         </div>
 
