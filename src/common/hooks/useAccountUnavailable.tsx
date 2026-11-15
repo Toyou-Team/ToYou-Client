@@ -7,7 +7,7 @@ import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 import { formatKoreanDay } from '@/utils/date';
 
-// 403 AUTH_ACCOUNT_UNAVAILABLE. 재가입 가능일이 없으면 랜딩의 가입 제한 모달로
+// 403 AUTH_ACCOUNT_UNAVAILABLE. 제재 이력이 있으면 랜딩의 가입 제한 모달로, 일반 탈퇴 후 재가입 제한이면 가능일 안내
 export function useAccountUnavailable() {
   const router = useRouter();
   const { open } = useModal();
@@ -16,7 +16,7 @@ export function useAccountUnavailable() {
     const details = error instanceof ApiError ? error.details : undefined;
     const rejoinAvailableAt = details?.rejoinAvailableAt;
 
-    if (!rejoinAvailableAt) {
+    if (!rejoinAvailableAt || details.sanctionReasonTitle) {
       router.replace('/?blocked=restricted');
       return;
     }
@@ -31,7 +31,6 @@ export function useAccountUnavailable() {
         <Modal
           title="가입이 제한됐어요"
           description={`${formatKoreanDay(rejoinAvailableAt)}부터 다시 가입할 수 있어요.`}
-          subDescription={details.sanctionReasonTitle ? `제한 사유: ${details.sanctionReasonTitle}` : undefined}
           confirmText="닫기"
           onConfirm={handleClose}
           onClose={handleClose}
