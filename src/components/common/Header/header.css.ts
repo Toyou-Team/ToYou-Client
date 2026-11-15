@@ -6,6 +6,7 @@ import { SAFE_AREA, withSafeTop } from '@/styles/safeArea';
 
 export const headerWrapper = recipe({
   base: {
+    position: 'sticky',
     zIndex: Z_INDEX.HEADER,
     top: 0,
     display: 'flex',
@@ -16,14 +17,6 @@ export const headerWrapper = recipe({
     backgroundColor: 'white',
   },
   variants: {
-    isSticky: {
-      true: {
-        position: 'sticky',
-      },
-      false: {
-        position: 'relative',
-      },
-    },
     bordered: {
       true: {
         height: withSafeTop('8rem'),

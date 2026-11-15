@@ -52,7 +52,7 @@ export default function WithdrawReasonPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <Header isSticky bordered left={<BackButton />} center={<span className={styles.headerTitle}>회원 탈퇴</span>} />
+      <Header bordered left={<BackButton />} center={<span className={styles.headerTitle}>회원 탈퇴</span>} />
 
       <main className={styles.content}>
         <h1 className={styles.title}>

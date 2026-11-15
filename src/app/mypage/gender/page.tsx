@@ -30,7 +30,7 @@ export default function MyPageGenderPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <Header left={<BackButton />} center={<span className={styles.titleText}>받는 사람 성별</span>} bordered />
+      <Header bordered left={<BackButton />} center={<span className={styles.titleText}>받는 사람 성별</span>} />
 
       <main className={styles.content}>
         <p className={styles.description}>편지를 받고 싶은 사람의 성별을 선택해요.</p>
@@ -38,7 +38,12 @@ export default function MyPageGenderPage() {
         <ul className={styles.list}>
           {RECEIVE_GENDER_OPTIONS.map((option) => (
             <li key={option}>
-              <button type="button" className={styles.optionRow} onClick={() => handleSelect(option)} disabled={isPending}>
+              <button
+                type="button"
+                className={styles.optionRow}
+                onClick={() => handleSelect(option)}
+                disabled={isPending}
+              >
                 <span className={styles.optionLabel}>{GENDER_LABEL[option]}</span>
                 {selected === option && <IcCheckNeutral900 />}
               </button>
