@@ -15,7 +15,9 @@ import {
   useUploadLetterImageMutation,
   useWritingPromptQuery,
 } from '@/common/apis/letter';
+import { useAccountStatusQuery } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
+import { ACCOUNT_SUSPENDED_EVENT } from '@/components/restriction/AccountStatusGate/AccountStatusGate';
 import { CONTENT_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useSendMessageMutation } from '@/common/apis/conversation';
@@ -60,6 +62,16 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
 
   const isValidBody = message.trim().length >= MIN_LENGTH;
 
+  // 제재 중이면 편지작성 탭 클릭 시 안내 시트 노출
+  const { data: accountStatus } = useAccountStatusQuery();
+  const isRestricted = accountStatus?.restricted === true;
+
+  useEffect(() => {
+    if (!isRestricted) return;
+    window.dispatchEvent(new Event(ACCOUNT_SUSPENDED_EVENT));
+    router.back();
+  }, [isRestricted, router]);
+
   // 새 편지만 보낸다. 답장은 제외
   useEffect(() => {
     if (!replyTo && !conversationId) trackEvent({ event: 'letter_write_start', screen_name: getScreenName() });
@@ -77,9 +89,11 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     router.back();
   };
 
+  // 한글 조합 중에 글자를 자르면 앞 글자가 지워져서, 조합이 끝난 뒤에 자른다
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     clientMessageIdRef.current = null;
-    setMessage(e.target.value.slice(0, MAX_LENGTH));
+    const { value } = e.target;
+    setMessage((e.nativeEvent as InputEvent).isComposing ? value : value.slice(0, MAX_LENGTH));
   };
 
   const handleSelectTrack = (track: SpotifyTrack | null) => {
@@ -240,6 +254,8 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     ));
   };
 
+  if (isRestricted) return null;
+
   return (
     <main
       className={styles.page}
@@ -255,15 +271,18 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
         <IcClose />
       </button>
 
-      <section className={styles.letter({ withTrack: Boolean(selectedTrack) })}>
+      <section className={styles.letter}>
         <div className={styles.messageWrapper}>
-          <textarea
-            value={message}
-            onChange={handleMessageChange}
-            maxLength={MAX_LENGTH}
-            placeholder={writingPrompt ?? undefined}
-            className={styles.message}
-          />
+          <div className={styles.messageField} data-value={message || writingPrompt || ''}>
+            <textarea
+              value={message}
+              onChange={handleMessageChange}
+              onCompositionEnd={(e) => setMessage(e.currentTarget.value.slice(0, MAX_LENGTH))}
+              maxLength={MAX_LENGTH}
+              placeholder={writingPrompt ?? undefined}
+              className={styles.message}
+            />
+          </div>
 
           <span className={styles.characterCount}>
             {message.length === 0

@@ -11,7 +11,7 @@ export const page = style({
 
   width: '100%',
   height: '100dvh',
-  padding: `${withSafeTop('11.6rem')} 4.5rem ${withSafeBottom('4rem')}`,
+  padding: `${withSafeTop('11.6rem')} 4.5rem ${withSafeBottom('11.6rem')}`,
   backgroundColor: vars.color.neutral_100,
 
   backgroundSize: 'cover',
@@ -32,50 +32,59 @@ export const closeButton = style({
   cursor: 'pointer',
 });
 
-export const letter = recipe({
-  base: {
-    display: 'flex',
-    flexDirection: 'column',
+export const letter = style({
+  display: 'flex',
+  flexDirection: 'column',
 
-    width: '100%',
-    gap: '1.6rem',
-    minHeight: 0,
+  width: '100%',
+  gap: '1.6rem',
+  minHeight: 0,
+  marginBlock: 'auto',
 
-    backgroundColor: vars.color.neutral_50,
-  },
-  variants: {
-    withTrack: {
-      true: { height: '51rem' },
-      false: { height: '41rem' },
-    },
-  },
-  defaultVariants: {
-    withTrack: false,
-  },
+  backgroundColor: vars.color.neutral_50,
 });
 
 export const messageWrapper = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.8rem',
+  gap: '1.6rem',
 
-  flex: 1,
   minHeight: 0,
 });
 
-export const message = style({
-  width: '100%',
-  flex: 1,
-  minHeight: 0,
+// textarea 는 ::after 높이를 따라 한 줄씩 늘어난다
+const fieldText = {
+  gridArea: '1 / 1',
+  minHeight: '6.6rem',
+  maxHeight: '29rem',
   padding: '2rem 2.5rem 0',
+
+  ...vars.fontStyles.body,
+  whiteSpace: 'pre-wrap',
+  overflowWrap: 'break-word',
+} as const;
+
+export const messageField = style({
+  display: 'grid',
+  minHeight: 0,
+
+  '::after': {
+    ...fieldText,
+    content: 'attr(data-value) " "',
+    visibility: 'hidden',
+    overflow: 'hidden',
+  },
+});
+
+export const message = style({
+  ...fieldText,
+  width: '100%',
 
   border: 0,
   outline: 0,
   resize: 'none',
 
   backgroundColor: 'transparent',
-
-  ...vars.fontStyles.body,
   color: vars.color.neutral_900,
 
   '::placeholder': {
