@@ -1,9 +1,9 @@
 import { vars } from '@/styles/theme.css';
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
-import { SAFE_AREA } from '@/styles/safeArea';
 
 export const navBarWrapper = style({
+  borderTop: `1px solid ${vars.color.neutral_300}`,
   position: 'sticky',
   bottom: '0',
 
@@ -12,7 +12,6 @@ export const navBarWrapper = style({
 
   width: '100%',
   height: '8.8rem',
-  paddingBottom: SAFE_AREA.bottom,
 
   backgroundColor: vars.color.neutral_50,
 });
@@ -22,14 +21,12 @@ export const navItemWrapper = style({
 
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
   alignItems: 'center',
   gap: '1.2rem',
 
   width: '100%',
   height: '100%',
-
-  borderTop: `1px solid ${vars.color.neutral_300}`,
+  padding: '1.4rem 3rem 3rem',
 });
 
 export const navItemIcon = style({
