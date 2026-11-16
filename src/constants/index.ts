@@ -44,3 +44,6 @@ export const AGREE_DATA: AgreeData[] = [
       '오후 9시부터 오전 8시 사이에도 광고·이벤트 알림을 받아요. 선택하면 광고성 정보 수신에도 함께 동의돼요.',
   },
 ];
+
+// 가입 전 화면용 고객센터 주소 (계정 상태 API 사용 불가)
+export const KAKAO_SUPPORT_URL = 'https://pf.kakao.com/_mUxnWX/chat';
