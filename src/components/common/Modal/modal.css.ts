@@ -13,6 +13,10 @@ export const card = style({
 
   borderRadius: '2.4rem',
   backgroundColor: vars.color.neutral_50,
+
+  ':focus': {
+    outline: 'none',
+  },
 });
 
 export const verticalCard = style({

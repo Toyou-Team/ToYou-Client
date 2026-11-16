@@ -15,7 +15,7 @@ interface LetterCarouselProps {
   onSelect?: (delivery: Delivery) => void;
 }
 
-// 편지를 보고 홈으로 돌아왔을 때 보던 편지에서 다시 시작하도록, 마지막으로 누른 편지를 기억한다
+// 마지막으로 본 편지 및 캐러샐 위치를 기억
 const LAST_SELECTED_KEY = 'toyou_home_last_letter';
 
 const getLastSelectedId = () => (typeof window === 'undefined' ? null : sessionStorage.getItem(LAST_SELECTED_KEY));
@@ -71,6 +71,7 @@ export function LetterCarousel({ deliveries, onSelect }: LetterCarouselProps) {
     });
 
     setActiveIndex(closestIndex);
+    sessionStorage.setItem(LAST_SELECTED_KEY, deliveries[closestIndex].id);
   };
 
   const scrollToIndex = (index: number) => scrollTrackToIndex(trackRef.current, index, 'smooth');

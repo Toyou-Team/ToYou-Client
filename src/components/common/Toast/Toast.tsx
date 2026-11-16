@@ -3,12 +3,10 @@
 import clsx from 'clsx';
 import { toast, Toaster } from 'sonner';
 
-import { withSafeBottom } from '@/styles/safeArea';
-
 import * as styles from './toast.css';
 
 // 메뉴 바(8.8rem) 바로 위
-const OFFSET = { bottom: withSafeBottom('10rem') };
+const OFFSET = { bottom: '10rem' };
 
 export function AppToaster() {
   return (
