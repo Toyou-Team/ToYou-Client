@@ -105,6 +105,57 @@ export const postSignup = (payload: SignupPayload) =>
 
 export const useSignupMutation = () => useMutation({ mutationFn: postSignup });
 
+export interface SignupConsentsPayload {
+  registrationToken: string;
+  termsVersion: string;
+  privacyVersion: string;
+  marketingPushAgreed: boolean;
+  nightPushAgreed: boolean;
+}
+
+// 본인인증 전 약관 동의 저장
+export const postSignupConsents = (payload: SignupConsentsPayload) =>
+  request<{ consented: boolean }>('post', '/api/v1/auth/signup/consents', payload, { auth: false });
+
+export const useSignupConsentsMutation = () => useMutation({ mutationFn: postSignupConsents });
+
+export interface IdentityVerificationLaunch {
+  verificationId: string;
+  provider: 'KG_INICIS';
+  launchUrl: string;
+  // KG이니시스에 그대로 전달
+  launch: Record<string, string>;
+}
+
+// 본인인증 시작
+export const postIdentityVerification = (registrationToken: string) =>
+  request<IdentityVerificationLaunch>(
+    'post',
+    '/api/v1/auth/identity-verifications',
+    { registrationToken },
+    { auth: false, retry: 0 },
+  );
+
+export const useIdentityVerificationMutation = () => useMutation({ mutationFn: postIdentityVerification });
+
+// 본인인증 완료, 200이면 계정 생성
+export const postIdentityVerificationComplete = ({
+  verificationId,
+  registrationToken,
+}: {
+  verificationId: string;
+  registrationToken: string;
+}) =>
+  request<SignedInResult>(
+    'post',
+    `/api/v1/auth/identity-verifications/${encodeURIComponent(verificationId)}/complete`,
+    { registrationToken },
+    { auth: false, retry: 0 },
+  );
+
+export const useIdentityVerificationCompleteMutation = () =>
+  useMutation({ mutationFn: postIdentityVerificationComplete });
+
 // 가입 닉네임 미리 확인
 export const postNicknameCheck = (payload: { registrationToken: string; nickname: string }) =>
   request<{ available: boolean }>('post', '/api/v1/auth/nickname-check', payload, { auth: false });
