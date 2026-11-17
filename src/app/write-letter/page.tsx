@@ -11,6 +11,7 @@ import { MusicPicker } from '@/components/write-letter/MusicPicker/MusicPicker';
 import type { SpotifyTrack } from '@/common/apis/music';
 import {
   deleteLetterImage,
+  useContentCheckMutation,
   useCreateLetterMutation,
   useUploadLetterImageMutation,
   useWritingPromptQuery,
@@ -18,7 +19,7 @@ import {
 import { useAccountStatusQuery } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED_EVENT } from '@/components/restriction/AccountStatusGate/AccountStatusGate';
-import { CONTENT_ERROR_CODE } from '@/common/apis/constants/error-code';
+import { ACCOUNT_SUSPENDED, CONTENT_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useSendMessageMutation } from '@/common/apis/conversation';
 import { useReplyMutation } from '@/common/apis/delivery';
@@ -45,7 +46,8 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const { mutate: sendReply, isPending: isReplying } = useReplyMutation();
   const { mutate: sendMessage, isPending: isSendingMessage } = useSendMessageMutation();
   const { mutate: uploadImage, isPending: isUploadingImage } = useUploadLetterImageMutation();
-  const isSending = isCreating || isReplying || isSendingMessage;
+  const { mutate: checkContent, isPending: isCheckingContent } = useContentCheckMutation();
+  const isSending = isCreating || isReplying || isSendingMessage || isCheckingContent;
 
   const [message, setMessage] = useState('');
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -232,7 +234,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     setIsImageActionSheetOpen(false);
   };
 
-  const handleSubmitClick = () => {
+  const openSendConfirm = () => {
     open(({ close }) => (
       <Modal
         title="편지 보내기"
@@ -252,6 +254,28 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
         onClose={close}
       />
     ));
+  };
+
+  // 편지 보내기 전 사전 검사 추가
+  const handleSubmitClick = () => {
+    checkContent(message.trim(), {
+      onSuccess: openSendConfirm,
+      onError: (error) => {
+        if (openForbiddenWordModal(error)) return;
+
+        const code = error instanceof ApiError ? error.code : undefined;
+        // 정지 안내는 전역에서 표시
+        if (code === ACCOUNT_SUSPENDED) return;
+        if (code === CONTENT_ERROR_CODE.EXTERNAL_CONTACT) {
+          openAlertModal(
+            replyTo || conversationId ? '답장을 보내지 못했어요' : '편지를 보내지 못했어요',
+            error.message,
+          );
+          return;
+        }
+        openSendConfirm();
+      },
+    });
   };
 
   if (isRestricted) return null;
