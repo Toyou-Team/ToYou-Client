@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { getScreenName, trackEvent } from '@/common/analytics/gtm';
 import { IcMore } from '@/assets/icons';
 import { ApiError } from '@/common/apis/client';
+import { DELIVERY_AUTHOR_WITHDRAWN } from '@/common/apis/constants/error-code';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { OPEN_DELIVERY_COST, useCurrentDeliveryRoundQuery, useOpenDeliveryMutation } from '@/common/apis/delivery';
 import { usePrefetchWritingPrompt } from '@/common/apis/letter';
@@ -106,7 +107,7 @@ export default function LetterPage() {
             onError: (error) => {
               if (!(error instanceof ApiError)) return;
               // 배달이 없거나, 탈퇴/차단으로 열 수 없는 편지
-              if (error.status === HTTP_STATUS_CODE.NOT_FOUND) {
+              if (error.status === HTTP_STATUS_CODE.NOT_FOUND || error.code === DELIVERY_AUTHOR_WITHDRAWN) {
                 open(({ close }) => (
                   <Modal
                     title="편지를 열 수 없어요"
@@ -119,6 +120,7 @@ export default function LetterPage() {
                     onClose={close}
                   />
                 ));
+                return;
               }
               if (error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY) {
                 openShortageModal('편지를 열려면', OPEN_DELIVERY_COST, round.chocolateBalance);
@@ -134,7 +136,7 @@ export default function LetterPage() {
   const renderBottomButton = () => {
     if (!opened) {
       return (
-        <Button type="button" disabled={isPending} onClick={handleOpenClick}>
+        <Button type="button" disabled={isPending || delivery?.content.author.isWithdrawn} onClick={handleOpenClick}>
           {isShortLetter ? '답장하기' : '편지 열기'} · 초코 {OPEN_DELIVERY_COST}개
         </Button>
       );
