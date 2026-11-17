@@ -30,6 +30,7 @@ export interface LetterContent {
 
 export interface DeliveryCardContent extends LetterContent {
   isTruncated: boolean;
+  author: LetterContent['author'] & { isWithdrawn: boolean };
 }
 
 export interface Delivery {

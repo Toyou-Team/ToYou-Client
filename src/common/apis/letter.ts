@@ -50,6 +50,12 @@ export const useCreateLetterMutation = () => {
   });
 };
 
+// 금칙어/외부 연락처 사전 검사
+export const postContentCheck = (body: string) =>
+  request<{ available: boolean }>('post', '/api/v1/letters/content-check', { body });
+
+export const useContentCheckMutation = () => useMutation({ mutationFn: postContentCheck });
+
 // 편지쓰기 랜덤 문구
 export const getWritingPrompt = () => request<{ phrase: string | null }>('get', '/api/v1/letters/writing-prompt');
 

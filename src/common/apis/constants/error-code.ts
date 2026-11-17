@@ -39,6 +39,9 @@ export const ACCOUNT_SUSPENDED = 'ACCOUNT_SUSPENDED';
 // 없는 대화방·비참여자·차단 관계. 안내 후 편지함으로
 export const CONVERSATION_NOT_FOUND = 'CONVERSATION_NOT_FOUND';
 
+// 탈퇴한 작성자의 안 연 편지 열기 비활성화
+export const DELIVERY_AUTHOR_WITHDRAWN = 'DELIVERY_AUTHOR_WITHDRAWN';
+
 // 편지/답장/닉네임에 금칙어나 외부 연락처가 있으면 message 를 그대로 안내
 export const CONTENT_ERROR_CODE = {
   EXTERNAL_CONTACT: 'CONTENT_EXTERNAL_CONTACT',
