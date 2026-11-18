@@ -4,10 +4,13 @@ import type { ChocolateCalendarDay, ChocolateSummary } from '@/common/apis/choco
 
 import * as styles from './chocoWeek.css';
 
-type Box = 'empty' | 'dot' | 'outlined' | 'filled' | 'dashed' | 'dashedStrong' | 'muted' | 'struck';
+type Box = 'empty' | 'dot' | 'outlined' | 'usedToday' | 'filled' | 'dashed' | 'dashedStrong' | 'muted' | 'struck';
 
 interface ChocoWeekProps {
-  summary: Pick<ChocolateSummary, 'joinedAt' | 'week' | 'firstLetterWrittenAt' | 'firstLetterBonusAmount'>;
+  summary: Pick<
+    ChocolateSummary,
+    'joinedAt' | 'week' | 'firstLetterWrittenAt' | 'firstLetterBonusAmount' | 'firstLetterBonusRemainingAmount'
+  >;
 }
 
 const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -26,7 +29,11 @@ const getDayBox = (
 ): { box: Box; value?: string; label?: string } => {
   // 가입일과 첫 편지일이 같으면 첫 편지로 보여준다
   const bonus = day.firstLetterBonusGrantedAmount;
-  if (bonus > 0) return { box: day.isToday ? 'filled' : 'outlined', value: `+${bonus}`, label: '첫 편지' };
+  if (bonus > 0) {
+    const unusedBox = day.isToday ? 'filled' : 'muted';
+    const box = summary.firstLetterBonusRemainingAmount > 0 ? unusedBox : 'outlined';
+    return { box, value: `+${bonus}`, label: '첫 편지' };
+  }
   if (day.date < joinedDate) return { box: 'empty' };
   if (day.date === joinedDate) return { box: 'dot', label: '가입' };
   // 첫 편지 전에는 오늘 받을 수 있는 첫 편지 초코를 보여준다
@@ -37,14 +44,16 @@ const getDayBox = (
   if (day.isFuture)
     return { box: 'dashed', value: `+${day.scheduledDailyAmount}`, label: FUTURE_LABELS[daysFromToday - 1] };
 
-  const { grantedAmount, remainingAmount, expiredAmount } = day.daily;
+  const { grantedAmount, usedAmount, remainingAmount, expiredAmount } = day.daily;
 
   if (grantedAmount === 0) return { box: 'empty' };
-  if (expiredAmount > 0) return { box: 'struck', value: `${grantedAmount}`, label: '소멸' };
+  // 지난 날은 전부 써야 사용, 일부라도 남았으면 소멸
+  if (expiredAmount > 0 || (!day.isToday && usedAmount < grantedAmount))
+    return { box: 'struck', value: `${grantedAmount}`, label: '소멸' };
   if (remainingAmount > 0) return { box: 'filled', value: `+${grantedAmount}`, label: '오늘' };
 
   return day.isToday
-    ? { box: 'outlined', value: `+${grantedAmount}`, label: '모두 사용' }
+    ? { box: 'usedToday', value: `+${grantedAmount}`, label: '모두 사용' }
     : { box: 'muted', value: `${grantedAmount}`, label: '사용' };
 };
 
