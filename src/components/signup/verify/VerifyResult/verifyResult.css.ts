@@ -38,7 +38,7 @@ export const infoBox = style({
   flexDirection: 'column',
   gap: '1.8rem',
 
-  marginTop: '3.5rem',
+  marginTop: '2.4rem',
   padding: '2rem 2.6rem',
 
   borderRadius: '2.4rem',
@@ -72,30 +72,16 @@ export const infoRows = style([infoBox, { gap: '0.8rem' }]);
 export const accountCard = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '1rem',
+  gap: '1.3rem',
 
-  marginTop: '3.2rem',
+  marginTop: '2.4rem',
   padding: '2rem',
 
   border: `1px solid ${vars.color.neutral_600}`,
   borderRadius: '2.4rem',
 });
 
-export const accountTitle = style({
-  ...vars.fontStyles.caption,
-  fontWeight: 600,
-  color: vars.color.neutral_950,
-});
-
-export const accountDetail = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.3rem',
-
-  paddingLeft: '1.3rem',
-});
-
-export const accountEmail = style({
+export const accountProvider = style({
   ...vars.fontStyles.subtitle,
   color: vars.color.neutral_950,
 });

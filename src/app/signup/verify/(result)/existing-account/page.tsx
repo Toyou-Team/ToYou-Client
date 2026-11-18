@@ -15,7 +15,6 @@ export default function VerifyExistingAccountPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const provider = PROVIDER_LABEL[searchParams.get('provider') ?? ''];
-  const maskedEmail = searchParams.get('maskedEmail');
   const joinedAt = searchParams.get('joinedAt');
 
   return (
@@ -28,13 +27,8 @@ export default function VerifyExistingAccountPage() {
     >
       {provider && (
         <section className={styles.accountCard}>
-          <h2 className={styles.accountTitle}>[{provider}]로 가입한 계정</h2>
-          {(maskedEmail || joinedAt) && (
-            <div className={styles.accountDetail}>
-              {maskedEmail && <p className={styles.accountEmail}>{maskedEmail}</p>}
-              {joinedAt && <p className={styles.accountJoinedAt}>가입일 {formatKoreanDay(joinedAt)}</p>}
-            </div>
-          )}
+          <h2 className={styles.accountProvider}>{provider}로 가입한 계정이 있어요</h2>
+          {joinedAt && <p className={styles.accountJoinedAt}>가입일 {formatKoreanDay(joinedAt)}</p>}
         </section>
       )}
     </VerifyResult>

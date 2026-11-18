@@ -64,7 +64,6 @@ export default function SignupVerifyCallbackPage() {
               router.replace(
                 withQuery('/signup/verify/existing-account', {
                   provider: details?.provider,
-                  maskedEmail: details?.maskedEmail,
                   joinedAt: details?.joinedAt,
                 }),
               );
