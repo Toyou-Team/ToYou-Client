@@ -1,8 +1,9 @@
 'use client';
 
-import { ChangeEvent, useRef, useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 
 import { IcProfileImage, IcTrashCan } from '@/assets/icons';
+import { usePhotoPicker } from '@/common/hooks/usePhotoPicker';
 import { ImageActionSheet } from '../ImageActionSheet/ImageActionSheet';
 
 import * as styles from './imageUpload.css';
@@ -32,34 +33,26 @@ export function ImageUpload({
   size = 20,
   topSpacing = 6.3,
 }: ImageUploadProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
 
-  const openFilePicker = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    // 같은 파일을 다시 선택할 수 있도록 초기화
-    e.target.value = '';
-
-    if (!file) return;
+  const handleSelectImage = async (file: File) => {
     onChange(await readFileAsDataUrl(file));
     onSelectFile?.(file);
   };
+
+  const { fileInputRef, openPicker, handleFileChange } = usePhotoPicker(handleSelectImage);
 
   const handleImageClick = () => {
     if (value) {
       setIsActionSheetOpen(true);
       return;
     }
-    openFilePicker();
+    openPicker();
   };
 
   const handleChangeImage = () => {
     setIsActionSheetOpen(false);
-    openFilePicker();
+    openPicker();
   };
 
   const handleDeleteImage = () => {
@@ -101,7 +94,7 @@ export function ImageUpload({
         type="file"
         accept="image/*"
         className={styles.hiddenInput}
-        onChange={handleImageChange}
+        onChange={handleFileChange}
       />
 
       <ImageActionSheet

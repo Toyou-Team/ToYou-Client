@@ -18,7 +18,7 @@ declare global {
         signIn: () => Promise<AppleSignInResponse>;
       };
     };
-    TOYOU_APP?: { appleSignIn?: boolean; kakaoSignIn?: boolean; push?: boolean };
+    TOYOU_APP?: { appleSignIn?: boolean; kakaoSignIn?: boolean; push?: boolean; photoPicker?: boolean };
     ReactNativeWebView?: { postMessage: (message: string) => void };
   }
 }
