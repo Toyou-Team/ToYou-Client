@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, use, useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 
 import { getScreenName, trackEvent } from '@/common/analytics/gtm';
 import Button from '@/components/common/Button/Button';
@@ -24,6 +24,7 @@ import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useSendMessageMutation } from '@/common/apis/conversation';
 import { useReplyMutation } from '@/common/apis/delivery';
 import { useModal } from '@/common/hooks/useModal';
+import { usePhotoPicker } from '@/common/hooks/usePhotoPicker';
 import { Modal } from '@/components/common/Modal/Modal';
 import { showToast } from '@/components/common/Toast/Toast';
 import { isDarkImageTop } from '@/utils/image';
@@ -58,7 +59,6 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
   const [isMusicPickerOpen, setIsMusicPickerOpen] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   // 같은 답장을 재전송할 때는 같은 id 를 쓰고, 내용을 고치면 새로 만든다
   const clientMessageIdRef = useRef<string | null>(null);
 
@@ -195,21 +195,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     }
   };
 
-  const handlePhotoButtonClick = () => {
-    if (backgroundImage) {
-      setIsImageActionSheetOpen(true);
-      return;
-    }
-
-    fileInputRef.current?.click();
-  };
-
-  const handleImageSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-
-    if (!file) return;
-
+  const handleImageSelect = (file: File) => {
     discardUploadedImage();
     setBackgroundImage(URL.createObjectURL(file));
     isDarkImageTop(file).then(setIsDarkImage);
@@ -223,9 +209,20 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     });
   };
 
+  const { fileInputRef, openPicker, handleFileChange } = usePhotoPicker(handleImageSelect);
+
+  const handlePhotoButtonClick = () => {
+    if (backgroundImage) {
+      setIsImageActionSheetOpen(true);
+      return;
+    }
+
+    openPicker();
+  };
+
   const handleChangeImage = () => {
     setIsImageActionSheetOpen(false);
-    fileInputRef.current?.click();
+    openPicker();
   };
 
   const handleDeleteImage = () => {
@@ -374,7 +371,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
         type="file"
         accept="image/*"
         className={styles.hiddenInput}
-        onChange={handleImageSelect}
+        onChange={handleFileChange}
       />
       <ImageActionSheet
         isOpen={isImageActionSheetOpen}
