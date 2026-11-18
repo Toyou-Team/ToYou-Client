@@ -73,6 +73,10 @@ export const box = recipe({
     border: '1px solid transparent',
     ...vars.fontStyles.enBody,
     color: vars.color.neutral_950,
+
+    selectors: {
+      [`${today} &`]: { fontWeight: vars.fontStyles.enBodyBold.fontWeight },
+    },
   },
 
   variants: {
@@ -90,16 +94,20 @@ export const box = recipe({
           },
         },
       },
-      // 첫 편지, 오늘 지급분을 다 쓴 날
+      // 모두 사용한 첫 편지 초코
       outlined: {
         borderColor: vars.color.neutral_950,
         backgroundColor: vars.color.neutral_50,
       },
-      // 오늘 지급분이 남아 있는 날
+      // 오늘 지급분 모두 사용
+      usedToday: {
+        borderColor: vars.color.neutral_950,
+        backgroundColor: vars.color.neutral_100,
+      },
+      // 오늘 받은 초코가 남은 날
       filled: {
         backgroundColor: vars.color.neutral_950,
         color: vars.color.neutral_50,
-        fontWeight: vars.fontStyles.enBodyBold.fontWeight,
       },
       // 지급 예정
       dashed: {
@@ -113,7 +121,7 @@ export const box = recipe({
         backgroundColor: vars.color.neutral_50,
         color: vars.color.neutral_600,
       },
-      // 지난 날 지급분을 다 쓴 날
+      // 지난 날 사용, 남은 첫 편지 초코
       muted: {
         borderColor: vars.color.neutral_300,
         backgroundColor: vars.color.neutral_100,

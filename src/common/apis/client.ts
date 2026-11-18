@@ -16,6 +16,14 @@ interface ErrorDetails {
   // 탈퇴 후 재가입 제한 (AUTH_ACCOUNT_UNAVAILABLE)
   rejoinAvailableAt?: string;
   sanctionReasonTitle?: string | null;
+  // 제재로 인한 재가입 제한 단계 (AUTH_REJOIN_RESTRICTED)
+  sanctionStage?: number | null;
+  // 탈퇴 시각, UTC (AUTH_REJOIN_RESTRICTED)
+  withdrawnAt?: string;
+  // 기존 계정 로그인 수단 (AUTH_ACCOUNT_EXISTS)
+  provider?: 'KAKAO' | 'APPLE';
+  // 기존 계정 가입 시각, UTC (AUTH_ACCOUNT_EXISTS)
+  joinedAt?: string;
   // 금칙어 (CONTENT_FORBIDDEN_WORD)
   forbiddenWords?: string[];
   // 입력값 오류 (VALIDATION_ERROR)

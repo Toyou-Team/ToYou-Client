@@ -3,6 +3,8 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/styles/theme.css';
 
 export const badge = style({
+  height: '3.4rem',
+
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
