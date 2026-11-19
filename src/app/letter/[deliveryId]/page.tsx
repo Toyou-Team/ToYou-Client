@@ -20,6 +20,7 @@ import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
 import { Modal } from '@/components/common/Modal/Modal';
 import { LetterPaper } from '@/components/letter/LetterPaper/LetterPaper';
+import { countChars } from '@/utils/text';
 import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 
 import * as styles from './letter.css';
@@ -56,7 +57,9 @@ export default function LetterPage() {
 
   // 짧은 편지는 열기 전에도 전체가 보이므로, 열면서 바로 답장한다
   const isShortLetter = delivery?.content.isTruncated === false;
-  const isPreview = !opened && !isShortLetter;
+  // 79자를 넘는 분량만 흐리게 표시
+  const hiddenLength =
+    opened || !delivery?.content.isTruncated ? 0 : delivery.content.bodyLength - countChars(delivery.content.body);
 
   const openShortageModal = (purpose: string, cost: number, chocolateBalance: number) => {
     trackEvent({ event: 'choco_insufficient', screen_name: getScreenName() });
@@ -156,7 +159,7 @@ export default function LetterPage() {
 
       <div className={styles.content}>
         <div className={styles.letterWrapper}>
-          <LetterPaper letter={letter} isPreview={isPreview} />
+          <LetterPaper letter={letter} hiddenLength={hiddenLength} />
         </div>
 
         <div className={styles.bottomButtonWrapper}>{renderBottomButton()}</div>

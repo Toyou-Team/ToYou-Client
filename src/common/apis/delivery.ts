@@ -31,6 +31,8 @@ export interface LetterContent {
 
 export interface DeliveryCardContent extends LetterContent {
   isTruncated: boolean;
+  // bodyLength는 원문 전체 글자 수
+  bodyLength: number;
   author: LetterContent['author'] & { isWithdrawn: boolean };
 }
 
