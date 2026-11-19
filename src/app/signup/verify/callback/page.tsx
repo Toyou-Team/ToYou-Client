@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { useIdentityVerificationCompleteMutation } from '@/common/apis/auth';
+import { getSignedInPath, useIdentityVerificationCompleteMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { registrationTokenStore, setTokens } from '@/common/apis/token';
@@ -33,13 +33,13 @@ export default function SignupVerifyCallbackPage() {
     const verificationId = searchParams.get('verificationId');
     const registrationToken = registrationTokenStore.get();
 
-    if (!registrationToken) {
-      router.replace('/');
-      return;
-    }
     // 취소·실패·시간 초과
     if (!verificationId || searchParams.get('status') !== 'SUCCESS') {
       router.replace(FAILED_PATH);
+      return;
+    }
+    if (!registrationToken) {
+      router.replace('/');
       return;
     }
 
@@ -49,8 +49,7 @@ export default function SignupVerifyCallbackPage() {
         onSuccess: (result) => {
           setTokens(result);
           registrationTokenStore.clear();
-          // TODO: 온보딩 API 전환 시 온보딩 첫 화면으로 이동
-          router.replace('/signup/nickname');
+          router.replace(getSignedInPath(result));
         },
         onError: (error) => {
           const apiError = error instanceof ApiError ? error : undefined;

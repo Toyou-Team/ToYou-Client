@@ -4,7 +4,7 @@ import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } fro
 import { useRouter } from 'next/navigation';
 
 import { trackEvent } from '@/common/analytics/gtm';
-import { startKakaoLogin, useKakaoTokenLoginMutation } from '@/common/apis/auth';
+import { getSignedInPath, startKakaoLogin, useKakaoTokenLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { getKakaoLoginMode, parseKakaoAppResult, requestKakaoAppSignIn } from '@/common/apis/kakaoSignIn';
@@ -56,7 +56,7 @@ export function useKakaoLogin() {
       switch (result.status) {
         case 'SIGNED_IN':
           setTokens(result);
-          await checkAccountStatus(() => router.replace('/home'));
+          await checkAccountStatus(() => router.replace(getSignedInPath(result)));
           return;
         case 'SIGNUP_REQUIRED':
           registrationTokenStore.set(result.registrationToken);

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { trackEvent } from '@/common/analytics/gtm';
-import { consumeKakaoState, useKakaoLoginMutation } from '@/common/apis/auth';
+import { consumeKakaoState, getSignedInPath, useKakaoLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { kakaoProfileStore, loginProviderStore, registrationTokenStore, setTokens } from '@/common/apis/token';
@@ -50,7 +50,7 @@ export default function KakaoCallbackPage() {
         switch (result.status) {
           case 'SIGNED_IN':
             setTokens(result);
-            checkAccountStatus(() => router.replace('/home'));
+            checkAccountStatus(() => router.replace(getSignedInPath(result)));
             return;
           case 'SIGNUP_REQUIRED':
             registrationTokenStore.set(result.registrationToken);

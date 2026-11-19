@@ -12,6 +12,9 @@ interface AgreeData {
   description?: string;
 }
 
+export const TERMS_VERSION = '2026-10-19';
+export const PRIVACY_VERSION = '2026-10-19';
+
 export const AGREE_DATA: AgreeData[] = [
   {
     id: 1,

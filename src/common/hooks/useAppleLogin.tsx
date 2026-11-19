@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 
 import { trackEvent } from '@/common/analytics/gtm';
-import { useAppleLoginMutation } from '@/common/apis/auth';
+import { getSignedInPath, useAppleLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { kakaoProfileStore, loginProviderStore, registrationTokenStore, setTokens } from '@/common/apis/token';
@@ -44,7 +44,7 @@ export function useAppleLogin() {
         case 'SIGNED_IN':
           loginProviderStore.set('APPLE');
           setTokens(result);
-          await checkAccountStatus(() => router.replace('/home'));
+          await checkAccountStatus(() => router.replace(getSignedInPath(result)));
           return;
         case 'SIGNUP_REQUIRED':
           loginProviderStore.set('APPLE');

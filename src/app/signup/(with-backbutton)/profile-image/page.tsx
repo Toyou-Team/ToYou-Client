@@ -5,19 +5,11 @@ import { useRouter } from 'next/navigation';
 
 import { TrackEvent } from '@/components/analytics/TrackEvent/TrackEvent';
 import { trackEvent } from '@/common/analytics/gtm';
-import { useSignupMutation } from '@/common/apis/auth';
+import { useOnboardingMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
-import { AUTH_ERROR_CODE, CONTENT_ERROR_CODE, PROFILE_ERROR_CODE } from '@/common/apis/constants/error-code';
+import { CONTENT_ERROR_CODE, PROFILE_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { useUploadProfileImageMutation } from '@/common/apis/profile';
-import {
-  clearSignupData,
-  kakaoProfileStore,
-  loginProviderStore,
-  registrationTokenStore,
-  setTokens,
-  signupDraftStore,
-} from '@/common/apis/token';
-import { useAccountUnavailable } from '@/common/hooks/useAccountUnavailable';
+import { clearSignupData, loginProviderStore, signupDraftStore } from '@/common/apis/token';
 import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
@@ -30,18 +22,12 @@ import { getNicknameServerError } from '@/utils/nickname';
 
 import * as styles from './profile-image.css';
 
-// 가입 실패 안내를 닫은 뒤 이동할 화면
-const RETRY_PATH: Record<string, string> = {
-  [AUTH_ERROR_CODE.REGISTRATION_TOKEN_INVALID]: '/',
-  [AUTH_ERROR_CODE.ACCOUNT_EXISTS]: '/',
-  [PROFILE_ERROR_CODE.NICKNAME_TAKEN]: '/signup/nickname',
-};
+const NICKNAME_PATH = '/signup/nickname';
 
 export default function SignUpProfileImagePage() {
   const router = useRouter();
   const { open } = useModal();
-  const handleAccountUnavailable = useAccountUnavailable();
-  const { mutate: signup, isPending: isSigningUp } = useSignupMutation();
+  const { mutate: completeOnboarding, isPending: isCompleting } = useOnboardingMutation();
   const { mutate: uploadProfileImage, isPending: isUploading } = useUploadProfileImageMutation();
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -70,36 +56,23 @@ export default function SignUpProfileImagePage() {
     });
 
   const handleComplete = () => {
-    const registrationToken = registrationTokenStore.get();
     const draft = signupDraftStore.get();
 
-    // 가입용 토큰은 카카오 로그인 때만 받을 수 있어서 로그인부터 다시 한다
-    if (!registrationToken) {
-      alertAndGo('가입 시간이 지났어요.\n카카오 로그인부터 다시 진행해 주세요.', '/');
-      return;
-    }
-
-    // 입력값만 비어 있으면 가입 화면 처음부터
+    // 입력값이 없으면 닉네임부터
     if (!draft.nickname || !draft.receiveGender) {
-      router.replace('/signup/terms');
+      router.replace(NICKNAME_PATH);
       return;
     }
 
-    signup(
+    completeOnboarding(
       {
-        registrationToken,
         nickname: draft.nickname,
-        // 성별 선택 화면이 없어져 카카오에서 받은 성별을 보낸다
-        gender: kakaoProfileStore.get()?.gender,
         receiveGender: draft.receiveGender,
-        marketingPushAgreed: draft.marketingPushAgreed,
-        nightPushAgreed: draft.nightPushAgreed,
-        // 직접 고른 사진은 가입 후 사진 업로드 API로 따로 저장
+        // 직접 고른 사진은 온보딩 후 별도 업로드
         useKakaoProfileImage: false,
       },
       {
-        onSuccess: (result) => {
-          setTokens(result);
+        onSuccess: () => {
           trackEvent({ event: 'sign_up', method: loginProviderStore.get() === 'APPLE' ? 'apple' : 'kakao' });
           clearSignupData();
           // 광고성 정보 수신 동의 처리 결과 안내 (정보통신망법)
@@ -114,19 +87,14 @@ export default function SignUpProfileImagePage() {
         onError: (error) => {
           const code = error instanceof ApiError ? error.code : undefined;
 
-          if (code === AUTH_ERROR_CODE.ACCOUNT_UNAVAILABLE) {
-            handleAccountUnavailable(error);
-            return;
-          }
-
-          // 금칙어/연락처는 미리 검사할 수 없어서 가입 요청에서 걸리면 닉네임 화면으로 돌려보낸다
+          // 금칙어/연락처는 닉네임 화면에서 안내
           if (code === CONTENT_ERROR_CODE.FORBIDDEN_WORD || code === CONTENT_ERROR_CODE.EXTERNAL_CONTACT) {
             signupDraftStore.patch({ nicknameError: getNicknameServerError(error) });
-            router.replace('/signup/nickname');
+            router.replace(NICKNAME_PATH);
             return;
           }
 
-          alertAndGo(error.message, code && RETRY_PATH[code]);
+          alertAndGo(error.message, code === PROFILE_ERROR_CODE.NICKNAME_TAKEN ? NICKNAME_PATH : undefined);
         },
       },
     );
@@ -149,7 +117,7 @@ export default function SignUpProfileImagePage() {
 
       <div className={styles.bottomButtonWrapper}>
         <p className={styles.guideText}>기본 이미지를 원할 경우 완료 버튼을 눌러주세요.</p>
-        <Button type="button" disabled={isSigningUp || isUploading} onClick={handleComplete}>
+        <Button type="button" disabled={isCompleting || isUploading} onClick={handleComplete}>
           완료
         </Button>
       </div>
