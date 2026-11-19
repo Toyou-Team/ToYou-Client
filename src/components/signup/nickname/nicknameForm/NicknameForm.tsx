@@ -3,15 +3,12 @@
 import React, { useEffect, useEffectEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { useNicknameCheckMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
-import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
-import { registrationTokenStore, signupDraftStore } from '@/common/apis/token';
-import { useModal } from '@/common/hooks/useModal';
+import { useProfileNicknameCheckMutation } from '@/common/apis/profile';
+import { signupDraftStore } from '@/common/apis/token';
 import { useSignupDraft } from '@/common/hooks/useSignupDraft';
 import Button from '@/components/common/Button/Button';
-import { Modal } from '@/components/common/Modal/Modal';
 import { getNicknameError, getNicknameServerError, NICKNAME_LENGTH_ERROR, NICKNAME_MAX_LENGTH } from '@/utils/nickname';
 import TextField from '../textField/TextField';
 import * as styles from './nicknameForm.css';
@@ -20,8 +17,7 @@ const CHECK_DELAY = 400;
 
 function NicknameForm() {
   const router = useRouter();
-  const { open } = useModal();
-  const { mutateAsync: checkNickname } = useNicknameCheckMutation();
+  const { mutateAsync: checkNickname } = useProfileNicknameCheckMutation();
 
   // 이전에 입력했던 값 복원
   const savedNickname = useSignupDraft('nickname');
@@ -41,54 +37,25 @@ function NicknameForm() {
     (nicknameInput === null && savedError ? savedError : null);
   const isAvailable = !nicknameError && isChecked;
 
-  const openAlert = (title: string, description: string, path?: string) =>
-    open(({ close }) => {
-      const handleClose = () => {
-        close();
-        if (path) router.replace(path);
-      };
-
-      return (
-        <Modal
-          title={title}
-          description={description}
-          confirmText="확인"
-          onConfirm={handleClose}
-          onClose={handleClose}
-        />
-      );
-    });
-
   const saveCheckResult = (target: string, error: string | null) =>
     setCheckResults((results) => new Map(results).set(target, error));
 
   const runCheck = async () => {
-    const registrationToken = registrationTokenStore.get();
-
-    if (!registrationToken) {
-      openAlert('가입하지 못했어요', '가입 시간이 지났어요.\n로그인부터 다시 진행해 주세요.', '/');
-      return false;
-    }
-
     try {
-      await checkNickname({ registrationToken, nickname: trimmed });
+      await checkNickname({ nickname: trimmed });
       saveCheckResult(trimmed, null);
       return true;
     } catch (error) {
-      if (!(error instanceof ApiError)) return false;
-
-      if (error.code === AUTH_ERROR_CODE.REGISTRATION_TOKEN_INVALID) {
-        openAlert('가입하지 못했어요', error.message, '/');
-      } else if (
-        error.status === HTTP_STATUS_CODE.BAD_REQUEST ||
-        error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY
+      if (
+        error instanceof ApiError &&
+        (error.status === HTTP_STATUS_CODE.BAD_REQUEST || error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY)
       ) {
         saveCheckResult(trimmed, getNicknameServerError(error));
-      } else {
-        openAlert('닉네임을 확인하지 못했어요', error.message);
+        return false;
       }
 
-      return false;
+      // 그 외 오류는 온보딩 요청에서 재검사
+      return true;
     }
   };
 

@@ -18,6 +18,10 @@ export interface SignedInResult {
   onboardingRequired?: boolean;
 }
 
+// 온보딩 미완료 계정은 닉네임 입력부터
+export const getSignedInPath = ({ onboardingRequired }: SignedInResult) =>
+  onboardingRequired ? '/signup/nickname' : '/home';
+
 // 카카오 로그인 시작 · state 검증
 
 const KAKAO_AUTHORIZE_URL = 'https://kauth.kakao.com/oauth/authorize';
@@ -89,21 +93,17 @@ export const postAppleLogin = (payload: { identityToken: string; nonce: string }
 
 export const useAppleLoginMutation = () => useMutation({ mutationFn: postAppleLogin });
 
-export interface SignupPayload {
-  registrationToken: string;
+export interface OnboardingPayload {
   nickname: string;
   receiveGender: ReceiveGender;
   useKakaoProfileImage: boolean;
-  gender?: Gender;
-  marketingPushAgreed?: boolean;
-  nightPushAgreed?: boolean;
 }
 
-// 회원가입
-export const postSignup = (payload: SignupPayload) =>
-  request<SignedInResult>('post', '/api/v1/auth/signup', payload, { auth: false });
+// 본인인증 후 프로필 저장
+export const postOnboarding = (payload: OnboardingPayload) =>
+  request<{ onboarded: boolean }>('post', '/api/v1/auth/onboarding', payload);
 
-export const useSignupMutation = () => useMutation({ mutationFn: postSignup });
+export const useOnboardingMutation = () => useMutation({ mutationFn: postOnboarding });
 
 export interface SignupConsentsPayload {
   registrationToken: string;
@@ -155,12 +155,6 @@ export const postIdentityVerificationComplete = ({
 
 export const useIdentityVerificationCompleteMutation = () =>
   useMutation({ mutationFn: postIdentityVerificationComplete });
-
-// 가입 닉네임 미리 확인
-export const postNicknameCheck = (payload: { registrationToken: string; nickname: string }) =>
-  request<{ available: boolean }>('post', '/api/v1/auth/nickname-check', payload, { auth: false });
-
-export const useNicknameCheckMutation = () => useMutation({ mutationFn: postNicknameCheck });
 
 // 로그아웃
 export const postLogout = async () => {

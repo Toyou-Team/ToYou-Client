@@ -5,9 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
 import { trackEvent } from '@/common/analytics/gtm';
-import { signupDraftStore } from '@/common/apis/token';
+import { useSignupConsentsMutation } from '@/common/apis/auth';
+import { ApiError } from '@/common/apis/client';
+import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
+import { registrationTokenStore, signupDraftStore } from '@/common/apis/token';
+import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
-import { AGREE_DATA } from '@/constants';
+import { Modal } from '@/components/common/Modal/Modal';
+import { AGREE_DATA, PRIVACY_VERSION, TERMS_VERSION } from '@/constants';
 
 import { AllAgreeCheckboxField } from '../AllAgreeCheckboxField/AllAgreeCheckboxField';
 import { TermCheckboxField } from '../TermCheckboxField/TermCheckboxField';
@@ -27,6 +32,8 @@ const NIGHT_ID = 4;
 
 export function TermsForm() {
   const router = useRouter();
+  const { open } = useModal();
+  const { mutate: saveConsents, isPending } = useSignupConsentsMutation();
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
   const selectedPolicy = AGREE_DATA.find((data) => data.id === selectedPolicyId);
@@ -72,9 +79,44 @@ export function TermsForm() {
   const isAllChecked = useMemo(() => [agree1, agree2, agree3, agree4].every(Boolean), [agree1, agree2, agree3, agree4]);
 
   const onSubmit = () => {
-    signupDraftStore.patch({ marketingPushAgreed: agree3, nightPushAgreed: agree4 });
-    trackEvent({ event: 'terms_agree', marketing_opt_in: agree3 });
-    router.push('/signup/nickname');
+    const registrationToken = registrationTokenStore.get();
+    if (!registrationToken) {
+      router.replace('/');
+      return;
+    }
+
+    saveConsents(
+      {
+        registrationToken,
+        termsVersion: TERMS_VERSION,
+        privacyVersion: PRIVACY_VERSION,
+        marketingPushAgreed: agree3,
+        nightPushAgreed: agree4,
+      },
+      {
+        onSuccess: () => {
+          signupDraftStore.patch({ marketingPushAgreed: agree3, nightPushAgreed: agree4 });
+          trackEvent({ event: 'terms_agree', marketing_opt_in: agree3 });
+          router.push('/signup/verify');
+        },
+        onError: (error) => {
+          if (error instanceof ApiError && error.code === AUTH_ERROR_CODE.REGISTRATION_TOKEN_INVALID) {
+            router.replace('/');
+            return;
+          }
+
+          open(({ close }) => (
+            <Modal
+              title="약관 동의를 저장하지 못했어요"
+              description={error.message}
+              confirmText="확인"
+              onConfirm={close}
+              onClose={close}
+            />
+          ));
+        },
+      },
+    );
   };
 
   return (
@@ -101,7 +143,7 @@ export function TermsForm() {
         </div>
 
         <div className={styles.bottomButtonWrapper}>
-          <Button type="submit" disabled={!isAllRequired}>
+          <Button type="submit" disabled={!isAllRequired || isPending}>
             완료
           </Button>
         </div>
