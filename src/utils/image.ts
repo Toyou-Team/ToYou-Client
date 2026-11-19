@@ -1,6 +1,16 @@
 const SAMPLE_SIZE = 20;
 const UPLOAD_MAX_SIDE = 1440;
 const UPLOAD_QUALITY = 0.85;
+const DECODE_TIMEOUT_MS = 500;
+
+// 화면 교체 전 디코딩, 실패/지연 시 그대로 진행
+export const decodeImage = (url: string) =>
+  Promise.race([
+    Object.assign(new Image(), { src: url })
+      .decode()
+      .catch(() => {}),
+    new Promise((resolve) => setTimeout(resolve, DECODE_TIMEOUT_MS)),
+  ]);
 
 // 업로드용 JPEG 변환, 실패 시 원본 사용
 export async function resizeImageForUpload(file: File) {
