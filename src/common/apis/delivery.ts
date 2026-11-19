@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, request, retryOnce } from './client';
 import { HTTP_STATUS_CODE } from './constants/http';
 import { CONVERSATIONS_QUERY_KEY, type ReportPayload, type ReportResult } from './conversation';
+import { keepImageUrl } from './imageUrl';
 import { syncChocolateBalance, type ProfileImage } from './profile';
 
 export interface DeliverySpotify {
@@ -101,8 +102,25 @@ const isStaleRoundError = (error: Error) =>
   error instanceof ApiError &&
   (error.status === HTTP_STATUS_CODE.NOT_FOUND || error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY);
 
+const keepLetterImages = <T extends LetterContent>(deliveryId: string, letter: T): T => ({
+  ...letter,
+  image: keepImageUrl(`letter:${deliveryId}`, letter.image),
+  author: {
+    ...letter.author,
+    profileImage: keepImageUrl(`author:${deliveryId}`, letter.author.profileImage),
+  },
+});
+
+const keepDeliveryImages = (delivery: Delivery): Delivery => ({
+  ...delivery,
+  content: keepLetterImages(delivery.id, delivery.content),
+});
+
 // 홈 배달 상태 조회
-export const postCurrentDeliveryRound = () => request<CurrentDeliveryRound>('post', '/api/v1/delivery-rounds/current');
+export const postCurrentDeliveryRound = async () => {
+  const round = await request<CurrentDeliveryRound>('post', '/api/v1/delivery-rounds/current');
+  return { ...round, deliveries: round.deliveries.map(keepDeliveryImages) };
+};
 
 // enabled = false 인 경우 홈이 아닌 NavBar에서는 회차 조회/생성 요청을 보내지 않음
 export const useCurrentDeliveryRoundQuery = (enabled = true) => {
@@ -121,10 +139,12 @@ export const useCurrentDeliveryRoundQuery = (enabled = true) => {
 };
 
 // 더받기
-export const postExtraDeliveryRound = (idempotencyKey: string) =>
-  request<ExtraDeliveryRound>('post', '/api/v1/delivery-rounds/extra', undefined, {
+export const postExtraDeliveryRound = async (idempotencyKey: string) => {
+  const round = await request<ExtraDeliveryRound>('post', '/api/v1/delivery-rounds/extra', undefined, {
     headers: { 'Idempotency-Key': idempotencyKey },
   });
+  return { ...round, deliveries: round.deliveries.map(keepDeliveryImages) };
+};
 
 export const useExtraDeliveryRoundMutation = () => {
   const queryClient = useQueryClient();
@@ -152,8 +172,10 @@ export const useExtraDeliveryRoundMutation = () => {
 };
 
 // 편지 선택·열람 (최초 1회만 초코 차감)
-export const postOpenDelivery = (deliveryId: string) =>
-  request<OpenedDelivery>('post', `/api/v1/deliveries/${deliveryId}/open`);
+export const postOpenDelivery = async (deliveryId: string) => {
+  const opened = await request<OpenedDelivery>('post', `/api/v1/deliveries/${deliveryId}/open`);
+  return { ...opened, letter: keepLetterImages(deliveryId, opened.letter) };
+};
 
 export const useOpenDeliveryMutation = () => {
   const queryClient = useQueryClient();

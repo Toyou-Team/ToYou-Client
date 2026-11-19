@@ -8,6 +8,7 @@ import {
 
 import { request, retryOnce } from './client';
 import type { DeliverySpotify, LetterImage } from './delivery';
+import { keepImageUrl } from './imageUrl';
 import type { ProfileImage } from './profile';
 
 const PAGE_SIZE = 8;
@@ -78,8 +79,20 @@ export const CONVERSATIONS_QUERY_KEY = ['conversations'] as const;
 const conversationQueryKey = (conversationId: string) => [...CONVERSATIONS_QUERY_KEY, conversationId];
 
 // 편지함 목록 (최신순)
-export const getConversations = (cursor: string | null) =>
-  request<ConversationList>('get', withCursor('/api/v1/conversations', cursor));
+export const getConversations = async (cursor: string | null) => {
+  const list = await request<ConversationList>('get', withCursor('/api/v1/conversations', cursor));
+
+  return {
+    ...list,
+    items: list.items.map((item) => ({
+      ...item,
+      partner: {
+        ...item.partner,
+        profileImage: keepImageUrl(`partner:${item.partner.id}`, item.partner.profileImage),
+      },
+    })),
+  };
+};
 
 export const useConversationsQuery = () =>
   useInfiniteQuery({
@@ -91,8 +104,18 @@ export const useConversationsQuery = () =>
   });
 
 // 대화 상세 (최신순)
-export const getConversation = (conversationId: string, cursor: string | null) =>
-  request<ConversationDetail>('get', withCursor(`/api/v1/conversations/${conversationId}`, cursor));
+export const getConversation = async (conversationId: string, cursor: string | null) => {
+  const detail = await request<ConversationDetail>(
+    'get',
+    withCursor(`/api/v1/conversations/${conversationId}`, cursor),
+  );
+
+  return {
+    ...detail,
+    // 편지함 목록에서도 호출되므로 미리 받지 않음
+    items: detail.items.map((item) => ({ ...item, image: keepImageUrl(`message:${item.id}`, item.image, false) })),
+  };
+};
 
 // enabled 를 false 로 두면 나간 대화처럼 더 이상 조회하지 않는다
 export const useConversationQuery = (conversationId: string, enabled = true) =>
