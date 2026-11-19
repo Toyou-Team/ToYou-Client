@@ -22,8 +22,6 @@ import { getNicknameServerError } from '@/utils/nickname';
 
 import * as styles from './profile-image.css';
 
-const NICKNAME_PATH = '/signup/nickname';
-
 export default function SignUpProfileImagePage() {
   const router = useRouter();
   const { open } = useModal();
@@ -60,7 +58,7 @@ export default function SignUpProfileImagePage() {
 
     // 입력값이 없으면 닉네임부터
     if (!draft.nickname || !draft.receiveGender) {
-      router.replace(NICKNAME_PATH);
+      router.replace('/signup/nickname');
       return;
     }
 
@@ -90,11 +88,11 @@ export default function SignUpProfileImagePage() {
           // 금칙어/연락처는 닉네임 화면에서 안내
           if (code === CONTENT_ERROR_CODE.FORBIDDEN_WORD || code === CONTENT_ERROR_CODE.EXTERNAL_CONTACT) {
             signupDraftStore.patch({ nicknameError: getNicknameServerError(error) });
-            router.replace(NICKNAME_PATH);
+            router.replace('/signup/nickname');
             return;
           }
 
-          alertAndGo(error.message, code === PROFILE_ERROR_CODE.NICKNAME_TAKEN ? NICKNAME_PATH : undefined);
+          alertAndGo(error.message, code === PROFILE_ERROR_CODE.NICKNAME_TAKEN ? '/signup/nickname' : undefined);
         },
       },
     );

@@ -8,8 +8,6 @@ import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { registrationTokenStore, setTokens } from '@/common/apis/token';
 
-const FAILED_PATH = '/signup/verify/failed';
-
 // 값 있는 항목만 쿼리로 전달
 const withQuery = (path: string, params: Record<string, string | null | undefined>) => {
   const query = new URLSearchParams(
@@ -35,7 +33,7 @@ export default function SignupVerifyCallbackPage() {
 
     // 취소·실패·시간 초과
     if (!verificationId || searchParams.get('status') !== 'SUCCESS') {
-      router.replace(FAILED_PATH);
+      router.replace('/signup/verify/failed');
       return;
     }
     if (!registrationToken) {
@@ -79,7 +77,7 @@ export default function SignupVerifyCallbackPage() {
               router.replace('/');
               return;
             default:
-              router.replace(FAILED_PATH);
+              router.replace('/signup/verify/failed');
           }
         },
       },
