@@ -135,7 +135,7 @@ export function MusicPicker({ initialTrack, onClose, onConfirm }: MusicPickerPro
             <li key={track.id}>
               <button type="button" className={styles.trackRow} onClick={() => setSelectedTrack(track)}>
                 {track.albumImageUrl ? (
-                  <img src={track.albumImageUrl} alt="" className={styles.albumImage} />
+                  <img src={track.albumImageUrl} alt="" className={styles.albumImage} loading="lazy" />
                 ) : (
                   <span className={styles.albumImage} />
                 )}

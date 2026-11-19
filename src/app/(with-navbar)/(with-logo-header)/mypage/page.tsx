@@ -61,7 +61,12 @@ export default function MyPage() {
     <>
       <div className={styles.profileImageWrapper}>
         {profile.profileImage ? (
-          <img src={profile.profileImage.url} alt={`${profile.nickname}의 프로필`} className={styles.profileImage} />
+          <img
+            src={profile.profileImage.url}
+            alt={`${profile.nickname}의 프로필`}
+            className={styles.profileImage}
+            decoding="sync"
+          />
         ) : (
           <IcProfileImage className={styles.profileImage} />
         )}

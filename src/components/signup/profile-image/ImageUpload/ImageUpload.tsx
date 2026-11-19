@@ -74,7 +74,13 @@ export function ImageUpload({
     >
       <div className={styles.profileImageWrapper}>
         {value ? (
-          <img src={value} alt="선택한 프로필 사진" className={styles.profileImage} onClick={handleImageClick} />
+          <img
+            src={value}
+            alt="선택한 프로필 사진"
+            className={styles.profileImage}
+            decoding="sync"
+            onClick={handleImageClick}
+          />
         ) : (
           <IcProfileImage className={styles.profileImage} onClick={handleImageClick} />
         )}
