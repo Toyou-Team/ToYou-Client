@@ -57,7 +57,7 @@ const fieldText = {
   gridArea: '1 / 1',
   minHeight: '6.6rem',
   maxHeight: '29rem',
-  padding: '2rem 2.5rem 0',
+  padding: '0 2.5rem',
 
   ...vars.fontStyles.body,
   whiteSpace: 'pre-wrap',
@@ -67,6 +67,7 @@ const fieldText = {
 export const messageField = style({
   display: 'grid',
   minHeight: 0,
+  paddingTop: '2rem',
 
   '::after': {
     ...fieldText,
