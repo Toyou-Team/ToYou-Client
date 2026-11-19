@@ -27,7 +27,7 @@ import { useModal } from '@/common/hooks/useModal';
 import { usePhotoPicker } from '@/common/hooks/usePhotoPicker';
 import { Modal } from '@/components/common/Modal/Modal';
 import { showToast } from '@/components/common/Toast/Toast';
-import { isDarkImageTop } from '@/utils/image';
+import { decodeImage, isDarkImageTop } from '@/utils/image';
 import { useRouter } from 'next/navigation';
 
 const MIN_LENGTH = 30;
@@ -61,6 +61,8 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
 
   // 같은 답장을 재전송할 때는 같은 id 를 쓰고, 내용을 고치면 새로 만든다
   const clientMessageIdRef = useRef<string | null>(null);
+  // 마지막으로 고른 사진의 미리보기 주소
+  const latestPreviewRef = useRef<string | null>(null);
 
   const isValidBody = message.trim().length >= MIN_LENGTH;
 
@@ -73,6 +75,14 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     window.dispatchEvent(new Event(ACCOUNT_SUSPENDED_EVENT));
     router.back();
   }, [isRestricted, router]);
+
+  // 교체된 미리보기 메모리 해제
+  useEffect(
+    () => () => {
+      if (backgroundImage) URL.revokeObjectURL(backgroundImage);
+    },
+    [backgroundImage],
+  );
 
   // 새 편지만 보낸다. 답장은 제외
   useEffect(() => {
@@ -195,15 +205,26 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     }
   };
 
+  const clearPreview = () => {
+    latestPreviewRef.current = null;
+    setBackgroundImage(null);
+  };
+
   const handleImageSelect = (file: File) => {
     discardUploadedImage();
-    setBackgroundImage(URL.createObjectURL(file));
+
+    const previewUrl = URL.createObjectURL(file);
+    latestPreviewRef.current = previewUrl;
+    decodeImage(previewUrl).then(() => {
+      if (latestPreviewRef.current === previewUrl) setBackgroundImage(previewUrl);
+      else URL.revokeObjectURL(previewUrl);
+    });
     isDarkImageTop(file).then(setIsDarkImage);
 
     uploadImage(file, {
       onSuccess: ({ key }) => setImageObjectKey(key),
       onError: (error) => {
-        setBackgroundImage(null);
+        clearPreview();
         openAlertModal('사진을 올리지 못했어요', error.message);
       },
     });
@@ -227,7 +248,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
 
   const handleDeleteImage = () => {
     discardUploadedImage();
-    setBackgroundImage(null);
+    clearPreview();
     setIsImageActionSheetOpen(false);
   };
 

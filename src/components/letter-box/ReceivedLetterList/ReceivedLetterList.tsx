@@ -125,7 +125,7 @@ function LetterItem({ conversation, isOpen, onOpenChange, onLeave }: LetterItemP
       >
         <div className={styles.profileImage}>
           {profileImage ? (
-            <img src={profileImage.url} alt={`${nickname}의 프로필`} className={styles.profileImg} />
+            <img src={profileImage.url} alt={`${nickname}의 프로필`} className={styles.profileImg} decoding="sync" />
           ) : (
             <IcProfileImage className={styles.profileImg} />
           )}

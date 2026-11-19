@@ -4,6 +4,9 @@ import clsx from 'clsx';
 import * as styles from './letterCard.css';
 import { LetterSong } from '@/types/letterCardTypes';
 
+// 재진입/스와이프 시 빈 화면 방지
+const IMAGE_PROPS = { fill: true, unoptimized: true, loading: 'eager', decoding: 'sync' } as const;
+
 interface LetterCardProps {
   nickname: string;
   message: string;
@@ -41,7 +44,15 @@ export function LetterCard({
       }}
     >
       {backgroundImage && (
-        <Image src={backgroundImage} alt="" fill unoptimized className={styles.letterCardBackground} />
+        <Image
+          {...IMAGE_PROPS}
+          src={backgroundImage}
+          alt=""
+          // 정적 이미지만 최적화
+          unoptimized={typeof backgroundImage === 'string'}
+          sizes={`${(width ?? 39) * 10}px`}
+          className={styles.letterCardBackground}
+        />
       )}
 
       <section className={styles.profileWrapper}>
@@ -53,7 +64,7 @@ export function LetterCard({
           }}
         >
           {profileImage && (
-            <Image src={profileImage} alt={`${nickname}의 프로필`} fill unoptimized className={styles.profileImg} />
+            <Image {...IMAGE_PROPS} src={profileImage} alt={`${nickname}의 프로필`} className={styles.profileImg} />
           )}
         </div>
 
@@ -67,7 +78,7 @@ export function LetterCard({
         {song && (
           <div className={styles.songWrapper}>
             <div className={styles.songImageWrapper}>
-              {song.albumImage && <Image src={song.albumImage} alt="" fill unoptimized className={styles.songImage} />}
+              {song.albumImage && <Image {...IMAGE_PROPS} src={song.albumImage} alt="" className={styles.songImage} />}
             </div>
 
             <div className={styles.songInfo}>

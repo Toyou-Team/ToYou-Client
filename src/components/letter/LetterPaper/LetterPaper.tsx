@@ -45,7 +45,9 @@ export function LetterPaper({ letter, isPreview = false }: LetterPaperProps) {
 
       {spotify && (
         <div className={styles.song}>
-          {spotify.albumImageUrl && <img src={spotify.albumImageUrl} alt="" className={styles.albumImage} />}
+          {spotify.albumImageUrl && (
+            <img src={spotify.albumImageUrl} alt="" className={styles.albumImage} decoding="sync" />
+          )}
 
           <div className={styles.songInfo}>
             <p className={styles.songTitle}>{spotify.title}</p>

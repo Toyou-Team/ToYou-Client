@@ -64,7 +64,7 @@ export default function OnboardingPage() {
       <ul ref={trackRef} className={styles.track} onScroll={handleScroll}>
         {STEPS.map(({ image, title, description, notice }) => (
           <li key={title} className={styles.slide}>
-            <Image src={image} alt="" className={styles.image} priority unoptimized />
+            <Image src={image} alt="" className={styles.image} sizes="390px" preload />
             <h2 className={styles.title}>{title}</h2>
             <p className={styles.description}>{description}</p>
 
