@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 
+import { resizeImageForUpload } from '@/utils/image';
+
 import { request } from './client';
 import type { Gender, ReceiveGender } from './auth';
 
@@ -66,9 +68,9 @@ export const postProfileNicknameCheck = (payload: { nickname: string }) =>
 export const useProfileNicknameCheckMutation = () => useMutation({ mutationFn: postProfileNicknameCheck });
 
 // 프로필 사진 등록, 교체
-export const postProfileImage = (file: File) => {
+export const postProfileImage = async (file: File) => {
   const formData = new FormData();
-  formData.append('image', file);
+  formData.append('image', await resizeImageForUpload(file));
 
   return request<Profile>('post', '/api/v1/profile/image', formData);
 };

@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { resizeImageForUpload } from '@/utils/image';
+
 import { request } from './client';
 import { CURRENT_DELIVERY_ROUND_QUERY_KEY, type CurrentDeliveryRound } from './delivery';
 import { PROFILE_QUERY_KEY } from './profile';
@@ -91,9 +93,9 @@ export const useWritingPromptQuery = () => {
 };
 
 // 편지 작성 시 백그라운드 이미지 업로드
-export const uploadLetterImage = (file: File) => {
+export const uploadLetterImage = async (file: File) => {
   const formData = new FormData();
-  formData.append('image', file);
+  formData.append('image', await resizeImageForUpload(file));
 
   return request<{ key: string }>('post', '/api/v1/storage/letter-images', formData);
 };
