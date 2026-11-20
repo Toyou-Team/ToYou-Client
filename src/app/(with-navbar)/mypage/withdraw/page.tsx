@@ -9,6 +9,7 @@ import { BackButton } from '@/components/common/BackButton/BackButton';
 import Button from '@/components/common/Button/Button';
 import { CheckBox } from '@/components/common/CheckBox/CheckBox';
 import { Header } from '@/components/common/Header/Header';
+import { sliceChars } from '@/utils/text';
 
 import * as styles from './withdraw.css';
 
@@ -83,8 +84,9 @@ export default function WithdrawReasonPage() {
                   <textarea
                     className={styles.detailInput}
                     value={details[id] ?? ''}
-                    onChange={(e) => setDetails((prev) => ({ ...prev, [id]: e.target.value }))}
-                    maxLength={DETAIL_MAX_LENGTH}
+                    onChange={(e) =>
+                      setDetails((prev) => ({ ...prev, [id]: sliceChars(e.target.value, DETAIL_MAX_LENGTH) }))
+                    }
                     placeholder={placeholder}
                   />
                 )}
