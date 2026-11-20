@@ -13,6 +13,7 @@ import Button from '@/components/common/Button/Button';
 import { CheckBox } from '@/components/common/CheckBox/CheckBox';
 import { Header } from '@/components/common/Header/Header';
 import { Modal } from '@/components/common/Modal/Modal';
+import { sliceChars } from '@/utils/text';
 
 import * as styles from './reportForm.css';
 
@@ -134,8 +135,7 @@ export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }
           <textarea
             className={styles.detailInput}
             value={detail}
-            onChange={(e) => setDetail(e.target.value)}
-            maxLength={DETAIL_MAX_LENGTH}
+            onChange={(e) => setDetail(sliceChars(e.target.value, DETAIL_MAX_LENGTH))}
             placeholder="어떤 일이 있었는지 알려주시면 조치할게요. (선택)"
           />
         )}

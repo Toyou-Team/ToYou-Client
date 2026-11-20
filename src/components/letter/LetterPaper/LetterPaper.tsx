@@ -1,10 +1,11 @@
 import type { LetterContent } from '@/common/apis/delivery';
+import { fillChars } from '@/utils/text';
 
 import * as styles from './letterPaper.css';
 
 interface LetterPaperProps {
   letter: Pick<LetterContent, 'body' | 'createdAt' | 'spotify'>;
-  isPreview?: boolean;
+  hiddenLength?: number;
 }
 
 const formatLetterDate = (isoString: string) => {
@@ -15,13 +16,13 @@ const formatLetterDate = (isoString: string) => {
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${hours < 12 ? '오전' : '오후'} ${pad(hours % 12 || 12)}:${pad(date.getMinutes())}`;
 };
 
-export function LetterPaper({ letter, isPreview = false }: LetterPaperProps) {
+export function LetterPaper({ letter, hiddenLength = 0 }: LetterPaperProps) {
   const { body, createdAt, spotify } = letter;
 
   return (
     <div className={styles.paper}>
       <article className={styles.letter}>
-        {isPreview ? (
+        {hiddenLength > 0 ? (
           <>
             <p className={styles.body}>{body}</p>
 
@@ -29,9 +30,9 @@ export function LetterPaper({ letter, isPreview = false }: LetterPaperProps) {
               <span className={styles.dividerText}>편지를 선택하면 온전히 열려요.</span>
             </div>
 
-            {/* 나머지 본문은 서버가 주지 않아 보이는 본문을 흐리게 채운다 */}
+            {/* 잘린 본문은 받지 않아 보이는 본문 글자로 같은 분량을 채움 */}
             <p className={styles.hiddenBody} aria-hidden>
-              {body.repeat(3)}
+              {fillChars(body, hiddenLength)}
             </p>
           </>
         ) : (

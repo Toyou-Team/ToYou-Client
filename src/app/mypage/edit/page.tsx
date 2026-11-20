@@ -22,6 +22,7 @@ import {
   useUploadProfileImageMutation,
 } from '@/common/apis/profile';
 import { getNicknameError, getNicknameServerError, NICKNAME_LENGTH_ERROR, NICKNAME_MAX_LENGTH } from '@/utils/nickname';
+import { countChars, sliceChars } from '@/utils/text';
 
 import * as styles from './edit.css';
 
@@ -55,7 +56,7 @@ export default function MyPageEditPage() {
   const localError = isChanged ? getNicknameError(nickname) : null;
   const nicknameError = serverError ?? localError ?? checkResults.get(trimmed) ?? null;
   const isValidNickname = !nicknameError;
-  const isFull = nicknameInput !== null && nickname.length >= NICKNAME_MAX_LENGTH;
+  const isFull = nicknameInput !== null && countChars(nickname) >= NICKNAME_MAX_LENGTH;
   const isError = (nickname !== '' && !isValidNickname) || isFull;
 
   const saveCheckResult = (target: string, error: string | null) =>
@@ -89,7 +90,7 @@ export default function MyPageEditPage() {
   }, [trimmed, isChanged, localError, isChecked]);
 
   const handleNicknameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setNickname(e.target.value.slice(0, NICKNAME_MAX_LENGTH));
+    setNickname(sliceChars(e.target.value, NICKNAME_MAX_LENGTH));
     setServerError(null);
   };
 
@@ -177,7 +178,6 @@ export default function MyPageEditPage() {
           <TextField
             isError={isError}
             value={nickname}
-            maxLength={NICKNAME_MAX_LENGTH}
             onChange={handleNicknameChange}
             helperText={nicknameError ?? NICKNAME_LENGTH_ERROR}
             helperTextType={isError ? 'error' : 'default'}

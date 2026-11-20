@@ -28,6 +28,7 @@ import { usePhotoPicker } from '@/common/hooks/usePhotoPicker';
 import { Modal } from '@/components/common/Modal/Modal';
 import { showToast } from '@/components/common/Toast/Toast';
 import { decodeImage, isDarkImageTop } from '@/utils/image';
+import { countChars, sliceChars } from '@/utils/text';
 import { useRouter } from 'next/navigation';
 
 const MIN_LENGTH = 30;
@@ -64,7 +65,8 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   // 마지막으로 고른 사진의 미리보기 주소
   const latestPreviewRef = useRef<string | null>(null);
 
-  const isValidBody = message.trim().length >= MIN_LENGTH;
+  const messageLength = countChars(message);
+  const isValidBody = countChars(message.trim()) >= MIN_LENGTH;
 
   // 제재 중이면 편지작성 탭 클릭 시 안내 시트 노출
   const { data: accountStatus } = useAccountStatusQuery();
@@ -105,7 +107,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     clientMessageIdRef.current = null;
     const { value } = e.target;
-    setMessage((e.nativeEvent as InputEvent).isComposing ? value : value.slice(0, MAX_LENGTH));
+    setMessage((e.nativeEvent as InputEvent).isComposing ? value : sliceChars(value, MAX_LENGTH));
   };
 
   const handleSelectTrack = (track: SpotifyTrack | null) => {
@@ -155,7 +157,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
         { body, ...attachment },
         {
           onSuccess: ({ bonusChocolateAmount }) => {
-            trackEvent({ event: 'letter_send', char_count: body.length });
+            trackEvent({ event: 'letter_send', char_count: countChars(body) });
             if (bonusChocolateAmount > 0) showToast(`${bonusChocolateAmount}초코가 지급됐어요.`);
             router.push('/home');
           },
@@ -176,7 +178,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     // 답장은 성공·실패 모두 답장 화면을 열기 직전 페이지로 돌아간다
     const replyOptions = {
       onSuccess: () => {
-        trackEvent({ event: 'reply_send', char_count: body.length });
+        trackEvent({ event: 'reply_send', char_count: countChars(body) });
         // 첫 답장이면 대화방이 생긴다
         if (replyTo) trackEvent({ event: 'chat_room_open' });
         router.back();
@@ -319,17 +321,16 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
             <textarea
               value={message}
               onChange={handleMessageChange}
-              onCompositionEnd={(e) => setMessage(e.currentTarget.value.slice(0, MAX_LENGTH))}
-              maxLength={MAX_LENGTH}
+              onCompositionEnd={(e) => setMessage(sliceChars(e.currentTarget.value, MAX_LENGTH))}
               placeholder={writingPrompt ?? undefined}
               className={styles.message}
             />
           </div>
 
           <span className={styles.characterCount}>
-            {message.length === 0
+            {messageLength === 0
               ? `${MIN_LENGTH}자 이상 써야 보낼 수 있어요`
-              : `${message.length} / ${message.length > MIN_LENGTH ? MAX_LENGTH : MIN_LENGTH}`}
+              : `${messageLength} / ${messageLength > MIN_LENGTH ? MAX_LENGTH : MIN_LENGTH}`}
           </span>
         </div>
 
