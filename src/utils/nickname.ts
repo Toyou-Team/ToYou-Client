@@ -1,5 +1,6 @@
 import { ApiError } from '@/common/apis/client';
 import { CONTENT_ERROR_CODE } from '@/common/apis/constants/error-code';
+import { countChars } from '@/utils/text';
 
 const NICKNAME_MIN_LENGTH = 2;
 export const NICKNAME_MAX_LENGTH = 12;
@@ -11,8 +12,9 @@ const NICKNAME_PATTERN_ERROR = '닉네임은 한글, 영문, 숫자, 띄어쓰�
 // 서버와 같은 규칙
 export const getNicknameError = (nickname: string) => {
   const trimmed = nickname.trim();
+  const length = countChars(trimmed);
 
-  if (trimmed.length < NICKNAME_MIN_LENGTH || trimmed.length > NICKNAME_MAX_LENGTH) return NICKNAME_LENGTH_ERROR;
+  if (length < NICKNAME_MIN_LENGTH || length > NICKNAME_MAX_LENGTH) return NICKNAME_LENGTH_ERROR;
   if (!NICKNAME_PATTERN.test(trimmed)) return NICKNAME_PATTERN_ERROR;
   return null;
 };

@@ -10,6 +10,7 @@ import { signupDraftStore } from '@/common/apis/token';
 import { useSignupDraft } from '@/common/hooks/useSignupDraft';
 import Button from '@/components/common/Button/Button';
 import { getNicknameError, getNicknameServerError, NICKNAME_LENGTH_ERROR, NICKNAME_MAX_LENGTH } from '@/utils/nickname';
+import { sliceChars } from '@/utils/text';
 import TextField from '../textField/TextField';
 import * as styles from './nicknameForm.css';
 
@@ -69,7 +70,7 @@ function NicknameForm() {
   }, [trimmed, nicknameError, isChecked]);
 
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNickname(e.target.value.slice(0, NICKNAME_MAX_LENGTH));
+    setNickname(sliceChars(e.target.value, NICKNAME_MAX_LENGTH));
   };
 
   const handleNext = async () => {
@@ -95,7 +96,6 @@ function NicknameForm() {
         <TextField
           isError={isError}
           value={nickname}
-          maxLength={NICKNAME_MAX_LENGTH}
           onChange={handleNicknameChange}
           helperText={helperText}
           helperTextType={helperTextType}
