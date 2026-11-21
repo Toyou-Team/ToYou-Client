@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 
 import { vars } from '@/styles/theme.css';
 import { withSafeBottom, withSafeTop } from '@/styles/safeArea';
@@ -71,14 +71,29 @@ export const infoRows = style([infoBox, { gap: '0.8rem' }]);
 
 export const accountCard = style({
   display: 'flex',
-  flexDirection: 'column',
-  gap: '1.3rem',
+  alignItems: 'center',
+  gap: '1.6rem',
 
   marginTop: '2.4rem',
-  padding: '2rem',
+  padding: '1.2rem 2.4rem',
 
   border: `1px solid ${vars.color.neutral_600}`,
   borderRadius: '2.4rem',
+});
+
+export const accountIcon = style({
+  flexShrink: 0,
+});
+
+// 애플 로고는 흰색이라 카드 위에서 검게 표시
+globalStyle(`${accountIcon} path`, {
+  fill: vars.color.neutral_950,
+});
+
+export const accountText = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.6rem',
 });
 
 export const accountProvider = style({

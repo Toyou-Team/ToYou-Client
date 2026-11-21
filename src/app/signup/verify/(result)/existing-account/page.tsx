@@ -2,19 +2,20 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { IcLogoApple, IcLogoKakao } from '@/assets/icons';
 import { SupportLink, VerifyResult } from '@/components/signup/verify/VerifyResult/VerifyResult';
 import * as styles from '@/components/signup/verify/VerifyResult/verifyResult.css';
 import { formatKoreanDay } from '@/utils/date';
 
-const PROVIDER_LABEL: Record<string, string> = {
-  KAKAO: '카카오',
-  APPLE: 'Apple',
+const PROVIDERS = {
+  KAKAO: { label: '카카오', Icon: IcLogoKakao },
+  APPLE: { label: '애플', Icon: IcLogoApple },
 };
 
 export default function VerifyExistingAccountPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const provider = PROVIDER_LABEL[searchParams.get('provider') ?? ''];
+  const provider = PROVIDERS[searchParams.get('provider') as keyof typeof PROVIDERS];
   const joinedAt = searchParams.get('joinedAt');
 
   return (
@@ -27,8 +28,11 @@ export default function VerifyExistingAccountPage() {
     >
       {provider && (
         <section className={styles.accountCard}>
-          <h2 className={styles.accountProvider}>{provider}로 가입한 계정이 있어요</h2>
-          {joinedAt && <p className={styles.accountJoinedAt}>가입일 {formatKoreanDay(joinedAt)}</p>}
+          <provider.Icon className={styles.accountIcon} aria-hidden />
+          <div className={styles.accountText}>
+            <h2 className={styles.accountProvider}>{provider.label}로 가입한 계정이 있어요</h2>
+            {joinedAt && <p className={styles.accountJoinedAt}>가입일 {formatKoreanDay(joinedAt)}</p>}
+          </div>
         </section>
       )}
     </VerifyResult>
