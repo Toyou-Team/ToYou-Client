@@ -2,21 +2,15 @@ import { ApiError } from '@/common/apis/client';
 import { CONTENT_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { countChars } from '@/utils/text';
 
-const NICKNAME_MIN_LENGTH = 2;
 export const NICKNAME_MAX_LENGTH = 12;
-const NICKNAME_PATTERN = /^[가-힣a-zA-Z0-9 ]+$/;
 
-export const NICKNAME_LENGTH_ERROR = '닉네임은 최소 2자에서 12자까지 작성 가능합니다.';
-const NICKNAME_PATTERN_ERROR = '닉네임은 한글, 영문, 숫자, 띄어쓰기만 쓸 수 있어요.';
+export const NICKNAME_LENGTH_ERROR = '닉네임은 최소 1자에서 12자까지 작성 가능합니다.';
 
 // 서버와 같은 규칙
 export const getNicknameError = (nickname: string) => {
-  const trimmed = nickname.trim();
-  const length = countChars(trimmed);
+  const length = countChars(nickname.trim());
 
-  if (length < NICKNAME_MIN_LENGTH || length > NICKNAME_MAX_LENGTH) return NICKNAME_LENGTH_ERROR;
-  if (!NICKNAME_PATTERN.test(trimmed)) return NICKNAME_PATTERN_ERROR;
-  return null;
+  return length < 1 || length > NICKNAME_MAX_LENGTH ? NICKNAME_LENGTH_ERROR : null;
 };
 
 const HANGUL_START = 0xac00;
