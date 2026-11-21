@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 
+import { landingPageWrapper } from '@/app/landing.css';
 import { vars } from '@/styles/theme.css';
 
 export const loginButtonSectionWrapper = style({
@@ -7,6 +8,10 @@ export const loginButtonSectionWrapper = style({
   marginTop: 'auto',
   paddingTop: '3.2rem',
   paddingInline: '2.4rem',
+
+  selectors: {
+    [`${landingPageWrapper}:has(+ footer) &`]: { marginTop: 0, paddingTop: '3.6rem' },
+  },
 });
 
 const loginButton = style({

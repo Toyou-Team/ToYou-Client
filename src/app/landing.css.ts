@@ -11,6 +11,11 @@ export const landingPageWrapper = style({
   minHeight: '100dvh',
 
   padding: `${withSafeTop('3rem')} 0 ${withSafeBottom('3rem')}`,
+
+  selectors: {
+    // 푸터가 있는 웹 브라우저는 첫 화면에 푸터까지 보이도록 높이 고정 해제
+    '&:has(+ footer)': { minHeight: 'auto' },
+  },
 });
 
 export const landingPageTitle = style({

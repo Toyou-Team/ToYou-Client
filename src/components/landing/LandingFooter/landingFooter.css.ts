@@ -5,7 +5,6 @@ import { withSafeBottom } from '@/styles/safeArea';
 
 export const footer = style({
   width: '100%',
-  marginTop: '16rem',
   padding: `3.6rem 2rem ${withSafeBottom('4rem')}`,
   background: vars.color.neutral_100,
 });
