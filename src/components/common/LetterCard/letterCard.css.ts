@@ -57,10 +57,6 @@ export const nickname = style({
   color: vars.color.neutral_950,
 });
 
-export const nicknameOnDark = style({
-  color: vars.color.neutral_50,
-});
-
 export const expiresText = style({
   marginLeft: 'auto',
   flexShrink: 0,
@@ -72,6 +68,10 @@ export const expiresText = style({
 
   backgroundColor: 'rgba(254, 254, 254, 0.3)',
   color: vars.color.neutral_950,
+});
+
+export const textOnDark = style({
+  color: vars.color.neutral_50,
 });
 
 export const messageWrapper = style({
