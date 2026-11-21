@@ -68,8 +68,8 @@ export function LetterCard({
           )}
         </div>
 
-        <span className={clsx(styles.nickname, isDarkBackground && styles.nicknameOnDark)}>{nickname}</span>
-        <span className={styles.expiresText}>{expiresText}</span>
+        <span className={clsx(styles.nickname, isDarkBackground && styles.textOnDark)}>{nickname}</span>
+        <span className={clsx(styles.expiresText, isDarkBackground && styles.textOnDark)}>{expiresText}</span>
       </section>
 
       <section className={styles.messageWrapper}>
