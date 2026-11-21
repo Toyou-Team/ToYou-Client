@@ -30,10 +30,20 @@ export default function SignUpProfileImagePage() {
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const goOnboarding = () => router.replace('/onboarding');
 
-  const uploadImage = (file: File) => uploadProfileImage(file, { onSettled: goOnboarding });
+  const uploadImage = (file: File) =>
+    uploadProfileImage(file, {
+      onSuccess: goOnboarding,
+      onError: () =>
+        showToast('업로드가 되지 않았어요. 다시 시도해 주세요.', {
+          type: 'error',
+          above: 'guideButton',
+          id: 'upload-error',
+        }),
+    });
 
   const alertAndGo = (message: string, path?: string) =>
     open(({ close }) => {
@@ -54,6 +64,13 @@ export default function SignUpProfileImagePage() {
     });
 
   const handleComplete = () => {
+    // 가입 후 사진 업로드만 실패한 경우 업로드만 재시도
+    if (isRegistered) {
+      if (imageFile) uploadImage(imageFile);
+      else goOnboarding();
+      return;
+    }
+
     const draft = signupDraftStore.get();
 
     // 입력값이 없으면 닉네임부터
@@ -71,6 +88,7 @@ export default function SignUpProfileImagePage() {
       },
       {
         onSuccess: () => {
+          setIsRegistered(true);
           trackEvent({ event: 'sign_up', method: loginProviderStore.get() === 'APPLE' ? 'apple' : 'kakao' });
           clearSignupData();
           // 광고성 정보 수신 동의 처리 결과 안내 (정보통신망법)

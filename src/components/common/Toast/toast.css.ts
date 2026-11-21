@@ -36,6 +36,7 @@ export const item = style({
   selectors: {
     // sonner 기본 슬라이드 효과를 끈다. 속성 선택자를 붙여 sonner 스타일보다 우선순위를 높인다
     '&[data-sonner-toast]': {
+      width: '100%',
       transition: 'none',
     },
   },
@@ -52,21 +53,30 @@ export const toast = style({
   backgroundColor: `color-mix(in srgb, ${vars.color.neutral_950} 90%, transparent)`,
 
   ...vars.fontStyles.body,
+  fontFamily: 'var(--font-montserrat), var(--font-pretendard), sans-serif',
   color: vars.color.neutral_50,
   whiteSpace: 'nowrap',
 
-  animation: `${appear} 3s ease-out forwards`,
+  animation: `${fadeOut} 3s ease-out forwards`,
+});
 
+// 점에서 퍼지며 나타남
+export const expand = style({
   '@media': {
-    '(prefers-reduced-motion: reduce)': {
-      animation: `${fadeOut} 3s ease-out forwards`,
+    '(prefers-reduced-motion: no-preference)': {
+      animation: `${appear} 3s ease-out forwards`,
     },
   },
 });
 
+export const above = styleVariants({
+  button: { transform: 'translateY(-7.4rem)' },
+  guideButton: { transform: 'translateY(-6.8rem)' },
+});
+
 // 기본은 body, 긴 문구는 caption
 export const textSize = styleVariants({
-  default: { fontSize: fitFontSize(vars.fontStyles.body.fontSize, 24) },
+  default: {},
   long: { fontSize: fitFontSize(vars.fontStyles.caption.fontSize, 26) },
   longest: { fontSize: fitFontSize(vars.fontStyles.caption.fontSize, 29.5) },
 });
@@ -76,11 +86,11 @@ export const content = style({
   alignItems: 'center',
   gap: '0.8rem',
 
-  animation: `${contentFadeIn} 3s ease-out forwards`,
-
   '@media': {
-    '(prefers-reduced-motion: reduce)': {
-      animation: 'none',
+    '(prefers-reduced-motion: no-preference)': {
+      selectors: {
+        [`${expand} &`]: { animation: `${contentFadeIn} 3s ease-out forwards` },
+      },
     },
   },
 });

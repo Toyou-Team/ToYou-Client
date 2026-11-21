@@ -158,7 +158,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
         {
           onSuccess: ({ bonusChocolateAmount }) => {
             trackEvent({ event: 'letter_send', char_count: countChars(body) });
-            if (bonusChocolateAmount > 0) showToast(`${bonusChocolateAmount}초코가 지급됐어요.`);
+            if (bonusChocolateAmount > 0) showToast(`${bonusChocolateAmount}초코가 지급됐어요.`, { isExpanding: true });
             router.push('/home');
           },
           onError: (error) => {

@@ -1,6 +1,7 @@
 'use client';
 
 import type { AccountSanction } from '@/common/apis/auth';
+import { showToast } from '@/components/common/Toast/Toast';
 import { SANCTION_STAGE_LABEL } from '@/constants/restriction';
 import { formatDateTime } from '@/utils/date';
 
@@ -13,7 +14,8 @@ interface RestrictionInfoCardProps {
 export function RestrictionInfoCard({ restriction }: RestrictionInfoCardProps) {
   const { referenceNumber, reason, stage, endsAt } = restriction;
 
-  const handleCopy = () => navigator.clipboard?.writeText(referenceNumber);
+  const handleCopy = () =>
+    navigator.clipboard?.writeText(referenceNumber).then(() => showToast('복사 완료', { above: 'button' }));
 
   return (
     <dl className={styles.card}>
