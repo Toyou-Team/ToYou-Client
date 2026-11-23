@@ -1,27 +1,24 @@
 import { sendGTMEvent } from '@next/third-parties/google';
 
-import type { DeliverySlot } from '@/common/apis/push';
+import type { Gender } from '@/common/apis/auth';
 
 // GA4 이벤트 명세서 v1. 개인정보·편지 내용은 보내지 않는다
 
 export type ScreenName = 'home' | 'letter-box' | 'write-letter' | 'mypage';
 export type LoginMethod = 'kakao' | 'apple';
+type AnalyticsGender = Lowercase<Gender>;
 
 export type AnalyticsEvent =
-  | { event: 'login' | 'sign_up'; method: LoginMethod }
-  | { event: 'terms_agree'; marketing_opt_in: boolean }
-  | { event: 'onboarding_step_view'; step_name: string; step_index: number }
+  | { event: 'login'; method: LoginMethod }
+  | { event: 'sign_up'; method: LoginMethod; gender?: AnalyticsGender }
   | {
-      event: 'choco_badge_click' | 'choco_notify_click' | 'choco_insufficient' | 'letter_write_start';
-      screen_name: ScreenName;
+      event: 'onboarding_step_view';
+      step_name: 'terms' | 'verify' | 'nickname' | 'receive_gender' | 'profile_image';
+      step_index: number;
     }
-  | { event: 'letterbox_view'; unread_count: number }
-  | { event: 'letter_open' | 'letter_more_request'; choco_spent: number }
-  | { event: 'letter_send' | 'reply_send'; char_count: number }
-  | { event: 'chat_room_open' | 'block_user' }
-  | { event: 'notification_permission_result'; result: 'granted' | 'denied' | 'later' }
-  | { event: 'push_open'; delivery_slot: DeliverySlot }
-  | { event: 'report_submit' | 'account_delete'; reason: string };
+  | { event: 'choco_badge_click' | 'choco_notify_click'; screen_name: ScreenName }
+  | { event: 'tab_click'; tab_name: ScreenName }
+  | { event: 'letter_send'; attach_type: 'none' | 'image' | 'music' | 'both' };
 
 const isBrowser = () => typeof window !== 'undefined';
 
@@ -29,9 +26,12 @@ export const trackEvent = (data: AnalyticsEvent) => {
   if (isBrowser()) sendGTMEvent(data);
 };
 
-// 로그아웃하면 undefined
-export const setAnalyticsUserId = (userId: string | undefined) => {
-  if (isBrowser()) sendGTMEvent({ user_id: userId });
+// 성별 미설정이면 undefined
+export const toAnalyticsGender = (gender?: Gender | null) => gender?.toLowerCase() as AnalyticsGender | undefined;
+
+// 로그아웃하면 user 없이 호출해 둘 다 지운다
+export const setAnalyticsUser = (user?: { id: string; gender?: Gender | null }) => {
+  if (isBrowser()) sendGTMEvent({ user_id: user?.id, gender: toAnalyticsGender(user?.gender) });
 };
 
 const SCREEN_NAMES: Record<string, ScreenName> = {
