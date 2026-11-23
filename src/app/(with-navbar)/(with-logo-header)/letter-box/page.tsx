@@ -1,8 +1,5 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-
-import { trackEvent } from '@/common/analytics/gtm';
 import { useConversationsQuery } from '@/common/apis/conversation';
 import { useInfiniteScroll } from '@/common/hooks/useInfiniteScroll';
 import { useLeaveConversation } from '@/common/hooks/useLeaveConversation';
@@ -17,15 +14,6 @@ export default function LetterBoxPage() {
   const { openLeaveConfirm } = useLeaveConversation();
 
   const loadMoreRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage);
-
-  // 진입 시 한 번, 첫 목록 기준
-  const hasTrackedRef = useRef(false);
-  useEffect(() => {
-    if (!conversations || hasTrackedRef.current) return;
-
-    hasTrackedRef.current = true;
-    trackEvent({ event: 'letterbox_view', unread_count: conversations.filter(({ hasUnread }) => hasUnread).length });
-  }, [conversations]);
 
   if (isPending || !conversations) return null;
 

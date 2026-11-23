@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
-import { getScreenName, trackEvent } from '@/common/analytics/gtm';
 import { IcMore } from '@/assets/icons';
 import { ApiError } from '@/common/apis/client';
 import { DELIVERY_AUTHOR_WITHDRAWN } from '@/common/apis/constants/error-code';
@@ -62,8 +61,6 @@ export default function LetterPage() {
     opened || !delivery?.content.isTruncated ? 0 : delivery.content.bodyLength - countChars(delivery.content.body);
 
   const openShortageModal = (purpose: string, cost: number, chocolateBalance: number) => {
-    trackEvent({ event: 'choco_insufficient', screen_name: getScreenName() });
-
     open(({ close }) => (
       <Modal
         title="초코가 부족해요"
@@ -99,7 +96,6 @@ export default function LetterPage() {
           close();
           openDelivery(deliveryId, {
             onSuccess: ({ replyStatus }) => {
-              trackEvent({ event: 'letter_open', choco_spent: OPEN_DELIVERY_COST });
               if (isShortLetter && replyStatus === 'AVAILABLE') goToReply();
             },
             onError: (error) => {
