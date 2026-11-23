@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
-import { trackEvent } from '@/common/analytics/gtm';
 import { useSignupConsentsMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
@@ -96,7 +95,6 @@ export function TermsForm() {
       {
         onSuccess: () => {
           signupDraftStore.patch({ marketingPushAgreed: agree3, nightPushAgreed: agree4 });
-          trackEvent({ event: 'terms_agree', marketing_opt_in: agree3 });
           router.push('/signup/verify');
         },
         onError: (error) => {

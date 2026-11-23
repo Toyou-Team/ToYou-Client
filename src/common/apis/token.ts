@@ -1,4 +1,4 @@
-import { setAnalyticsUserId } from '@/common/analytics/gtm';
+import { setAnalyticsUser } from '@/common/analytics/gtm';
 
 import type { KakaoProfileSuggestion, ReceiveGender, WithdrawalReasonPayload } from './auth';
 
@@ -45,9 +45,6 @@ export const refreshTokenStore = webStore(() => window.localStorage, 'toyou_refr
 
 // 애플 계정은 탈퇴할 때 재인증이 필요하다. 서버 응답에 로그인 수단이 없어 로그인할 때 기록한다
 export const loginProviderStore = webStore(() => window.localStorage, 'toyou_login_provider');
-
-// GA4 user_id 로 보내는 회원 ID
-export const userIdStore = webStore(() => window.localStorage, 'toyou_user_id');
 
 // 카카오 인증은 됐지만 가입 미완료인 유저가 가입 플로우 동안 들고 다니는 임시 토큰
 export const registrationTokenStore = webStore(() => window.sessionStorage, 'toyou_registration_token');
@@ -138,10 +135,8 @@ export const setTokens = ({
   refreshTokenStore.set(refreshToken);
   loggedInCookie.set();
 
-  if (user) {
-    userIdStore.set(user.id);
-    setAnalyticsUserId(user.id);
-  }
+  // 로그인 이벤트보다 먼저 보낸다. 성별은 프로필을 받은 뒤 AnalyticsSync 에서
+  if (user) setAnalyticsUser({ id: user.id });
 };
 
 // 로그인 토큰만 지운다. 로그인 복원에 실패해도 진행 중인 가입 정보는 남겨 둔다
@@ -150,8 +145,7 @@ export const clearTokens = () => {
   refreshTokenStore.clear();
   loginProviderStore.clear();
   loggedInCookie.clear();
-  userIdStore.clear();
-  setAnalyticsUserId(undefined);
+  setAnalyticsUser();
 };
 
 export const clearSignupData = () => {

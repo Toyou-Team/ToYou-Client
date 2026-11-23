@@ -14,6 +14,7 @@ import {
   IcWritingLetterNeutral300,
   IcWritingLetterNeutral900,
 } from '@/assets/icons';
+import { type ScreenName, trackEvent } from '@/common/analytics/gtm';
 import { useConversationsQuery } from '@/common/apis/conversation';
 import { useCurrentDeliveryRoundQuery } from '@/common/apis/delivery';
 import { usePrefetchWritingPrompt } from '@/common/apis/letter';
@@ -51,6 +52,8 @@ export function NavBar() {
           <Fragment key={href}>
             <Link
               href={href}
+              // 이미 있는 탭을 다시 눌러도 전송
+              onClick={() => trackEvent({ event: 'tab_click', tab_name: href.slice(1) as ScreenName })}
               className={styles.navItemWrapper}
               aria-label={showUnreadDot ? `${label}, 읽지 않은 편지 있음` : undefined}
               aria-describedby={hasTooltip ? tooltipId : undefined}

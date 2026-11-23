@@ -116,10 +116,7 @@ function ChocoSummary() {
           close();
           router.push('/mypage/settings');
         }}
-        onClose={() => {
-          close();
-          trackEvent({ event: 'notification_permission_result', result: 'later' });
-        }}
+        onClose={close}
       />
     ));
 

@@ -7,6 +7,7 @@ import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { registrationTokenStore } from '@/common/apis/token';
 import { useModal } from '@/common/hooks/useModal';
+import { TrackEvent } from '@/components/analytics/TrackEvent/TrackEvent';
 import Button from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
 import { openKgInicis } from '@/utils/kgInicis';
@@ -54,6 +55,7 @@ export default function SignupVerifyPage() {
 
   return (
     <div className={styles.pageWrapper}>
+      <TrackEvent event="onboarding_step_view" step_name="verify" step_index={2} />
       <h1 className={styles.title}>
         <span className={styles.firstLine}>안전한 이용을 위해</span>
         <span className={styles.secondLine}>본인인증이 필요해요.</span>

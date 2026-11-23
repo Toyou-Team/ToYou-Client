@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { TrackEvent } from '@/components/analytics/TrackEvent/TrackEvent';
-import { trackEvent } from '@/common/analytics/gtm';
+import { toAnalyticsGender, trackEvent } from '@/common/analytics/gtm';
 import { useOnboardingMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { CONTENT_ERROR_CODE, PROFILE_ERROR_CODE } from '@/common/apis/constants/error-code';
-import { useUploadProfileImageMutation } from '@/common/apis/profile';
+import { getProfile, useUploadProfileImageMutation } from '@/common/apis/profile';
 import { clearSignupData, loginProviderStore, signupDraftStore } from '@/common/apis/token';
 import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
@@ -89,7 +89,11 @@ export default function SignUpProfileImagePage() {
       {
         onSuccess: () => {
           setIsRegistered(true);
-          trackEvent({ event: 'sign_up', method: loginProviderStore.get() === 'APPLE' ? 'apple' : 'kakao' });
+          // 성별은 본인인증 정보라 프로필에서 읽는다
+          const method = loginProviderStore.get() === 'APPLE' ? 'apple' : 'kakao';
+          getProfile()
+            .catch(() => null)
+            .then((profile) => trackEvent({ event: 'sign_up', method, gender: toAnalyticsGender(profile?.gender) }));
           clearSignupData();
           // 광고성 정보 수신 동의 처리 결과 안내 (정보통신망법)
           if (draft.marketingPushAgreed) {
@@ -119,7 +123,7 @@ export default function SignUpProfileImagePage() {
   return (
     <>
       <div className={styles.profileImagePageWrapper}>
-        <TrackEvent event="onboarding_step_view" step_name="profile_image" step_index={3} />
+        <TrackEvent event="onboarding_step_view" step_name="profile_image" step_index={5} />
         <MemoizedStepIcon step={3} />
         <h1 className={styles.titleWrapper}>프로필 사진을 설정해주세요.</h1>
       </div>

@@ -8,7 +8,7 @@ export default function SignUpNicknamePage() {
   return (
     <>
       <div className={styles.nicknamePageWrapper}>
-        <TrackEvent event="onboarding_step_view" step_name="nickname" step_index={1} />
+        <TrackEvent event="onboarding_step_view" step_name="nickname" step_index={3} />
         <MemoizedStepIcon step={1} />
         <h1 className={styles.titleWrapper}>닉네임을 적어주세요.</h1>
       </div>
