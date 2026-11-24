@@ -12,6 +12,7 @@ const BUSINESS_INFO = [
   { label: '상호', value: '투유(toyou)' },
   { label: '대표자', value: '이현호' },
   { label: '사업자등록번호', value: '584-33-01669' },
+  { label: '대표번호', value: '010-3200-0098' },
   { label: '주소', value: '서울특별시 광진구 광나루로38길 65-5, 203호 (구의동, 오로시하우스)' },
 ];
 
