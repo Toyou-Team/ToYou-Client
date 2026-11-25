@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
@@ -45,13 +45,13 @@ export default function ConversationLetterPage() {
   const activeMessage = items[activeIndex];
 
   // 처음 선택한 편지 위치에서 시작
-  useEffect(() => {
+  useLayoutEffect(() => {
     const track = trackRef.current;
-    if (!track || !data || hasPositionedRef.current) return;
+    if (!track || !data || (hasPositionedRef.current && activeId !== null)) return;
 
     hasPositionedRef.current = true;
     track.scrollLeft = activeIndex * track.clientWidth;
-  }, [data, activeIndex]);
+  }, [data, activeId, activeIndex]);
 
   useEffect(() => {
     isBackFromWrite = false;
