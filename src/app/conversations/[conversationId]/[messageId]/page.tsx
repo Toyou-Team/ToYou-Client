@@ -19,6 +19,8 @@ import { getPartnerNickname } from '@/utils/partner';
 
 import * as styles from './conversationLetter.css';
 
+let isBackFromWrite = false;
+
 export default function ConversationLetterPage() {
   const { conversationId, messageId } = useParams<{ conversationId: string; messageId: string }>();
   const router = useRouter();
@@ -27,7 +29,8 @@ export default function ConversationLetterPage() {
   const { mutate: readMessage } = useReadMessageMutation(conversationId);
   usePrefetchWritingPrompt();
 
-  const [activeId, setActiveId] = useState(messageId);
+  // null 이면 맨 앞(가장 최근) 편지. 답장 화면에서 돌아오면 방금 보낸 답장부터 보여준다
+  const [activeId, setActiveId] = useState(() => (isBackFromWrite ? null : messageId));
   const [isReportBlockSheetOpen, setIsReportBlockSheetOpen] = useState(false);
   const openBlockConfirm = useBlockConversation(conversationId);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -49,6 +52,10 @@ export default function ConversationLetterPage() {
     hasPositionedRef.current = true;
     track.scrollLeft = activeIndex * track.clientWidth;
   }, [data, activeIndex]);
+
+  useEffect(() => {
+    isBackFromWrite = false;
+  }, []);
 
   // 받은 편지가 화면에 보이면 읽음 처리 (편지마다 한 번)
   useEffect(() => {
@@ -81,12 +88,14 @@ export default function ConversationLetterPage() {
 
   // 원본 편지에 대한 첫 답장은 배달 기준, 이후 답장은 대화방 기준 API 사용
   const isFirstReply = activeMessage.type === 'ORIGINAL';
-  const goToWrite = () =>
+  const goToWrite = () => {
+    isBackFromWrite = true;
     router.push(
       isFirstReply
         ? `/write-letter?replyTo=${conversation.deliveryId}`
         : `/write-letter?conversationId=${conversationId}`,
     );
+  };
 
   // 가장 최근에 받은 편지이고 내 답장 차례면, 그 편지에서는 점 대신 답장 버튼을 보여준다
   const canReplyToLatest = !items[0].isMine && !conversation.isReadOnly && conversation.canSend;
