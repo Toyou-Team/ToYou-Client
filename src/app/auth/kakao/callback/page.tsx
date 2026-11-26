@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { trackEvent } from '@/common/analytics/gtm';
-import { consumeKakaoState, getSignedInPath, useKakaoLoginMutation } from '@/common/apis/auth';
+import { consumeKakaoState, useKakaoLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
-import { kakaoProfileStore, loginProviderStore, registrationTokenStore, setTokens } from '@/common/apis/token';
-import { useAccountStatusCheck } from '@/common/hooks/useAccountStatusCheck';
 import { useAccountUnavailable } from '@/common/hooks/useAccountUnavailable';
+import { useSignInResult } from '@/common/hooks/useSignInResult';
 
 import * as styles from './callback.css';
 
@@ -23,7 +21,7 @@ export default function KakaoCallbackPage() {
   const router = useRouter();
   const started = useRef(false);
   const { mutate } = useKakaoLoginMutation();
-  const checkAccountStatus = useAccountStatusCheck();
+  const handleSignInResult = useSignInResult();
   const handleAccountUnavailable = useAccountUnavailable();
   const [blockedMessage, setBlockedMessage] = useState<string | null>(null);
 
@@ -43,22 +41,9 @@ export default function KakaoCallbackPage() {
     }
 
     mutate(code, {
-      onSuccess: (result) => {
-        loginProviderStore.clear();
-        if (result.status !== 'SIGNUP_UNAVAILABLE') trackEvent({ event: 'login', method: 'kakao' });
-
-        switch (result.status) {
-          case 'SIGNED_IN':
-            setTokens(result);
-            checkAccountStatus(() => router.replace(getSignedInPath(result)));
-            return;
-          case 'SIGNUP_REQUIRED':
-            registrationTokenStore.set(result.registrationToken);
-            kakaoProfileStore.set(result.kakaoProfile);
-            router.replace('/signup/terms');
-            return;
-          case 'SIGNUP_UNAVAILABLE':
-            setBlockedMessage(BLOCKED_MESSAGE.AGE_VERIFICATION_UNAVAILABLE);
+      onSuccess: async (result) => {
+        if (!(await handleSignInResult(result, 'kakao'))) {
+          setBlockedMessage(BLOCKED_MESSAGE.AGE_VERIFICATION_UNAVAILABLE);
         }
       },
       onError: (error) => {
@@ -79,7 +64,7 @@ export default function KakaoCallbackPage() {
         router.replace('/');
       },
     });
-  }, [router, mutate, checkAccountStatus, handleAccountUnavailable]);
+  }, [router, mutate, handleSignInResult, handleAccountUnavailable]);
 
   if (blockedMessage) {
     return (
