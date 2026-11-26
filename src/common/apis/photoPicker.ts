@@ -1,3 +1,5 @@
+import { parseAppMessage, postAppMessage } from './appBridge';
+
 // 앱 ↔ 웹 메시지 계약: ToYou-Server PR #44
 
 export type PhotoPickResult =
@@ -9,20 +11,9 @@ export type PhotoPickResult =
 export const isPhotoPickerSupported = () =>
   Boolean(window.ReactNativeWebView) && window.TOYOU_APP?.photoPicker === true;
 
-export const requestPhotoPick = () =>
-  window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'PHOTO_PICK_REQUEST' }));
+export const requestPhotoPick = () => postAppMessage('PHOTO_PICK_REQUEST');
 
-// 앱이 보낸 JSON 문자열 중 사진 선택 결과만 추출
-export const parsePhotoPickResult = (data: unknown): PhotoPickResult | null => {
-  if (typeof data !== 'string') return null;
-
-  try {
-    const message = JSON.parse(data) as Partial<PhotoPickResult>;
-    return message.type === 'PHOTO_PICK_RESULT' ? (message as PhotoPickResult) : null;
-  } catch {
-    return null;
-  }
-};
+export const parsePhotoPickResult = (data: unknown) => parseAppMessage<PhotoPickResult>(data, 'PHOTO_PICK_RESULT');
 
 export const dataUrlToFile = (dataUrl: string, mimeType: string) => {
   const binary = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));

@@ -18,6 +18,8 @@ import {
   usePushConsentsQuery,
   useUpdatePushConsentsMutation,
 } from '@/common/apis/pushConsent';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
+import { useAppMessage } from '@/common/hooks/useAppMessage';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 import { showToast } from '@/components/common/Toast/Toast';
@@ -50,23 +52,22 @@ const consentChangeMessage = (before: PushConsents, after: UpdatedPushConsents) 
 function useDevicePushPermission() {
   const [permission, setPermission] = useState<PushPermission | null>(null);
 
-  useEffect(() => {
+  // 설정 앱에서 알림을 바꾸고 돌아오면 앱이 먼저 보내 주고, 권한 창에 답하면 토큰 결과로 알 수 있다
+  useAppMessage((data) => {
     if (!isPushAppSupported()) return;
 
-    // 설정 앱에서 알림을 바꾸고 돌아오면 앱이 먼저 보내 주고, 권한 창에 답하면 토큰 결과로 알 수 있다
-    const listener = (event: MessageEvent) => {
-      const next = parsePushPermissionResult(event.data);
-      if (next) {
-        setPermission(next);
-        return;
-      }
+    const next = parsePushPermissionResult(data);
+    if (next) {
+      setPermission(next);
+      return;
+    }
 
-      const tokenResult = parsePushTokenResult(event.data);
-      if (tokenResult && tokenResult.status !== 'FAILED') setPermission(tokenResult.status);
-    };
-    window.addEventListener('message', listener);
-    requestPushPermission();
-    return () => window.removeEventListener('message', listener);
+    const tokenResult = parsePushTokenResult(data);
+    if (tokenResult && tokenResult.status !== 'FAILED') setPermission(tokenResult.status);
+  });
+
+  useEffect(() => {
+    if (isPushAppSupported()) requestPushPermission();
   }, []);
 
   return { permission };
@@ -75,6 +76,7 @@ function useDevicePushPermission() {
 // 설정 화면 알림: 서비스·광고성·야간 토글 + 기기 알림 상태
 export function usePushSettings() {
   const { open } = useModal();
+  const openAlert = useAlertModal();
   const { data: consents } = usePushConsentsQuery();
   const { mutate } = useUpdatePushConsentsMutation({
     onUpdated: (before, after) => {
@@ -84,16 +86,7 @@ export function usePushSettings() {
       const message = consentChangeMessage(before, after);
       if (message) showToast(message);
     },
-    onFailed: () =>
-      open(({ close }) => (
-        <Modal
-          title="알림 설정을 바꾸지 못했어요"
-          description="잠시 후 다시 시도해 주세요."
-          confirmText="확인"
-          onConfirm={close}
-          onClose={close}
-        />
-      )),
+    onFailed: () => openAlert({ title: '알림 설정을 바꾸지 못했어요', description: '잠시 후 다시 시도해 주세요.' }),
   });
   const device = useDevicePushPermission();
 

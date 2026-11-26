@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useEffectEvent, useRef, type ChangeEvent } from 'react';
+import { useRef, type ChangeEvent } from 'react';
 
 import {
   dataUrlToFile,
@@ -8,27 +8,18 @@ import {
   parsePhotoPickResult,
   requestPhotoPick,
 } from '@/common/apis/photoPicker';
-import { useModal } from '@/common/hooks/useModal';
-import { Modal } from '@/components/common/Modal/Modal';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
+import { useAppMessage } from '@/common/hooks/useAppMessage';
 
 // iOS 앱은 앱 사진 선택, 그 외는 파일 선택 사용
 export function usePhotoPicker(onSelect: (file: File) => void) {
-  const { open } = useModal();
+  const openAlert = useAlertModal();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const waitingAppRef = useRef(false);
 
-  const openFailModal = () =>
-    open(({ close }) => (
-      <Modal
-        title="사진을 불러오지 못했어요"
-        description="다시 시도해 주세요."
-        confirmText="확인"
-        onConfirm={close}
-        onClose={close}
-      />
-    ));
+  const openFailModal = () => openAlert({ title: '사진을 불러오지 못했어요', description: '다시 시도해 주세요.' });
 
-  const handleAppResult = useEffectEvent((data: unknown) => {
+  useAppMessage((data) => {
     const result = parsePhotoPickResult(data);
     if (!result || !waitingAppRef.current) return;
     waitingAppRef.current = false;
@@ -45,12 +36,6 @@ export function usePhotoPicker(onSelect: (file: File) => void) {
       openFailModal();
     }
   });
-
-  useEffect(() => {
-    const listener = (event: MessageEvent) => handleAppResult(event.data);
-    window.addEventListener('message', listener);
-    return () => window.removeEventListener('message', listener);
-  }, []);
 
   const openPicker = () => {
     if (isPhotoPickerSupported()) {

@@ -1,3 +1,4 @@
+import { parseAppMessage, postAppMessage } from './appBridge';
 import { APPLE_WEB_CLIENT_ID, APPLE_WEB_REDIRECT_URI } from './oAuth';
 
 interface AppleSignInResponse {
@@ -43,20 +44,9 @@ export type AppleAppResult =
     }
   | { type: 'APPLE_SIGN_IN_RESULT'; status: 'CANCELED' | 'FAILED' };
 
-export const requestAppleAppSignIn = () =>
-  window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'APPLE_SIGN_IN_REQUEST' }));
+export const requestAppleAppSignIn = () => postAppMessage('APPLE_SIGN_IN_REQUEST');
 
-// 앱이 보낸 JSON 문자열 중 애플 로그인 결과만 꺼낸다
-export const parseAppleAppResult = (data: unknown): AppleAppResult | null => {
-  if (typeof data !== 'string') return null;
-
-  try {
-    const message = JSON.parse(data) as Partial<AppleAppResult>;
-    return message.type === 'APPLE_SIGN_IN_RESULT' ? (message as AppleAppResult) : null;
-  } catch {
-    return null;
-  }
-};
+export const parseAppleAppResult = (data: unknown) => parseAppMessage<AppleAppResult>(data, 'APPLE_SIGN_IN_RESULT');
 
 // 일반 웹
 
