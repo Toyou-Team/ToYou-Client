@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import clsx from 'clsx';
 
 import { IcMore } from '@/assets/icons';
 import { ApiError } from '@/common/apis/client';
@@ -12,13 +11,11 @@ import { CONVERSATIONS_QUERY_KEY, useConversationQuery, type ConversationMessage
 import { useBlockConversation } from '@/common/hooks/useBlockConversation';
 import { useLeaveConversation } from '@/common/hooks/useLeaveConversation';
 import { useInfiniteScroll } from '@/common/hooks/useInfiniteScroll';
-import { useModal } from '@/common/hooks/useModal';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
-import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
+import { ActionSheet } from '@/components/common/ActionSheet/ActionSheet';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
-import { Modal } from '@/components/common/Modal/Modal';
-import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 import { formatDay, formatTime } from '@/utils/date';
 import { getPartnerNickname } from '@/utils/partner';
 
@@ -46,7 +43,7 @@ export default function ConversationPage() {
   );
   const openBlockConfirm = useBlockConversation(conversationId);
   const [isMenuSheetOpen, setIsMenuSheetOpen] = useState(false);
-  const { open } = useModal();
+  const openAlert = useAlertModal();
   const queryClient = useQueryClient();
 
   // 불러오는 동안 잠시 멈췄다가, 끝나면 끝 요소가 아직 보이는지 다시 확인
@@ -58,25 +55,16 @@ export default function ConversationPage() {
   useEffect(() => {
     if (!notFoundMessage) return;
 
-    open(({ close }) => {
+    openAlert({
+      title: '대화를 열 수 없어요',
+      description: notFoundMessage,
       // 상세를 닫고 편지함 목록 재조회 (편지함·대화 API 가이드)
-      const handleClose = () => {
-        close();
+      onClose: () => {
         queryClient.invalidateQueries({ queryKey: CONVERSATIONS_QUERY_KEY, exact: true });
         router.replace('/letter-box');
-      };
-
-      return (
-        <Modal
-          title="대화를 열 수 없어요"
-          description={notFoundMessage}
-          confirmText="확인"
-          onConfirm={handleClose}
-          onClose={handleClose}
-        />
-      );
+      },
     });
-  }, [notFoundMessage, open, queryClient, router]);
+  }, [notFoundMessage, openAlert, queryClient, router]);
 
   if (!data) return null;
 
@@ -121,36 +109,28 @@ export default function ConversationPage() {
 
       {hasNextPage && <div ref={loadMoreRef} aria-hidden />}
 
-      <BottomSheet isOpen={isMenuSheetOpen} onClose={closeMenuSheet}>
-        <div className={actionSheetStyles.actionList}>
-          {/* 탈퇴한 상대는 차단할 대상이 없어 나가기만 제공 */}
-          {!conversation.partner.isWithdrawn && (
-            <button
-              type="button"
-              className={actionSheetStyles.actionButton}
-              onClick={() => {
-                closeMenuSheet();
-                openBlockConfirm();
-              }}
-            >
-              차단
-            </button>
-          )}
-          <button
-            type="button"
-            className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
-            onClick={() => {
+      <ActionSheet
+        isOpen={isMenuSheetOpen}
+        onClose={closeMenuSheet}
+        actions={[
+          // 탈퇴한 상대는 차단할 대상이 없어 나가기만 제공
+          !conversation.partner.isWithdrawn && {
+            label: '차단',
+            onClick: () => {
+              closeMenuSheet();
+              openBlockConfirm();
+            },
+          },
+          {
+            label: '나가기',
+            isDanger: true,
+            onClick: () => {
               closeMenuSheet();
               openLeaveConfirm(conversationId, getPartnerNickname(conversation.partner));
-            }}
-          >
-            나가기
-          </button>
-          <button type="button" className={actionSheetStyles.actionButton} onClick={closeMenuSheet}>
-            취소
-          </button>
-        </div>
-      </BottomSheet>
+            },
+          },
+        ]}
+      />
     </div>
   );
 }
