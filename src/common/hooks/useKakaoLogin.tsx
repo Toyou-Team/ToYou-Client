@@ -1,18 +1,15 @@
 'use client';
 
-import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRef, useState, useSyncExternalStore } from 'react';
 
-import { trackEvent } from '@/common/analytics/gtm';
-import { getSignedInPath, startKakaoLogin, useKakaoTokenLoginMutation } from '@/common/apis/auth';
+import { startKakaoLogin, useKakaoTokenLoginMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { getKakaoLoginMode, parseKakaoAppResult, requestKakaoAppSignIn } from '@/common/apis/kakaoSignIn';
-import { kakaoProfileStore, loginProviderStore, registrationTokenStore, setTokens } from '@/common/apis/token';
-import { useAccountStatusCheck } from '@/common/hooks/useAccountStatusCheck';
 import { useAccountUnavailable } from '@/common/hooks/useAccountUnavailable';
-import { useModal } from '@/common/hooks/useModal';
-import { Modal } from '@/components/common/Modal/Modal';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
+import { useAppMessage } from '@/common/hooks/useAppMessage';
+import { useSignInResult } from '@/common/hooks/useSignInResult';
 
 const MESSAGE = {
   // 카카오 콜백 페이지와 같은 문구
@@ -29,43 +26,23 @@ const subscribe = () => () => {};
 
 // iOS 앱은 카카오톡(카카오 SDK), 그 외에는 카카오 로그인 페이지로 이동한다
 export function useKakaoLogin() {
-  const router = useRouter();
-  const { open } = useModal();
+  const openAlert = useAlertModal();
   const { mutateAsync: login } = useKakaoTokenLoginMutation();
-  const checkAccountStatus = useAccountStatusCheck();
+  const handleSignInResult = useSignInResult();
   const handleAccountUnavailable = useAccountUnavailable();
   // 서버 렌더링에서는 실행 환경을 알 수 없어 null
   const mode = useSyncExternalStore(subscribe, getKakaoLoginMode, () => null);
   const [isPending, setIsPending] = useState(false);
   const waitingAppRef = useRef(false);
 
-  const alert = (key: keyof typeof MESSAGE) => {
+  const openMessage = (key: keyof typeof MESSAGE) => {
     const [title, description] = MESSAGE[key];
-    open(({ close }) => (
-      <Modal title={title} description={description} confirmText="확인" onConfirm={close} onClose={close} />
-    ));
+    openAlert({ title, description });
   };
 
-  // 응답 처리는 카카오 콜백 페이지와 같다
   const loginToServer = async (accessToken: string) => {
     try {
-      const result = await login(accessToken);
-      loginProviderStore.clear();
-      if (result.status !== 'SIGNUP_UNAVAILABLE') trackEvent({ event: 'login', method: 'kakao' });
-
-      switch (result.status) {
-        case 'SIGNED_IN':
-          setTokens(result);
-          await checkAccountStatus(() => router.replace(getSignedInPath(result)));
-          return;
-        case 'SIGNUP_REQUIRED':
-          registrationTokenStore.set(result.registrationToken);
-          kakaoProfileStore.set(result.kakaoProfile);
-          router.replace('/signup/terms');
-          return;
-        case 'SIGNUP_UNAVAILABLE':
-          alert('SIGNUP_UNAVAILABLE');
-      }
+      if (!(await handleSignInResult(await login(accessToken), 'kakao'))) openMessage('SIGNUP_UNAVAILABLE');
     } catch (error) {
       const code = error instanceof ApiError ? error.code : undefined;
 
@@ -81,15 +58,15 @@ export function useKakaoLogin() {
       }
 
       if (code === AUTH_ERROR_CODE.AGE_RESTRICTED) {
-        alert('AGE_RESTRICTED');
+        openMessage('AGE_RESTRICTED');
         return;
       }
 
-      alert(code === AUTH_ERROR_CODE.KAKAO_UNAVAILABLE ? 'KAKAO_DOWN' : 'FAILED');
+      openMessage(code === AUTH_ERROR_CODE.KAKAO_UNAVAILABLE ? 'KAKAO_DOWN' : 'FAILED');
     }
   };
 
-  const handleAppResult = useEffectEvent(async (data: unknown) => {
+  useAppMessage(async (data) => {
     const result = parseKakaoAppResult(data);
     if (!result || !waitingAppRef.current) return;
     waitingAppRef.current = false;
@@ -97,19 +74,11 @@ export function useKakaoLogin() {
     if (result.status === 'SUCCESS' && result.accessToken) {
       await loginToServer(result.accessToken);
     } else if (result.status !== 'CANCELED') {
-      alert('FAILED');
+      openMessage('FAILED');
     }
 
     setIsPending(false);
-  });
-
-  useEffect(() => {
-    if (mode !== 'app') return;
-
-    const listener = (event: MessageEvent) => handleAppResult(event.data);
-    window.addEventListener('message', listener);
-    return () => window.removeEventListener('message', listener);
-  }, [mode]);
+  }, mode === 'app');
 
   const signIn = () => {
     if (mode !== 'app') {

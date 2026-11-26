@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 
 import { useCurrentDeliveryRoundQuery, useExtraDeliveryRoundMutation } from '@/common/apis/delivery';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useModal } from '@/common/hooks/useModal';
 import Button from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
@@ -14,6 +15,7 @@ import * as styles from './deliverySection.css';
 export function DeliverySection() {
   const router = useRouter();
   const { open } = useModal();
+  const openAlert = useAlertModal();
   const { data: round, isPending, isError, isFetching, refetch } = useCurrentDeliveryRoundQuery();
   const { mutate: receiveExtra, isPending: isReceivingExtra } = useExtraDeliveryRoundMutation();
 
@@ -41,15 +43,10 @@ export function DeliverySection() {
 
   const handleExtraClick = () => {
     if (unavailableReason === 'INSUFFICIENT_LETTERS') {
-      open(({ close }) => (
-        <Modal
-          title="받을 수 있는 편지가 없어요"
-          description={`다음 회차 ${formatNextDeliveryHour()}를 기다려주세요.`}
-          confirmText="확인"
-          onConfirm={close}
-          onClose={close}
-        />
-      ));
+      openAlert({
+        title: '받을 수 있는 편지가 없어요',
+        description: `다음 회차 ${formatNextDeliveryHour()}를 기다려주세요.`,
+      });
       return;
     }
 

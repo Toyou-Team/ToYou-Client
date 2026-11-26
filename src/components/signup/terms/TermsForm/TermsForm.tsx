@@ -8,9 +8,8 @@ import { useSignupConsentsMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { registrationTokenStore, signupDraftStore } from '@/common/apis/token';
-import { useModal } from '@/common/hooks/useModal';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import Button from '@/components/common/Button/Button';
-import { Modal } from '@/components/common/Modal/Modal';
 import { AGREE_DATA, PRIVACY_VERSION, TERMS_VERSION } from '@/constants';
 
 import { AllAgreeCheckboxField } from '../AllAgreeCheckboxField/AllAgreeCheckboxField';
@@ -31,7 +30,7 @@ const NIGHT_ID = 4;
 
 export function TermsForm() {
   const router = useRouter();
-  const { open } = useModal();
+  const openAlert = useAlertModal();
   const { mutate: saveConsents, isPending } = useSignupConsentsMutation();
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
@@ -103,15 +102,7 @@ export function TermsForm() {
             return;
           }
 
-          open(({ close }) => (
-            <Modal
-              title="약관 동의를 저장하지 못했어요"
-              description={error.message}
-              confirmText="확인"
-              onConfirm={close}
-              onClose={close}
-            />
-          ));
+          openAlert({ title: '약관 동의를 저장하지 못했어요', description: error.message });
         },
       },
     );

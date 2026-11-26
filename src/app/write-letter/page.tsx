@@ -23,6 +23,7 @@ import { ACCOUNT_SUSPENDED, CONTENT_ERROR_CODE } from '@/common/apis/constants/e
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useSendMessageMutation } from '@/common/apis/conversation';
 import { useReplyMutation } from '@/common/apis/delivery';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useModal } from '@/common/hooks/useModal';
 import { usePhotoPicker } from '@/common/hooks/usePhotoPicker';
 import { Modal } from '@/components/common/Modal/Modal';
@@ -43,6 +44,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   const { replyTo, conversationId } = use(searchParams);
   const router = useRouter();
   const { open } = useModal();
+  const openAlert = useAlertModal();
   const { data: writingPrompt } = useWritingPromptQuery();
   const { mutate: createLetter, isPending: isCreating } = useCreateLetterMutation();
   const { mutate: sendReply, isPending: isReplying } = useReplyMutation();
@@ -110,31 +112,16 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     setSelectedTrack(track);
   };
 
-  const openAlertModal = (title: string, description: string, onConfirm?: () => void) => {
-    open(({ close }) => (
-      <Modal
-        title={title}
-        description={description}
-        confirmText="확인"
-        onConfirm={() => {
-          close();
-          onConfirm?.();
-        }}
-        onClose={close}
-      />
-    ));
-  };
-
   const openForbiddenWordModal = (error: Error) => {
     if (!(error instanceof ApiError) || error.code !== CONTENT_ERROR_CODE.FORBIDDEN_WORD) return false;
 
     const words = error.details?.forbiddenWords;
-    openAlertModal(
-      '전송 불가',
-      words?.length
+    openAlert({
+      title: '전송 불가',
+      description: words?.length
         ? `${words.join(', ')}은(는) 보낼 수 없는 표현이에요.\n다른 표현으로 작성해 주세요.`
         : error.message,
-    );
+    });
     return true;
   };
 
@@ -165,7 +152,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
           onError: (error) => {
             if (openForbiddenWordModal(error)) return;
             if (error instanceof ApiError && error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY) {
-              openAlertModal('편지를 보내지 못했어요', error.message);
+              openAlert({ title: '편지를 보내지 못했어요', description: error.message });
             }
           },
         },
@@ -186,16 +173,16 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
         if (!(error instanceof ApiError) || openForbiddenWordModal(error)) return;
 
         if (error.status === HTTP_STATUS_CODE.CONFLICT) {
-          openAlertModal('답장을 보낼 수 없어요', error.message, () => router.back());
+          openAlert({ title: '답장을 보낼 수 없어요', description: error.message, onConfirm: () => router.back() });
           return;
         }
 
         if (error.status === HTTP_STATUS_CODE.NOT_FOUND) {
-          openAlertModal('답장할 수 없어요', error.message, () => router.back());
+          openAlert({ title: '답장할 수 없어요', description: error.message, onConfirm: () => router.back() });
           return;
         }
 
-        openAlertModal('답장을 보내지 못했어요', error.message);
+        openAlert({ title: '답장을 보내지 못했어요', description: error.message });
       },
     };
 
@@ -226,7 +213,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
       onSuccess: ({ key }) => setImageObjectKey(key),
       onError: (error) => {
         clearPreview();
-        openAlertModal('사진을 올리지 못했어요', error.message);
+        openAlert({ title: '사진을 올리지 못했어요', description: error.message });
       },
     });
   };
@@ -286,10 +273,10 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
         // 정지 안내는 전역에서 표시
         if (code === ACCOUNT_SUSPENDED) return;
         if (code === CONTENT_ERROR_CODE.EXTERNAL_CONTACT) {
-          openAlertModal(
-            replyTo || conversationId ? '답장을 보내지 못했어요' : '편지를 보내지 못했어요',
-            error.message,
-          );
+          openAlert({
+            title: replyTo || conversationId ? '답장을 보내지 못했어요' : '편지를 보내지 못했어요',
+            description: error.message,
+          });
           return;
         }
         openSendConfirm();

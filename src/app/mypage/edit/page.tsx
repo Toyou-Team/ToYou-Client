@@ -1,22 +1,20 @@
 'use client';
 
-import { useEffect, useEffectEvent, useState, type ChangeEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { ApiError } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED } from '@/common/apis/constants/error-code';
-import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
-import { useModal } from '@/common/hooks/useModal';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
+import { useNicknameCheck } from '@/common/hooks/useNicknameCheck';
 import { Header } from '@/components/common/Header/Header';
 import { BackButton } from '@/components/common/BackButton/BackButton';
-import { Modal } from '@/components/common/Modal/Modal';
 import { NavBar } from '@/components/common/NavBar/NavBar';
 import TextField from '@/components/signup/nickname/textField/TextField';
 import { ImageUpload } from '@/components/signup/profile-image/ImageUpload/ImageUpload';
 import {
   GENDER_LABEL,
   useDeleteProfileImageMutation,
-  useProfileNicknameCheckMutation,
   useProfileQuery,
   useUpdateProfileMutation,
   useUploadProfileImageMutation,
@@ -26,25 +24,20 @@ import { countChars, sliceChars } from '@/utils/text';
 
 import * as styles from './edit.css';
 
-const CHECK_DELAY = 400;
-
 const isSuspended = (error: Error) => error instanceof ApiError && error.code === ACCOUNT_SUSPENDED;
 
 export default function MyPageEditPage() {
   const router = useRouter();
-  const { open } = useModal();
+  const openAlert = useAlertModal();
 
   const { data: profile } = useProfileQuery();
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfileMutation();
   const { mutate: uploadProfileImage } = useUploadProfileImageMutation();
   const { mutate: deleteProfileImage } = useDeleteProfileImageMutation();
-  const { mutate: checkNickname } = useProfileNicknameCheckMutation();
 
   // 사용자가 바꾸기 전까지는 프로필 값을 그대로 보여준다
   const [nicknameInput, setNickname] = useState<string | null>(null);
   const [imageInput, setProfileImageUrl] = useState<string | null | undefined>(undefined);
-  // 닉네임별 서버 확인 결과. 응답이 늦게 와도 자기 닉네임에만 기록된다 (null 이면 통과)
-  const [checkResults, setCheckResults] = useState(new Map<string, string | null>());
   const [serverError, setServerError] = useState<string | null>(null);
 
   const nickname = nicknameInput ?? profile?.nickname ?? '';
@@ -54,40 +47,11 @@ export default function MyPageEditPage() {
   // 기존 닉네임은 그대로 유지할 수 있어서 바꿀 때만 검사한다
   const isChanged = trimmed !== profile?.nickname;
   const localError = isChanged ? getNicknameError(nickname) : null;
-  const nicknameError = serverError ?? localError ?? checkResults.get(trimmed) ?? null;
+  const { checkError } = useNicknameCheck(trimmed, isChanged && !localError);
+  const nicknameError = serverError ?? localError ?? checkError ?? null;
   const isValidNickname = !nicknameError;
   const isFull = nicknameInput !== null && countChars(nickname) >= NICKNAME_MAX_LENGTH;
   const isError = (nickname !== '' && !isValidNickname) || isFull;
-
-  const saveCheckResult = (target: string, error: string | null) =>
-    setCheckResults((results) => new Map(results).set(target, error));
-
-  // 형식 오류·금칙어만 표시하고, 그 밖의 실패는 저장할 때 다시 검사
-  const checkAfterPause = useEffectEvent((target: string) =>
-    checkNickname(
-      { nickname: target },
-      {
-        onSuccess: () => saveCheckResult(target, null),
-        onError: (error) => {
-          if (
-            error instanceof ApiError &&
-            (error.status === HTTP_STATUS_CODE.BAD_REQUEST || error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY)
-          ) {
-            saveCheckResult(target, getNicknameServerError(error));
-          }
-        },
-      },
-    ),
-  );
-
-  const isChecked = checkResults.has(trimmed);
-
-  useEffect(() => {
-    if (!isChanged || localError || isChecked) return;
-
-    const timer = setTimeout(() => checkAfterPause(trimmed), CHECK_DELAY);
-    return () => clearTimeout(timer);
-  }, [trimmed, isChanged, localError, isChecked]);
 
   const handleNicknameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNickname(sliceChars(e.target.value, NICKNAME_MAX_LENGTH));
@@ -118,15 +82,7 @@ export default function MyPageEditPage() {
     setProfileImageUrl(undefined);
     if (isSuspended(error)) return;
 
-    open(({ close }) => (
-      <Modal
-        title="사진을 변경하지 못했어요"
-        description={error.message}
-        confirmText="확인"
-        onConfirm={close}
-        onClose={close}
-      />
-    ));
+    openAlert({ title: '사진을 변경하지 못했어요', description: error.message });
   };
 
   const handleSelectFile = (file: File) => {

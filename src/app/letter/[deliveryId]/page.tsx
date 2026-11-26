@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import clsx from 'clsx';
 
 import { IcMore } from '@/assets/icons';
 import { ApiError } from '@/common/apis/client';
@@ -11,16 +10,16 @@ import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { OPEN_DELIVERY_COST, useCurrentDeliveryRoundQuery, useOpenDeliveryMutation } from '@/common/apis/delivery';
 import { usePrefetchWritingPrompt } from '@/common/apis/letter';
 import { useBlockDelivery } from '@/common/hooks/useBlockConversation';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
-import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
+import { ActionSheet } from '@/components/common/ActionSheet/ActionSheet';
 import Button from '@/components/common/Button/Button';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
 import { Modal } from '@/components/common/Modal/Modal';
 import { LetterPaper } from '@/components/letter/LetterPaper/LetterPaper';
 import { countChars } from '@/utils/text';
-import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 
 import * as styles from './letter.css';
 
@@ -28,6 +27,7 @@ export default function LetterPage() {
   const { deliveryId } = useParams<{ deliveryId: string }>();
   const router = useRouter();
   const { open } = useModal();
+  const openAlert = useAlertModal();
 
   const { data: round } = useCurrentDeliveryRoundQuery();
   const { mutate: openDelivery, data: opened, isPending, isIdle, isError } = useOpenDeliveryMutation();
@@ -102,18 +102,11 @@ export default function LetterPage() {
               if (!(error instanceof ApiError)) return;
               // 배달이 없거나, 탈퇴/차단으로 열 수 없는 편지
               if (error.status === HTTP_STATUS_CODE.NOT_FOUND || error.code === DELIVERY_AUTHOR_WITHDRAWN) {
-                open(({ close }) => (
-                  <Modal
-                    title="편지를 열 수 없어요"
-                    description={error.message}
-                    confirmText="확인"
-                    onConfirm={() => {
-                      close();
-                      router.replace('/home');
-                    }}
-                    onClose={close}
-                  />
-                ));
+                openAlert({
+                  title: '편지를 열 수 없어요',
+                  description: error.message,
+                  onConfirm: () => router.replace('/home'),
+                });
                 return;
               }
               if (error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY) {
@@ -161,30 +154,21 @@ export default function LetterPage() {
         <div className={styles.bottomButtonWrapper}>{renderBottomButton()}</div>
       </div>
 
-      <BottomSheet isOpen={isReportBlockSheetOpen} onClose={closeReportBlockSheet}>
-        <div className={actionSheetStyles.actionList}>
-          <button
-            type="button"
-            className={actionSheetStyles.actionButton}
-            onClick={() => router.push(`/letter/${deliveryId}/report`)}
-          >
-            신고
-          </button>
-          <button
-            type="button"
-            className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
-            onClick={() => {
+      <ActionSheet
+        isOpen={isReportBlockSheetOpen}
+        onClose={closeReportBlockSheet}
+        actions={[
+          { label: '신고', onClick: () => router.push(`/letter/${deliveryId}/report`) },
+          {
+            label: '차단',
+            isDanger: true,
+            onClick: () => {
               closeReportBlockSheet();
               openBlockConfirm();
-            }}
-          >
-            차단
-          </button>
-          <button type="button" className={actionSheetStyles.actionButton} onClick={closeReportBlockSheet}>
-            취소
-          </button>
-        </div>
-      </BottomSheet>
+            },
+          },
+        ]}
+      />
     </main>
   );
 }

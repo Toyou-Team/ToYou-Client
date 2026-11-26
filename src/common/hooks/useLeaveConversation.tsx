@@ -10,6 +10,7 @@ import {
   removeConversationFromCache,
   useLeaveConversationMutation,
 } from '@/common/apis/conversation';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 
@@ -17,6 +18,7 @@ import { Modal } from '@/components/common/Modal/Modal';
 export function useLeaveConversation() {
   const router = useRouter();
   const { open } = useModal();
+  const openAlert = useAlertModal();
   const queryClient = useQueryClient();
   const { mutate: leave, isPending, isSuccess, error } = useLeaveConversationMutation();
 
@@ -37,15 +39,7 @@ export function useLeaveConversation() {
           return;
         }
 
-        open(({ close }) => (
-          <Modal
-            title="대화방을 나가지 못했어요"
-            description={error.message}
-            confirmText="확인"
-            onConfirm={close}
-            onClose={close}
-          />
-        ));
+        openAlert({ title: '대화방을 나가지 못했어요', description: error.message });
       },
     });
   };

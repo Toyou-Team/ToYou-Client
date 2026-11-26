@@ -6,17 +6,16 @@ import { useIdentityVerificationMutation } from '@/common/apis/auth';
 import { ApiError } from '@/common/apis/client';
 import { AUTH_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { registrationTokenStore } from '@/common/apis/token';
-import { useModal } from '@/common/hooks/useModal';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { TrackEvent } from '@/components/analytics/TrackEvent/TrackEvent';
 import Button from '@/components/common/Button/Button';
-import { Modal } from '@/components/common/Modal/Modal';
 import { openKgInicis } from '@/utils/kgInicis';
 
 import * as styles from './verify.css';
 
 export default function SignupVerifyPage() {
   const router = useRouter();
-  const { open } = useModal();
+  const openAlert = useAlertModal();
   const { mutate: startVerification, isPending } = useIdentityVerificationMutation();
 
   const handleNext = () => {
@@ -40,15 +39,7 @@ export default function SignupVerifyPage() {
           return;
         }
 
-        open(({ close }) => (
-          <Modal
-            title="본인인증을 시작하지 못했어요"
-            description={error.message}
-            confirmText="확인"
-            onConfirm={close}
-            onClose={close}
-          />
-        ));
+        openAlert({ title: '본인인증을 시작하지 못했어요', description: error.message });
       },
     });
   };

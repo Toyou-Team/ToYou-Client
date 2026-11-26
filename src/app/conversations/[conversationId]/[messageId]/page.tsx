@@ -9,12 +9,11 @@ import { useConversationQuery, useReadMessageMutation } from '@/common/apis/conv
 import { usePrefetchWritingPrompt } from '@/common/apis/letter';
 import { useBlockConversation } from '@/common/hooks/useBlockConversation';
 import { BackButton } from '@/components/common/BackButton/BackButton';
-import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
+import { ActionSheet } from '@/components/common/ActionSheet/ActionSheet';
 import Button from '@/components/common/Button/Button';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
 import { LetterPaper } from '@/components/letter/LetterPaper/LetterPaper';
-import * as actionSheetStyles from '@/components/signup/profile-image/ImageActionSheet/imageActionSheet.css';
 import { getPartnerNickname } from '@/utils/partner';
 
 import * as styles from './conversationLetter.css';
@@ -151,30 +150,24 @@ export default function ConversationLetterPage() {
           ))}
       </div>
 
-      <BottomSheet isOpen={isReportBlockSheetOpen} onClose={closeReportBlockSheet}>
-        <div className={actionSheetStyles.actionList}>
-          <button
-            type="button"
-            className={actionSheetStyles.actionButton}
-            onClick={() => router.push(`/conversations/${conversationId}/${activeMessage.id}/report`)}
-          >
-            신고
-          </button>
-          <button
-            type="button"
-            className={clsx(actionSheetStyles.actionButton, actionSheetStyles.deleteButton)}
-            onClick={() => {
+      <ActionSheet
+        isOpen={isReportBlockSheetOpen}
+        onClose={closeReportBlockSheet}
+        actions={[
+          {
+            label: '신고',
+            onClick: () => router.push(`/conversations/${conversationId}/${activeMessage.id}/report`),
+          },
+          {
+            label: '차단',
+            isDanger: true,
+            onClick: () => {
               closeReportBlockSheet();
               openBlockConfirm();
-            }}
-          >
-            차단
-          </button>
-          <button type="button" className={actionSheetStyles.actionButton} onClick={closeReportBlockSheet}>
-            취소
-          </button>
-        </div>
-      </BottomSheet>
+            },
+          },
+        ]}
+      />
     </main>
   );
 }

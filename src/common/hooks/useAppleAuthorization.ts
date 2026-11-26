@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import {
   type AppleWebAttempt,
@@ -11,6 +11,7 @@ import {
   requestAppleAppSignIn,
   signInWithAppleWeb,
 } from '@/common/apis/appleSignIn';
+import { useAppMessage } from '@/common/hooks/useAppMessage';
 
 export type AppleAuthorization =
   | { status: 'SUCCESS'; identityToken?: string; nonce?: string; authorizationCode?: string }
@@ -56,32 +57,27 @@ export function useAppleAuthorization({ enabled = true, onResult }: UseAppleAuth
     if (enabled && mode === 'web') prepareWebAttempt();
   }, [enabled, mode, prepareWebAttempt]);
 
-  const handleAppResult = useEffectEvent(async (data: unknown) => {
-    const result = parseAppleAppResult(data);
-    if (!result || !waitingAppRef.current) return;
-    waitingAppRef.current = false;
+  useAppMessage(
+    async (data) => {
+      const result = parseAppleAppResult(data);
+      if (!result || !waitingAppRef.current) return;
+      waitingAppRef.current = false;
 
-    if (result.status === 'SUCCESS') {
-      await onResult({
-        status: 'SUCCESS',
-        identityToken: result.identityToken,
-        nonce: result.nonce,
-        authorizationCode: result.authorizationCode,
-      });
-    } else {
-      await onResult({ status: result.status });
-    }
+      if (result.status === 'SUCCESS') {
+        await onResult({
+          status: 'SUCCESS',
+          identityToken: result.identityToken,
+          nonce: result.nonce,
+          authorizationCode: result.authorizationCode,
+        });
+      } else {
+        await onResult({ status: result.status });
+      }
 
-    setIsPending(false);
-  });
-
-  useEffect(() => {
-    if (!enabled || mode !== 'app') return;
-
-    const listener = (event: MessageEvent) => handleAppResult(event.data);
-    window.addEventListener('message', listener);
-    return () => window.removeEventListener('message', listener);
-  }, [enabled, mode]);
+      setIsPending(false);
+    },
+    enabled && mode === 'app',
+  );
 
   // 클릭 직후 비동기 작업 없이 팝업을 띄운다
   const authorizeWeb = async (attempt: AppleWebAttempt) => {

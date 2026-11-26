@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import type { ReportReason, ReportResult } from '@/common/apis/conversation';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useModal } from '@/common/hooks/useModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import Button from '@/components/common/Button/Button';
@@ -36,27 +37,13 @@ interface ReportFormProps {
 export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }: ReportFormProps) {
   const router = useRouter();
   const { open } = useModal();
+  const openAlert = useAlertModal();
 
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [detail, setDetail] = useState('');
 
   const isOther = reason === 'OTHER';
   const canSubmit = reason !== null;
-
-  const openAlertModal = (title: string, description?: string, onConfirm?: () => void) => {
-    open(({ close }) => (
-      <Modal
-        title={title}
-        description={description}
-        confirmText="확인"
-        onConfirm={() => {
-          close();
-          onConfirm?.();
-        }}
-        onClose={close}
-      />
-    ));
-  };
 
   // 신고 화면을 닫은 뒤에도 떠 있도록 전역 모달로 띄운다
   const openReportedModal = () => {
@@ -84,7 +71,10 @@ export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }
       router.back();
 
       if (alreadyReportedUser) {
-        openAlertModal('이미 접수된 신고가 있어요', '24시간 이내 검토할 예정이니 조금만 기다려 주세요.');
+        openAlert({
+          title: '이미 접수된 신고가 있어요',
+          description: '24시간 이내 검토할 예정이니 조금만 기다려 주세요.',
+        });
       } else {
         openReportedModal();
       }
@@ -92,11 +82,15 @@ export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }
       if (!(error instanceof ApiError)) return;
 
       if (error.status === HTTP_STATUS_CODE.NOT_FOUND) {
-        openAlertModal('신고할 수 없는 편지예요', error.message, () => router.replace(notFoundPath));
+        openAlert({
+          title: '신고할 수 없는 편지예요',
+          description: error.message,
+          onConfirm: () => router.replace(notFoundPath),
+        });
         return;
       }
 
-      openAlertModal('신고하지 못했어요', error.message);
+      openAlert({ title: '신고하지 못했어요', description: error.message });
     }
   };
 
