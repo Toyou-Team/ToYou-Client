@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { useAccountStatusQuery, useLogoutMutation } from '@/common/apis/auth';
 import { GENDER_LABEL, useProfileQuery } from '@/common/apis/profile';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 import { IcChevronRight, IcProfileImage } from '@/assets/icons';
@@ -14,6 +15,7 @@ import * as styles from './mypage.css';
 export default function MyPage() {
   const router = useRouter();
   const { open } = useModal();
+  const openAlert = useAlertModal();
   const { mutate: logout } = useLogoutMutation();
 
   const { data: profile } = useProfileQuery();
@@ -38,16 +40,7 @@ export default function MyPage() {
           close();
           logout(undefined, {
             onSuccess: () => router.replace('/'),
-            onError: (error) =>
-              open(({ close: closeError }) => (
-                <Modal
-                  title="로그아웃하지 못했어요"
-                  description={error.message}
-                  confirmText="확인"
-                  onConfirm={closeError}
-                  onClose={closeError}
-                />
-              )),
+            onError: (error) => openAlert({ title: '로그아웃하지 못했어요', description: error.message }),
           });
         }}
         onClose={close}

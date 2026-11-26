@@ -8,6 +8,7 @@ import { getScreenName, trackEvent } from '@/common/analytics/gtm';
 import { useChargeAlertMutation, useChocolateSummaryQuery } from '@/common/apis/chocolate';
 import { ApiError } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED, CHARGE_ALERT_CONDITIONS_NOT_MET } from '@/common/apis/constants/error-code';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useModal } from '@/common/hooks/useModal';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
 import Button from '@/components/common/Button/Button';
@@ -68,6 +69,7 @@ export function ChocoSheet({ isOpen, onClose }: ChocoSheetProps) {
 function ChocoSummary() {
   const router = useRouter();
   const { open } = useModal();
+  const openAlert = useAlertModal();
   const { data: summary, refetch } = useChocolateSummaryQuery();
   const { mutate: requestChargeAlert, isPending: isRequesting } = useChargeAlertMutation();
 
@@ -120,16 +122,7 @@ function ChocoSummary() {
       />
     ));
 
-  const openFailModal = (message: string) =>
-    open(({ close }) => (
-      <Modal
-        title="알림을 신청하지 못했어요"
-        description={message}
-        confirmText="확인"
-        onConfirm={close}
-        onClose={close}
-      />
-    ));
+  const openFailModal = (message: string) => openAlert({ title: '알림을 신청하지 못했어요', description: message });
 
   const handleNotifyClick = () => {
     trackEvent({ event: 'choco_notify_click', screen_name: getScreenName() });

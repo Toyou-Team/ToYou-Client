@@ -7,6 +7,7 @@ import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useBlockMutation } from '@/common/apis/conversation';
 import { CURRENT_DELIVERY_ROUND_QUERY_KEY, useDeliveryBlockMutation } from '@/common/apis/delivery';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useModal } from '@/common/hooks/useModal';
 import { Modal } from '@/components/common/Modal/Modal';
 
@@ -14,6 +15,7 @@ import { Modal } from '@/components/common/Modal/Modal';
 function useBlockConfirm(block: () => Promise<unknown>, redirectPath: string) {
   const router = useRouter();
   const { open } = useModal();
+  const openAlert = useAlertModal();
   const queryClient = useQueryClient();
 
   const blockAndLeave = async () => {
@@ -21,15 +23,7 @@ function useBlockConfirm(block: () => Promise<unknown>, redirectPath: string) {
       await block();
     } catch (error) {
       if (!(error instanceof ApiError) || error.status !== HTTP_STATUS_CODE.NOT_FOUND) {
-        open(({ close }) => (
-          <Modal
-            title="차단하지 못했어요"
-            description={error instanceof Error ? error.message : undefined}
-            confirmText="확인"
-            onConfirm={close}
-            onClose={close}
-          />
-        ));
+        openAlert({ title: '차단하지 못했어요', description: error instanceof Error ? error.message : undefined });
         return;
       }
     }

@@ -10,9 +10,8 @@ import { ApiError } from '@/common/apis/client';
 import { CONTENT_ERROR_CODE, PROFILE_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { getProfile, useUploadProfileImageMutation } from '@/common/apis/profile';
 import { clearSignupData, loginProviderStore, signupDraftStore } from '@/common/apis/token';
-import { useModal } from '@/common/hooks/useModal';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import Button from '@/components/common/Button/Button';
-import { Modal } from '@/components/common/Modal/Modal';
 import { showToast } from '@/components/common/Toast/Toast';
 import { MemoizedStepIcon } from '@/components/signup/stepIcon/StepIcon';
 import { ImageUpload } from '@/components/signup/profile-image/ImageUpload/ImageUpload';
@@ -24,7 +23,7 @@ import * as styles from './profile-image.css';
 
 export default function SignUpProfileImagePage() {
   const router = useRouter();
-  const { open } = useModal();
+  const openAlert = useAlertModal();
   const { mutate: completeOnboarding, isPending: isCompleting } = useOnboardingMutation();
   const { mutate: uploadProfileImage, isPending: isUploading } = useUploadProfileImageMutation();
 
@@ -46,21 +45,12 @@ export default function SignUpProfileImagePage() {
     });
 
   const alertAndGo = (message: string, path?: string) =>
-    open(({ close }) => {
-      const handleClose = () => {
-        close();
+    openAlert({
+      title: '가입하지 못했어요',
+      description: message,
+      onClose: () => {
         if (path) router.replace(path);
-      };
-
-      return (
-        <Modal
-          title="가입하지 못했어요"
-          description={message}
-          confirmText="확인"
-          onConfirm={handleClose}
-          onClose={handleClose}
-        />
-      );
+      },
     });
 
   const handleComplete = () => {

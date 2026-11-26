@@ -11,12 +11,11 @@ import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { APPLE_WEB_CLIENT_ID } from '@/common/apis/oAuth';
 import { loginProviderStore, withdrawalReasonStore } from '@/common/apis/token';
 import { type AppleAuthorization, useAppleAuthorization } from '@/common/hooks/useAppleAuthorization';
-import { useModal } from '@/common/hooks/useModal';
+import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import Button from '@/components/common/Button/Button';
 import { CheckBox } from '@/components/common/CheckBox/CheckBox';
 import { Header } from '@/components/common/Header/Header';
-import { Modal } from '@/components/common/Modal/Modal';
 import { formatKoreanDay } from '@/utils/date';
 
 import * as styles from '../withdraw.css';
@@ -36,7 +35,7 @@ const getWithdrawErrorMessage = (error: Error) => {
 
 export default function WithdrawConfirmPage() {
   const router = useRouter();
-  const { open } = useModal();
+  const openAlert = useAlertModal();
   const { data: summary, isError: isSummaryError, refetch: refetchSummary } = useWithdrawalSummaryQuery();
   const { mutateAsync: deleteAccount, isPending } = useDeleteAccountMutation();
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -44,16 +43,7 @@ export default function WithdrawConfirmPage() {
   // 재시도할 때도 같은 사유를 다시 보낸다
   const [reasonPayload] = useState(() => withdrawalReasonStore.get());
 
-  const openErrorModal = (description: string) =>
-    open(({ close }) => (
-      <Modal
-        title="탈퇴를 완료하지 못했어요"
-        description={description}
-        confirmText="확인"
-        onConfirm={close}
-        onClose={close}
-      />
-    ));
+  const openErrorModal = (description: string) => openAlert({ title: '탈퇴를 완료하지 못했어요', description });
 
   const withdraw = async (applePayload?: AppleWithdrawalPayload) => {
     try {
