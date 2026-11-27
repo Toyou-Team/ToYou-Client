@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation';
 
 import { useCurrentDeliveryRoundQuery, useExtraDeliveryRoundMutation } from '@/common/apis/delivery';
 import { useAlertModal } from '@/common/hooks/useAlertModal';
-import { useModal } from '@/common/hooks/useModal';
+import { useChocoShortageModal } from '@/common/hooks/useChocoShortageModal';
+import { useConfirmModal } from '@/common/hooks/useConfirmModal';
 import Button from '@/components/common/Button/Button';
-import { Modal } from '@/components/common/Modal/Modal';
 import { LetterCarousel } from '@/components/home/LetterCarousel/LetterCarousel';
 import { formatNextDeliveryHour } from '@/utils/date';
 
@@ -14,8 +14,9 @@ import * as styles from './deliverySection.css';
 
 export function DeliverySection() {
   const router = useRouter();
-  const { open } = useModal();
   const openAlert = useAlertModal();
+  const openConfirm = useConfirmModal();
+  const openShortageModal = useChocoShortageModal();
   const { data: round, isPending, isError, isFetching, refetch } = useCurrentDeliveryRoundQuery();
   const { mutate: receiveExtra, isPending: isReceivingExtra } = useExtraDeliveryRoundMutation();
 
@@ -51,39 +52,18 @@ export function DeliverySection() {
     }
 
     if (!available) {
-      open(({ close }) => (
-        <Modal
-          title="초코가 부족해요"
-          description={`편지를 새로 받으려면 초코 ${cost}개가 필요해요.`}
-          subDescription={
-            <>
-              지금은 <strong>초코 {chocolateBalance}개</strong>를 가지고 있어요.
-            </>
-          }
-          cancelText="다음에"
-          confirmText="열기"
-          confirmDisabled
-          onConfirm={() => {}}
-          onClose={close}
-        />
-      ));
+      openShortageModal(`편지를 새로 받으려면 초코 ${cost}개가 필요해요.`, chocolateBalance);
       return;
     }
 
-    open(({ close }) => (
-      <Modal
-        title="새 카드 받기"
-        description="편지 두 장을 새로 받을까요?"
-        subDescription={`초코 ${cost}개를 사용해요.`}
-        cancelText="다음에"
-        confirmText="받기"
-        onConfirm={() => {
-          close();
-          receiveExtra(crypto.randomUUID());
-        }}
-        onClose={close}
-      />
-    ));
+    openConfirm({
+      title: '새 카드 받기',
+      description: '편지 두 장을 새로 받을까요?',
+      subDescription: `초코 ${cost}개를 사용해요.`,
+      cancelText: '다음에',
+      confirmText: '받기',
+      onConfirm: () => receiveExtra(crypto.randomUUID()),
+    });
   };
 
   return (

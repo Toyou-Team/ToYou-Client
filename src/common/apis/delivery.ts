@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { ApiError, request, retryOnce } from './client';
+import { hasErrorStatus, request, retryOnce } from './client';
 import { HTTP_STATUS_CODE } from './constants/http';
 import { CONVERSATIONS_QUERY_KEY, type ReportPayload, type ReportResult } from './conversation';
 import { keepImageUrl } from './imageUrl';
@@ -101,8 +101,7 @@ export const CURRENT_DELIVERY_ROUND_QUERY_KEY = ['delivery-rounds', 'current'] a
 
 // 배달 없음·접근 불가·잔액/후보 부족은 홈 상태가 바뀐 것이므로 다시 불러온다
 const isStaleRoundError = (error: Error) =>
-  error instanceof ApiError &&
-  (error.status === HTTP_STATUS_CODE.NOT_FOUND || error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY);
+  hasErrorStatus(error, HTTP_STATUS_CODE.NOT_FOUND, HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY);
 
 const keepLetterImages = <T extends LetterContent>(deliveryId: string, letter: T): T => ({
   ...letter,

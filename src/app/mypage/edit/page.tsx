@@ -3,7 +3,7 @@
 import { useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { ApiError } from '@/common/apis/client';
+import { hasErrorCode } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED } from '@/common/apis/constants/error-code';
 import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useNicknameCheck } from '@/common/hooks/useNicknameCheck';
@@ -24,7 +24,7 @@ import { countChars, sliceChars } from '@/utils/text';
 
 import * as styles from './edit.css';
 
-const isSuspended = (error: Error) => error instanceof ApiError && error.code === ACCOUNT_SUSPENDED;
+const isSuspended = (error: Error) => hasErrorCode(error, ACCOUNT_SUSPENDED);
 
 export default function MyPageEditPage() {
   const router = useRouter();

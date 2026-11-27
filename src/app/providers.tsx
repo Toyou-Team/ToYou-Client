@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { isServer, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { ApiError } from '@/common/apis/client';
+import { hasErrorCode } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED } from '@/common/apis/constants/error-code';
 import { ModalProvider } from '@/common/providers/ModalProvider';
 import { AnalyticsSync } from '@/components/analytics/AnalyticsSync/AnalyticsSync';
@@ -53,7 +53,7 @@ export default function Providers({ children }: { children: ReactNode }) {
 
 // 제재로 막힌 요청이면 안내 시트 띄우기
 function notifyIfSuspended(error: Error) {
-  if (error instanceof ApiError && error.code === ACCOUNT_SUSPENDED) {
+  if (hasErrorCode(error, ACCOUNT_SUSPENDED)) {
     window.dispatchEvent(new Event(ACCOUNT_SUSPENDED_EVENT));
   }
 }

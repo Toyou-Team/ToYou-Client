@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 
 import { getScreenName, trackEvent } from '@/common/analytics/gtm';
 import { useChargeAlertMutation, useChocolateSummaryQuery } from '@/common/apis/chocolate';
-import { ApiError } from '@/common/apis/client';
+import { hasErrorCode } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED, CHARGE_ALERT_CONDITIONS_NOT_MET } from '@/common/apis/constants/error-code';
 import { useAlertModal } from '@/common/hooks/useAlertModal';
+import { useConfirmModal } from '@/common/hooks/useConfirmModal';
 import { useModal } from '@/common/hooks/useModal';
 import { BottomSheet } from '@/components/common/BottomSheet/BottomSheet';
 import Button from '@/components/common/Button/Button';
@@ -69,6 +70,7 @@ export function ChocoSheet({ isOpen, onClose }: ChocoSheetProps) {
 function ChocoSummary() {
   const router = useRouter();
   const { open } = useModal();
+  const openConfirm = useConfirmModal();
   const openAlert = useAlertModal();
   const { data: summary, refetch } = useChocolateSummaryQuery();
   const { mutate: requestChargeAlert, isPending: isRequesting } = useChargeAlertMutation();
@@ -107,20 +109,14 @@ function ChocoSummary() {
 
   // 기기 알림/광고성 수신 동의는 설정 화면에서 켠다
   const openTurnOnModal = () =>
-    open(({ close }) => (
-      <Modal
-        title="알림을 켜주세요"
-        description="충전 기능이 열리면 가장 먼저 알려드릴게요."
-        subDescription="지금 켜면 초코 10개를 선물로 드려요."
-        cancelText="다음에"
-        confirmText="알림 켜기"
-        onConfirm={() => {
-          close();
-          router.push('/mypage/settings');
-        }}
-        onClose={close}
-      />
-    ));
+    openConfirm({
+      title: '알림을 켜주세요',
+      description: '충전 기능이 열리면 가장 먼저 알려드릴게요.',
+      subDescription: '지금 켜면 초코 10개를 선물로 드려요.',
+      cancelText: '다음에',
+      confirmText: '알림 켜기',
+      onConfirm: () => router.push('/mypage/settings'),
+    });
 
   const openFailModal = (message: string) => openAlert({ title: '알림을 신청하지 못했어요', description: message });
 
@@ -131,8 +127,8 @@ function ChocoSummary() {
       onSuccess: ({ grantedAmount }) => openNotifyDoneModal(grantedAmount),
       onError: (error) => {
         // 제재는 공통 안내 시트가 띄워진다
-        if (error instanceof ApiError && error.code === ACCOUNT_SUSPENDED) return;
-        if (error instanceof ApiError && error.code === CHARGE_ALERT_CONDITIONS_NOT_MET) openTurnOnModal();
+        if (hasErrorCode(error, ACCOUNT_SUSPENDED)) return;
+        if (hasErrorCode(error, CHARGE_ALERT_CONDITIONS_NOT_MET)) openTurnOnModal();
         else openFailModal(error.message);
       },
     });

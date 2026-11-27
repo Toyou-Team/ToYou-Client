@@ -2,7 +2,7 @@
 
 import { useEffect, useEffectEvent, useState } from 'react';
 
-import { ApiError } from '@/common/apis/client';
+import { hasErrorStatus } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useProfileNicknameCheckMutation } from '@/common/apis/profile';
 import { getNicknameServerError } from '@/utils/nickname';
@@ -26,10 +26,7 @@ export function useNicknameCheck(nickname: string, shouldCheck: boolean) {
       saveResult(target, null);
       return true;
     } catch (error) {
-      if (
-        error instanceof ApiError &&
-        (error.status === HTTP_STATUS_CODE.BAD_REQUEST || error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY)
-      ) {
+      if (hasErrorStatus(error, HTTP_STATUS_CODE.BAD_REQUEST, HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY)) {
         saveResult(target, getNicknameServerError(error));
         return false;
       }

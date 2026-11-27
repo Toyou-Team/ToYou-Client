@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { type InfiniteData, type QueryClient, type QueryFilters, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 
-import { ApiError } from '@/common/apis/client';
+import { hasErrorCode } from '@/common/apis/client';
 import { AUTH_ERROR_CODE, CONVERSATION_NOT_FOUND } from '@/common/apis/constants/error-code';
 import { CONVERSATIONS_QUERY_KEY, removeConversationFromCache } from '@/common/apis/conversation';
 import { CURRENT_DELIVERY_ROUND_QUERY_KEY } from '@/common/apis/delivery';
@@ -39,7 +39,7 @@ export function RealtimeSync() {
     const missingIds = queryClient
       .getQueryCache()
       .findAll({ queryKey: CONVERSATIONS_QUERY_KEY, type: 'active' })
-      .filter(({ state }) => state.error instanceof ApiError && state.error.code === CONVERSATION_NOT_FOUND)
+      .filter(({ state }) => hasErrorCode(state.error, CONVERSATION_NOT_FOUND))
       .map(({ queryKey }) => queryKey[1])
       .filter((id): id is string => typeof id === 'string');
 
