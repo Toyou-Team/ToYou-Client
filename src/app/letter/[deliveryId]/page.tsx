@@ -4,20 +4,20 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 import { IcMore } from '@/assets/icons';
-import { ApiError } from '@/common/apis/client';
+import { hasErrorCode, hasErrorStatus } from '@/common/apis/client';
 import { DELIVERY_AUTHOR_WITHDRAWN } from '@/common/apis/constants/error-code';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { OPEN_DELIVERY_COST, useCurrentDeliveryRoundQuery, useOpenDeliveryMutation } from '@/common/apis/delivery';
 import { usePrefetchWritingPrompt } from '@/common/apis/letter';
 import { useBlockDelivery } from '@/common/hooks/useBlockConversation';
 import { useAlertModal } from '@/common/hooks/useAlertModal';
-import { useModal } from '@/common/hooks/useModal';
+import { useChocoShortageModal } from '@/common/hooks/useChocoShortageModal';
+import { useConfirmModal } from '@/common/hooks/useConfirmModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import { ActionSheet } from '@/components/common/ActionSheet/ActionSheet';
 import Button from '@/components/common/Button/Button';
 import { Header } from '@/components/common/Header/Header';
 import { IconButton } from '@/components/common/IconButton';
-import { Modal } from '@/components/common/Modal/Modal';
 import { LetterPaper } from '@/components/letter/LetterPaper/LetterPaper';
 import { countChars } from '@/utils/text';
 
@@ -26,8 +26,9 @@ import * as styles from './letter.css';
 export default function LetterPage() {
   const { deliveryId } = useParams<{ deliveryId: string }>();
   const router = useRouter();
-  const { open } = useModal();
   const openAlert = useAlertModal();
+  const openConfirm = useConfirmModal();
+  const openShortageModal = useChocoShortageModal();
 
   const { data: round } = useCurrentDeliveryRoundQuery();
   const { mutate: openDelivery, data: opened, isPending, isIdle, isError } = useOpenDeliveryMutation();
@@ -60,64 +61,40 @@ export default function LetterPage() {
   const hiddenLength =
     opened || !delivery?.content.isTruncated ? 0 : delivery.content.bodyLength - countChars(delivery.content.body);
 
-  const openShortageModal = (purpose: string, cost: number, chocolateBalance: number) => {
-    open(({ close }) => (
-      <Modal
-        title="초코가 부족해요"
-        description={`${purpose} 초코 ${cost}개가 필요해요.`}
-        subDescription={
-          <>
-            지금은 <strong>초코 {chocolateBalance}개</strong>를 가지고 있어요.
-          </>
-        }
-        cancelText="다음에"
-        confirmText="열기"
-        confirmDisabled
-        onConfirm={() => {}}
-        onClose={close}
-      />
-    ));
-  };
+  const openShortage = () =>
+    openShortageModal(`편지를 열려면 초코 ${OPEN_DELIVERY_COST}개가 필요해요.`, round.chocolateBalance);
 
   const handleOpenClick = () => {
     if (round.chocolateBalance < OPEN_DELIVERY_COST) {
-      openShortageModal('편지를 열려면', OPEN_DELIVERY_COST, round.chocolateBalance);
+      openShortage();
       return;
     }
 
-    open(({ close }) => (
-      <Modal
-        title={isShortLetter ? '답장하기' : '편지 열기'}
-        description={isShortLetter ? '편지에 답장할까요?' : '편지를 열면 전체 내용을 볼 수 있어요.'}
-        subDescription={`초코 ${OPEN_DELIVERY_COST}개가 사용돼요.`}
-        cancelText="다음에"
-        confirmText={isShortLetter ? '답장하기' : '열기'}
-        onConfirm={() => {
-          close();
-          openDelivery(deliveryId, {
-            onSuccess: ({ replyStatus }) => {
-              if (isShortLetter && replyStatus === 'AVAILABLE') goToReply();
-            },
-            onError: (error) => {
-              if (!(error instanceof ApiError)) return;
-              // 배달이 없거나, 탈퇴/차단으로 열 수 없는 편지
-              if (error.status === HTTP_STATUS_CODE.NOT_FOUND || error.code === DELIVERY_AUTHOR_WITHDRAWN) {
-                openAlert({
-                  title: '편지를 열 수 없어요',
-                  description: error.message,
-                  onConfirm: () => router.replace('/home'),
-                });
-                return;
-              }
-              if (error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY) {
-                openShortageModal('편지를 열려면', OPEN_DELIVERY_COST, round.chocolateBalance);
-              }
-            },
-          });
-        }}
-        onClose={close}
-      />
-    ));
+    openConfirm({
+      title: isShortLetter ? '답장하기' : '편지 열기',
+      description: isShortLetter ? '편지에 답장할까요?' : '편지를 열면 전체 내용을 볼 수 있어요.',
+      subDescription: `초코 ${OPEN_DELIVERY_COST}개가 사용돼요.`,
+      cancelText: '다음에',
+      confirmText: isShortLetter ? '답장하기' : '열기',
+      onConfirm: () =>
+        openDelivery(deliveryId, {
+          onSuccess: ({ replyStatus }) => {
+            if (isShortLetter && replyStatus === 'AVAILABLE') goToReply();
+          },
+          onError: (error) => {
+            // 배달이 없거나, 탈퇴/차단으로 열 수 없는 편지
+            if (hasErrorStatus(error, HTTP_STATUS_CODE.NOT_FOUND) || hasErrorCode(error, DELIVERY_AUTHOR_WITHDRAWN)) {
+              openAlert({
+                title: '편지를 열 수 없어요',
+                description: error.message,
+                onConfirm: () => router.replace('/home'),
+              });
+              return;
+            }
+            if (hasErrorStatus(error, HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY)) openShortage();
+          },
+        }),
+    });
   };
 
   const renderBottomButton = () => {
