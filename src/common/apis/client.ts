@@ -47,6 +47,12 @@ export class ApiError extends Error {
   }
 }
 
+export const hasErrorCode = (error: unknown, ...codes: string[]): error is ApiError =>
+  error instanceof ApiError && error.code !== undefined && codes.includes(error.code);
+
+export const hasErrorStatus = (error: unknown, ...statuses: number[]): error is ApiError =>
+  error instanceof ApiError && statuses.includes(error.status);
+
 interface RequestOptions {
   // Authorization 헤더 첨부 + 401 자동 갱신 대상 여부 (기본 true)
   auth?: boolean;

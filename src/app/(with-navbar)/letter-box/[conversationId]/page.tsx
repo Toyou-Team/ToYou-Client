@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { IcMore } from '@/assets/icons';
-import { ApiError } from '@/common/apis/client';
+import { hasErrorCode } from '@/common/apis/client';
 import { CONVERSATION_NOT_FOUND } from '@/common/apis/constants/error-code';
 import { CONVERSATIONS_QUERY_KEY, useConversationQuery, type ConversationMessage } from '@/common/apis/conversation';
 import { useBlockConversation } from '@/common/hooks/useBlockConversation';
@@ -50,8 +50,7 @@ export default function ConversationPage() {
   const loadMoreRef = useInfiniteScroll(fetchNextPage, hasNextPage && !isFetchingNextPage);
 
   // 차단/나가기 등으로 볼 수 없는 대화 (답장 알림으로 들어온 경우 등)
-  const notFoundMessage =
-    error instanceof ApiError && error.code === CONVERSATION_NOT_FOUND && !data ? error.message : null;
+  const notFoundMessage = hasErrorCode(error, CONVERSATION_NOT_FOUND) && !data ? error.message : null;
   useEffect(() => {
     if (!notFoundMessage) return;
 
