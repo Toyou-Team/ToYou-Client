@@ -7,12 +7,11 @@ import { ApiError } from '@/common/apis/client';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import type { ReportReason, ReportResult } from '@/common/apis/conversation';
 import { useAlertModal } from '@/common/hooks/useAlertModal';
-import { useModal } from '@/common/hooks/useModal';
+import { useConfirmModal } from '@/common/hooks/useConfirmModal';
 import { BackButton } from '@/components/common/BackButton/BackButton';
 import Button from '@/components/common/Button/Button';
 import { CheckBox } from '@/components/common/CheckBox/CheckBox';
 import { Header } from '@/components/common/Header/Header';
-import { Modal } from '@/components/common/Modal/Modal';
 import { sliceChars } from '@/utils/text';
 
 import * as styles from './reportForm.css';
@@ -36,8 +35,8 @@ interface ReportFormProps {
 
 export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }: ReportFormProps) {
   const router = useRouter();
-  const { open } = useModal();
   const openAlert = useAlertModal();
+  const openConfirm = useConfirmModal();
 
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [detail, setDetail] = useState('');
@@ -46,22 +45,15 @@ export function ReportForm({ report, isPending, openBlockConfirm, notFoundPath }
   const canSubmit = reason !== null;
 
   // 신고 화면을 닫은 뒤에도 떠 있도록 전역 모달로 띄운다
-  const openReportedModal = () => {
-    open(({ close }) => (
-      <Modal
-        title="신고가 접수 됐어요"
-        description={'24시간 안에 검토하고 조치할게요.\n조금만 기다려 주세요.'}
-        confirmText="이 사용자 차단하기"
-        cancelText="차단 없이 닫기"
-        isVertical
-        onConfirm={() => {
-          close();
-          openBlockConfirm();
-        }}
-        onClose={close}
-      />
-    ));
-  };
+  const openReportedModal = () =>
+    openConfirm({
+      title: '신고가 접수 됐어요',
+      description: '24시간 안에 검토하고 조치할게요.\n조금만 기다려 주세요.',
+      confirmText: '이 사용자 차단하기',
+      cancelText: '차단 없이 닫기',
+      isVertical: true,
+      onConfirm: openBlockConfirm,
+    });
 
   const handleSubmit = async () => {
     if (!reason) return;

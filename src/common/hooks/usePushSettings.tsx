@@ -20,8 +20,7 @@ import {
 } from '@/common/apis/pushConsent';
 import { useAlertModal } from '@/common/hooks/useAlertModal';
 import { useAppMessage } from '@/common/hooks/useAppMessage';
-import { useModal } from '@/common/hooks/useModal';
-import { Modal } from '@/components/common/Modal/Modal';
+import { useConfirmModal } from '@/common/hooks/useConfirmModal';
 import { showToast } from '@/components/common/Toast/Toast';
 import { formatDotDate } from '@/utils/date';
 
@@ -75,7 +74,7 @@ function useDevicePushPermission() {
 
 // 설정 화면 알림: 서비스·광고성·야간 토글 + 기기 알림 상태
 export function usePushSettings() {
-  const { open } = useModal();
+  const openConfirm = useConfirmModal();
   const openAlert = useAlertModal();
   const { data: consents } = usePushConsentsQuery();
   const { mutate } = useUpdatePushConsentsMutation({
@@ -101,39 +100,29 @@ export function usePushSettings() {
       return;
     }
 
-    open(({ close }) => (
-      <Modal
-        title="광고·이벤트 알림도 함께 받을까요?"
-        description={'야간 알림을 받으려면\n광고·이벤트 알림 수신에도 동의해야 해요.'}
-        cancelText="취소"
-        confirmText="함께 동의하기"
-        onConfirm={() => {
-          close();
-          change({ marketingPushAgreed: true, nightPushAgreed: true });
-        }}
-        onClose={close}
-      />
-    ));
+    openConfirm({
+      title: '광고·이벤트 알림도 함께 받을까요?',
+      description: '야간 알림을 받으려면\n광고·이벤트 알림 수신에도 동의해야 해요.',
+      cancelText: '취소',
+      confirmText: '함께 동의하기',
+      onConfirm: () => change({ marketingPushAgreed: true, nightPushAgreed: true }),
+    });
   };
 
   // 기기 알림이 꺼져 있을 때만 안내
   const openDeviceNotificationModal = () => {
     if (device.permission === null || device.permission === 'GRANTED') return;
 
-    open(({ close }) => (
-      <Modal
-        title="기기 알림이 꺼져 있어요"
-        description={'편지가 도착했을 때 알림을 받으려면\n아이폰 설정에서 to you 알림을 켜주세요.'}
-        cancelText="취소"
-        confirmText="설정으로 이동"
-        onConfirm={() => {
-          close();
-          if (device.permission === 'NOT_DETERMINED') requestPushToken();
-          else openNotificationSettings();
-        }}
-        onClose={close}
-      />
-    ));
+    openConfirm({
+      title: '기기 알림이 꺼져 있어요',
+      description: '편지가 도착했을 때 알림을 받으려면\n아이폰 설정에서 to you 알림을 켜주세요.',
+      cancelText: '취소',
+      confirmText: '설정으로 이동',
+      onConfirm: () => {
+        if (device.permission === 'NOT_DETERMINED') requestPushToken();
+        else openNotificationSettings();
+      },
+    });
   };
 
   return {

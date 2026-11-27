@@ -17,16 +17,15 @@ import {
   useWritingPromptQuery,
 } from '@/common/apis/letter';
 import { useAccountStatusQuery } from '@/common/apis/auth';
-import { ApiError } from '@/common/apis/client';
+import { ApiError, hasErrorCode, hasErrorStatus } from '@/common/apis/client';
 import { ACCOUNT_SUSPENDED_EVENT } from '@/components/restriction/AccountStatusGate/AccountStatusGate';
 import { ACCOUNT_SUSPENDED, CONTENT_ERROR_CODE } from '@/common/apis/constants/error-code';
 import { HTTP_STATUS_CODE } from '@/common/apis/constants/http';
 import { useSendMessageMutation } from '@/common/apis/conversation';
 import { useReplyMutation } from '@/common/apis/delivery';
 import { useAlertModal } from '@/common/hooks/useAlertModal';
-import { useModal } from '@/common/hooks/useModal';
+import { useConfirmModal } from '@/common/hooks/useConfirmModal';
 import { usePhotoPicker } from '@/common/hooks/usePhotoPicker';
-import { Modal } from '@/components/common/Modal/Modal';
 import { showToast } from '@/components/common/Toast/Toast';
 import { decodeImage, isDarkImageTop } from '@/utils/image';
 import { countChars, sliceChars } from '@/utils/text';
@@ -43,7 +42,7 @@ interface WriteLetterPageProps {
 export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) {
   const { replyTo, conversationId } = use(searchParams);
   const router = useRouter();
-  const { open } = useModal();
+  const openConfirm = useConfirmModal();
   const openAlert = useAlertModal();
   const { data: writingPrompt } = useWritingPromptQuery();
   const { mutate: createLetter, isPending: isCreating } = useCreateLetterMutation();
@@ -113,7 +112,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
   };
 
   const openForbiddenWordModal = (error: Error) => {
-    if (!(error instanceof ApiError) || error.code !== CONTENT_ERROR_CODE.FORBIDDEN_WORD) return false;
+    if (!hasErrorCode(error, CONTENT_ERROR_CODE.FORBIDDEN_WORD)) return false;
 
     const words = error.details?.forbiddenWords;
     openAlert({
@@ -151,7 +150,7 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
           },
           onError: (error) => {
             if (openForbiddenWordModal(error)) return;
-            if (error instanceof ApiError && error.status === HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY) {
+            if (hasErrorStatus(error, HTTP_STATUS_CODE.UNPROCESSABLE_ENTITY)) {
               openAlert({ title: '편지를 보내지 못했어요', description: error.message });
             }
           },
@@ -240,27 +239,20 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
     setIsImageActionSheetOpen(false);
   };
 
-  const openSendConfirm = () => {
-    open(({ close }) => (
-      <Modal
-        title="편지 보내기"
-        description={
-          <>
-            보낸 편지는 수정하거나 되돌릴 수 없어요.
-            <br />
-            이대로 보낼까요?
-          </>
-        }
-        confirmText="보내기"
-        cancelText="다음에"
-        onConfirm={() => {
-          close();
-          submit();
-        }}
-        onClose={close}
-      />
-    ));
-  };
+  const openSendConfirm = () =>
+    openConfirm({
+      title: '편지 보내기',
+      description: (
+        <>
+          보낸 편지는 수정하거나 되돌릴 수 없어요.
+          <br />
+          이대로 보낼까요?
+        </>
+      ),
+      confirmText: '보내기',
+      cancelText: '다음에',
+      onConfirm: submit,
+    });
 
   // 편지 보내기 전 사전 검사 추가
   const handleSubmitClick = () => {
@@ -269,10 +261,9 @@ export default function WriteLetterPage({ searchParams }: WriteLetterPageProps) 
       onError: (error) => {
         if (openForbiddenWordModal(error)) return;
 
-        const code = error instanceof ApiError ? error.code : undefined;
         // 정지 안내는 전역에서 표시
-        if (code === ACCOUNT_SUSPENDED) return;
-        if (code === CONTENT_ERROR_CODE.EXTERNAL_CONTACT) {
+        if (hasErrorCode(error, ACCOUNT_SUSPENDED)) return;
+        if (hasErrorCode(error, CONTENT_ERROR_CODE.EXTERNAL_CONTACT)) {
           openAlert({
             title: replyTo || conversationId ? '답장을 보내지 못했어요' : '편지를 보내지 못했어요',
             description: error.message,

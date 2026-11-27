@@ -6,16 +6,15 @@ import Link from 'next/link';
 import { useAccountStatusQuery, useLogoutMutation } from '@/common/apis/auth';
 import { GENDER_LABEL, useProfileQuery } from '@/common/apis/profile';
 import { useAlertModal } from '@/common/hooks/useAlertModal';
-import { useModal } from '@/common/hooks/useModal';
-import { Modal } from '@/components/common/Modal/Modal';
+import { useConfirmModal } from '@/common/hooks/useConfirmModal';
 import { IcChevronRight, IcProfileImage } from '@/assets/icons';
 
 import * as styles from './mypage.css';
 
 export default function MyPage() {
   const router = useRouter();
-  const { open } = useModal();
   const openAlert = useAlertModal();
+  const openConfirm = useConfirmModal();
   const { mutate: logout } = useLogoutMutation();
 
   const { data: profile } = useProfileQuery();
@@ -24,28 +23,23 @@ export default function MyPage() {
   const canEdit = !accountStatus?.restricted;
 
   const handleLogout = () => {
-    open(({ close }) => (
-      <Modal
-        title="로그아웃 하기"
-        description={
-          <>
-            다시 로그인하면 편지와 초코는
-            <br />
-            그대로 남아 있어요.
-          </>
-        }
-        confirmText="로그아웃"
-        cancelText="취소"
-        onConfirm={() => {
-          close();
-          logout(undefined, {
-            onSuccess: () => router.replace('/'),
-            onError: (error) => openAlert({ title: '로그아웃하지 못했어요', description: error.message }),
-          });
-        }}
-        onClose={close}
-      />
-    ));
+    openConfirm({
+      title: '로그아웃 하기',
+      description: (
+        <>
+          다시 로그인하면 편지와 초코는
+          <br />
+          그대로 남아 있어요.
+        </>
+      ),
+      confirmText: '로그아웃',
+      cancelText: '취소',
+      onConfirm: () =>
+        logout(undefined, {
+          onSuccess: () => router.replace('/'),
+          onError: (error) => openAlert({ title: '로그아웃하지 못했어요', description: error.message }),
+        }),
+    });
   };
 
   if (!profile) return null;
